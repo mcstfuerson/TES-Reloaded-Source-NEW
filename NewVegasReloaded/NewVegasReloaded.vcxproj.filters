@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Framework\Detours">
+      <UniqueIdentifier>{901793f1-d588-4cbf-8c16-bfc8388f03d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{d824b335-cb77-4743-b092-330dbd2a3180}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Bink">
+      <UniqueIdentifier>{9e2fcff0-833a-455b-8c3b-e44a4b683e20}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\TESReloaded\Core\CameraMode.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\CommandManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\D3D9Device.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\D3D9Hook.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\EquipmentManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\FlyCam.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\FormHook.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\FrameRateManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\GameEventManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\GameMenuManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\KeyboardManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\Managers.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\MemoryManagement.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\PluginVersion.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\RenderHook.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\RenderManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\ScriptManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\SettingManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\ShaderIOHook.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\ShaderManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\ShadowManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\SleepingMode.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\TextureManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\WeatherMode.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Core\WindowedMode.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Framework.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\SafeWrite.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Types.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Logger.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Game.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\GameNi.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\GameHavok.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Detours\detours.h">
+      <Filter>Framework\Detours</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Plugin.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Bink\Binker.h">
+      <Filter>Framework\Bink</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Bink\bink.h">
+      <Filter>Framework\Bink</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TESReloaded\Framework\Bink\binktextures.h">
+      <Filter>Framework\Bink</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\TESReloaded\Core\CameraMode.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\CommandManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\D3D9Device.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\D3D9Hook.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\EquipmentManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\FlyCam.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\FormHook.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\FrameRateManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\GameEventManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\GameMenuManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\KeyboardManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\Managers.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\MemoryManagement.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\PluginVersion.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\RenderHook.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\RenderManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\ScriptManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\SettingManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\ShaderIOHook.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\ShaderManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\ShadowManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\SleepingMode.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\TextureManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\WeatherMode.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Core\WindowedMode.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Game.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Detours\detours.cpp">
+      <Filter>Framework\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Detours\modules.cpp">
+      <Filter>Framework\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Detours\disasm.cpp">
+      <Filter>Framework\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Logger.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\SafeWrite.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Bink\Binker.cpp">
+      <Filter>Framework\Bink</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TESReloaded\Framework\Bink\binktextures.cpp">
+      <Filter>Framework\Bink</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Exports.def">
+      <Filter>Main</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="NewVegasReloaded.rc">
+      <Filter>Main</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

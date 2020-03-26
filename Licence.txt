@@ -1,0 +1,23 @@
+Copyright (C) 2020 Alessio Tamburini (aletamburini78@gmail.com)
+All rights reserved.
+
+Contributor(s):
+ - Timeslip
+ - scanti
+ - ShadeMe
+ - Ethatron
+Additional contributions to the development MUST be authorized from the author.
+ 
+Redistribution and use of the source code and binary, with or without modification, are permitted provided that the following conditions are met:
+
+	  * the above copyright notice
+	  * the conditions
+	  * the following disclaimer
+	  
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(AUTHOR) 'AS IT IS'.
+THE SOFTWARE IS DISTRIBUTED FOR FREE AND ANY EXPRESS OR IMPLIED MONEY REQUEST IS DISCLAIMED: YOU ARE FREE TO DONATE MONEY TO THE AUTHOR.
+The licence terms can be eventually changed ONLY by the author.
+
+You can contact the author for informations.
+
+Official forum: www.tesreloaded.com
