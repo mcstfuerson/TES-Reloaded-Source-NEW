@@ -2,6 +2,7 @@
 
 #if defined(NEWVEGAS)
 #define kToggleCamera 0x00950110
+#define kToggleBody 0x00951A10
 #define kSetDialogCamera 0x00953060
 #define kUpdateCameraCollisions 0x0094A0C0
 #define PlayerNode Player->renderData->niNode
@@ -17,6 +18,7 @@ static const UInt32 kOnCameraPOVHook = 0x00942DC5;
 static const UInt32 kOnCameraPOVReturn = 0x00942DCE;
 #elif defined(OBLIVION)
 #define kToggleCamera 0x0066C580
+#define kToggleBody 0x00664F70
 #define kSetDialogCamera 0x0066C6F0
 #define kUpdateCameraCollisions 0x0065F080
 #define PlayerNode Player->niNode
@@ -38,6 +40,7 @@ static NiPoint3 FromOffset = { 0.0f, 0.0f, 0.0f };
 class CameraMode {
 public:
 	void TrackToggleCamera(UInt8 FirstPerson);
+	void TrackToggleBody(UInt8 FirstPerson);
 	void TrackSetDialogCamera(Actor* Act, float Arg2, UInt8 Arg3);
 	void TrackUpdateCameraCollisions(NiPoint3* CameraLocalPos, NiPoint3* PlayerWorldPos, UInt8 CameraChasing);
 };
@@ -47,11 +50,27 @@ void (__thiscall CameraMode::* TrackToggleCamera)(UInt8);
 void CameraMode::TrackToggleCamera(UInt8 FirstPerson) {
 	
 #if defined(NEWVEGAS)
-	bool POVSwitchPressed = TheKeyboardManager->OnControlDown(13) || TheKeyboardManager->OnControlPressed(13);
-	if (POVSwitchPressed || Player->isPipBoy) return (this->*ToggleCamera)(FirstPerson);
+	//TogglePOV = TheKeyboardManager->OnControlDown(13) || TheKeyboardManager->OnControlPressed(13);
+	//TogglePOV = TheKeyboardManager->OnControlDown(13);
+	//if (TogglePOV || Player->isPipBoy) return (this->*ToggleCamera)(FirstPerson);
 #endif
 	TheRenderManager->FirstPersonView = FirstPerson;
+#if defined(NEWVEGAS)
+	if (Player->isPipBoy) { (this->*ToggleCamera)(1); return; }
+#endif
 	(this->*ToggleCamera)(0);
+
+}
+
+void (__thiscall CameraMode::* ToggleBody)(UInt8);
+void (__thiscall CameraMode::* TrackToggleBody)(UInt8);
+void CameraMode::TrackToggleBody(UInt8 FirstPerson) {
+
+#if defined(NEWVEGAS)
+	if (TheSettingManager->GameLoading) Player->unkThirdPersonPrev = Player->unkThirdPerson = Player->isThirdPersonBody = Player->isThirdPerson = 1;
+	if (Player->isPipBoy) { (this->*ToggleBody)(1); return; }
+#endif
+	(this->*ToggleBody)(0);
 
 }
 
@@ -66,20 +85,21 @@ void CameraMode::TrackSetDialogCamera(Actor* Act, float Arg2, UInt8 Arg3) {
 void (__thiscall CameraMode::* UpdateCameraCollisions)(NiPoint3*, NiPoint3*, UInt8);
 void (__thiscall CameraMode::* TrackUpdateCameraCollisions)(NiPoint3*, NiPoint3*, UInt8);
 void CameraMode::TrackUpdateCameraCollisions(NiPoint3* CameraPosition, NiPoint3* PlayerPosition, UInt8 CameraChasing) {
-
+	
+	SettingsMainStruct::CameraModeStruct* CameraMode = &TheSettingManager->SettingsMain.CameraMode;
 	HighProcess* Process = (HighProcess*)Player->process;
 	UInt8 Crosshair = TheSettingManager->SettingsMain.CameraMode.Crosshair;
 	UInt8 DisableFading = Player->DisableFading;
 	UInt8 SitSleepState = Player->GetSitSleepState();
-	bool IsThirdPerson = Player->IsThirdPersonView(TheSettingManager->SettingsMain.CameraMode.Enabled, TheRenderManager->FirstPersonView);
+	bool IsThirdPerson = Player->IsThirdPersonView(CameraMode->Enabled, TheRenderManager->FirstPersonView);
 
 	if (SitSleepState >= HighProcess::kSitSleep_SleepingIn && SitSleepState <= HighProcess::kSitSleep_SleepingOut) Player->DisableFading = 1;
 	if (IsThirdPerson) {
-		CameraChasing = !TheSettingManager->SettingsMain.CameraMode.ChasingThird;
+		CameraChasing = !CameraMode->ChasingThird;
 	}
 	else {
 		Player->DisableFading = 1;
-		CameraChasing = !TheSettingManager->SettingsMain.CameraMode.ChasingFirst;
+		CameraChasing = !CameraMode->ChasingFirst;
 	}
 	(this->*UpdateCameraCollisions)(CameraPosition, PlayerPosition, CameraChasing);
 	Player->DisableFading = DisableFading;
@@ -103,18 +123,20 @@ void CameraMode::TrackUpdateCameraCollisions(NiPoint3* CameraPosition, NiPoint3*
 
 void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 	
+	SettingsMainStruct::CameraModeStruct* CameraMode = &TheSettingManager->SettingsMain.CameraMode;
 	NiMatrix33* CameraRotation = &CameraNode->m_localTransform.rot;
 	NiPoint3* CameraPosition = &CameraNode->m_localTransform.pos;
 	UInt8 SitSleepState = Player->GetSitSleepState();
 	HighProcess* Process = (HighProcess*)Player->process;
 	NiPoint3* HeadPosition = &Process->animData->nHead->m_worldTransform.pos;
-	bool IsThirdPerson = Player->IsThirdPersonView(TheSettingManager->SettingsMain.CameraMode.Enabled, TheRenderManager->FirstPersonView);
+	bool IsThirdPerson = Player->IsThirdPersonView(CameraMode->Enabled, TheRenderManager->FirstPersonView);
+	NiPoint3 Rot = { 0.0f, 0.0f, 0.0f };
+	NiMatrix33 mw, ml;
+	NiPoint3 v;
+	float x, y, z, r;
 
 	if (SitSleepState < HighProcess::kSitSleep_SleepingIn || SitSleepState > HighProcess::kSitSleep_SleepingOut) From.x = 0.0f;
 	if (IsThirdPerson && SitSleepState >= HighProcess::kSitSleep_SleepingIn && SitSleepState <= HighProcess::kSitSleep_SleepingOut) {
-		NiMatrix33 mw, ml;
-		float x, y, z, r;
-		NiPoint3 Rot = { 0.0f, 0.0f, 0.0f };
 		if (From.x == 0.0f) {
 			From.x = CameraPosition->x;
 			From.y = CameraPosition->y;
@@ -135,10 +157,10 @@ void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 			else if (TheKeyboardManager->OnControlPressed(6))
 				FromOffset.z -= 5.0f;
 			if (FromOffset.x != 0.0f || FromOffset.y != 0.0f || FromOffset.z != 0.0f) {
-				NiPoint3 r = CameraNode->m_worldTransform.rot * FromOffset;
-				From.x += r.x;
-				From.y += r.y;
-				From.z += r.z;
+				v = CameraNode->m_worldTransform.rot * FromOffset;
+				From.x += v.x;
+				From.y += v.y;
+				From.z += v.z;
 			}
 		}
 		CameraPosition->x = From.x;
@@ -157,11 +179,7 @@ void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 		CameraNode->m_localTransform.rot = ml;
 	}
 	else if (MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) {
-		NiPoint3 v;
-		NiMatrix33 mw, ml;
-		float x, y, z, r;
-		NiPoint3 Rot = { 0.0f, 0.0f, 0.0f };
-		v = PlayerNode->m_worldTransform.rot * TheSettingManager->SettingsMain.CameraMode.DialogOffset;
+		v = PlayerNode->m_worldTransform.rot * CameraMode->DialogOffset;
 		CameraPosition->x = HeadPosition->x + v.x;
 		CameraPosition->y = HeadPosition->y + v.y;
 		CameraPosition->z = HeadPosition->z + v.z;
@@ -180,23 +198,22 @@ void UpdateCamera(NiAVObject* CameraNode, NiPoint3* LocalPosition) {
 	}
 	else if (!IsThirdPerson && !Player->IsVanityView()) {
 		if (SitSleepState != 3 && SitSleepState != 5) {
-			NiPoint3 o = { TheSettingManager->SettingsMain.CameraMode.Offset.z, TheSettingManager->SettingsMain.CameraMode.Offset.y, TheSettingManager->SettingsMain.CameraMode.Offset.x };
-			NiPoint3 r = Process->animData->nHead->m_worldTransform.rot * o;
-			CameraPosition->x = HeadPosition->x + r.x;
-			CameraPosition->y = HeadPosition->y + r.y;
-			CameraPosition->z = HeadPosition->z + r.z;
-			PlayerEx->ReticleOffset.x = r.x;
-			PlayerEx->ReticleOffset.y = r.y;
-			PlayerEx->ReticleOffset.z = r.z;
+			NiPoint3 o = { CameraMode->Offset.z, CameraMode->Offset.y, CameraMode->Offset.x };
+			v = Process->animData->nHead->m_worldTransform.rot * o;
+			CameraPosition->x = HeadPosition->x + v.x;
+			CameraPosition->y = HeadPosition->y + v.y;
+			CameraPosition->z = HeadPosition->z + v.z;
+			PlayerEx->ReticleOffset.x = v.x;
+			PlayerEx->ReticleOffset.y = v.y;
+			PlayerEx->ReticleOffset.z = v.z;
 		}
 		BSAnimGroupSequence* AnimSequence = Process->animData->animSequences[0];
 		TESAnimGroup* AnimGroup = (AnimSequence ? AnimSequence->animGroup : NULL);
 		if ((AnimGroup && AnimGroup->animGroup >= TESAnimGroup::kAnimGroup_DodgeForward && AnimGroup->animGroup <= TESAnimGroup::kAnimGroup_DodgeRight && AnimGroup->animType == 0) || (SitSleepState >= HighProcess::kSitSleep_SleepingIn && SitSleepState <= HighProcess::kSitSleep_SleepingOut) || Player->LifeState || Process->KnockedState) {
-			NiMatrix33 m;
-			NiPoint3 Rot = { 0.0f, 0.0f, 90.0f };
-			m.GenerateRotationMatrixZXY(&Rot, 1);
-			m = Process->animData->nHead->m_worldTransform.rot * m;
-			memcpy(CameraRotation, &m, 0x24);
+			Rot.z = 90.0f;
+			ml.GenerateRotationMatrixZXY(&Rot, 1);
+			ml = Process->animData->nHead->m_worldTransform.rot * ml;
+			memcpy(CameraRotation, &ml, 0x24);
 		}
 	}
 	LocalPosition->x = CameraPosition->x;
@@ -296,6 +313,8 @@ void CreateCameraModeHook() {
 
 	*((int*)&ToggleCamera)					= kToggleCamera;
 	TrackToggleCamera						= &CameraMode::TrackToggleCamera;
+	*((int*)&ToggleBody)					= kToggleBody;
+	TrackToggleBody							= &CameraMode::TrackToggleBody;
 	*((int *)&SetDialogCamera)				= kSetDialogCamera;
 	TrackSetDialogCamera					= &CameraMode::TrackSetDialogCamera;
 	*((int *)&UpdateCameraCollisions)		= kUpdateCameraCollisions;
@@ -304,8 +323,9 @@ void CreateCameraModeHook() {
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&(PVOID&)ToggleCamera,				*((PVOID*)&TrackToggleCamera));
-	DetourAttach(&(PVOID&)SetDialogCamera,			*((PVOID *)&TrackSetDialogCamera));
-	DetourAttach(&(PVOID&)UpdateCameraCollisions,	*((PVOID *)&TrackUpdateCameraCollisions));
+	DetourAttach(&(PVOID&)ToggleBody,				*((PVOID*)&TrackToggleBody));
+	DetourAttach(&(PVOID&)SetDialogCamera,			*((PVOID*)&TrackSetDialogCamera));
+	DetourAttach(&(PVOID&)UpdateCameraCollisions,	*((PVOID*)&TrackUpdateCameraCollisions));
 	DetourTransactionCommit();
 
 	WriteRelJump(kUpdateCameraHook,		 (UInt32)UpdateCameraHook);
@@ -318,10 +338,6 @@ void CreateCameraModeHook() {
 	// Extends the PlayerCharacter allocation (for each constructor call) to store additional data
 	SafeWrite32(0x00406775, sizeof(PlayerCharacterEx));
 	SafeWrite32(0x0046451E, sizeof(PlayerCharacterEx));
-#elif defined(NEWVEGAS)
-	WriteRelJump(0x00761DE7, 0x00761DF4); // Avoids to toggle the body
-	WriteRelJump(0x0093FC04, 0x0093FC3B); // Avoids to toggle the body
-	WriteRelJump(0x00950244, 0x0095027E); // Avoids to toggle the body
 #endif
 
 }
@@ -415,9 +431,9 @@ void CreateCameraModeHook()
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&(PVOID&)SetCameraState,		*((PVOID *)&TrackSetCameraState));
-	DetourAttach(&(PVOID&)ManageButtonEvent,	*((PVOID *)&TrackManageButtonEvent));
-	DetourAttach(&(PVOID&)SetCameraPosition,	*((PVOID *)&TrackSetCameraPosition));
+	DetourAttach(&(PVOID&)SetCameraState,		*((PVOID*)&TrackSetCameraState));
+	DetourAttach(&(PVOID&)ManageButtonEvent,	*((PVOID*)&TrackManageButtonEvent));
+	DetourAttach(&(PVOID&)SetCameraPosition,	*((PVOID*)&TrackSetCameraPosition));
 	DetourTransactionCommit();
 	
 	SafeWrite8(0x0083F69B, 0); // Stops PlayerCharacter fading

@@ -22,9 +22,9 @@ void GameEventManager::OnHitByPlayer() {
 
 	float RandomPercent = 0.0f;
 
-	if (TheShaderManager->ShaderConst.BloodLens_Percent == 0) {
+	if (TheShaderManager->ShaderConst.BloodLens.Percent == 0) {
 		RandomPercent = (double)rand() / (RAND_MAX + 1) * (100 - 1) + 1;
-		if (RandomPercent <= TheSettingManager->SettingsBlood.LensChance) TheShaderManager->ShaderConst.BloodLens_Percent = 1;
+		if (RandomPercent <= TheSettingManager->SettingsBlood.LensChance) TheShaderManager->ShaderConst.BloodLens.Percent = 1;
 	}
 
 }

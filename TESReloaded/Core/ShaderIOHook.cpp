@@ -328,14 +328,14 @@ void CreateShaderIOHook() {
 	DetourTransactionCommit();
 
 #if defined(NEWVEGAS)
-	SafeWrite8(0x00BE1690, 0x48);	// Extends the NiD3DVertexShader allocation from size 0x3C to 0x48 to store additional data
-	SafeWrite8(0x00BE1DFB, 0x3C);	// Extends the NiD3DPixelShader allocation from size 0x30 to 0x3C to store additional data
+	SafeWrite8(0x00BE1690, sizeof(NiD3DVertexShaderEx));	// Extends the NiD3DVertexShader allocation to store additional data
+	SafeWrite8(0x00BE1DFB, sizeof(NiD3DPixelShaderEx));		// Extends the NiD3DPixelShader allocation to store additional data
 #elif defined(OBLIVION)
-	SafeWrite8(0x00801BCB, 0x44);	// Extends the NiD3DVertexShader allocation from size 0x38 to 0x44 to store additional data
-	SafeWrite8(0x008023A1, 0x38);	// Extends the NiD3DPixelShader allocation from size 0x2C to 0x38 to store additional data
+	SafeWrite8(0x00801BCB, sizeof(NiD3DVertexShaderEx));	// Extends the NiD3DVertexShader allocation to store additional data
+	SafeWrite8(0x008023A1, sizeof(NiD3DPixelShaderEx));		// Extends the NiD3DPixelShader allocation to store additional data
 #elif defined(SKYRIM)
-	SafeWrite8(0x00CCBD66, 0x40);	// Extends the NiD3DVertexShader allocation from size 0x34 to 0x40 to store additional data
-	SafeWrite8(0x00CCC676, 0x70);	// Extends the NiD3DPixelShader allocation from size 0x64 to 0x70 to store additional data
+	SafeWrite8(0x00CCBD66, sizeof(NiD3DVertexShaderEx));	// Extends the NiD3DVertexShader allocation to store additional data
+	SafeWrite8(0x00CCC676, sizeof(NiD3DPixelShaderEx));		// Extends the NiD3DPixelShader allocation to store additional data
 #endif
 
 }

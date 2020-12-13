@@ -31,9 +31,10 @@ public:
 	void					RenderObject(NiAVObject* Node, bool HasWater);
 	void					Render(NiGeometry* Geo);
 	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir);
-	void					RenderShadowCubeMap(NiPointLight* Lights[4], int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors);
+	void					RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors);
 	void					RenderShadowMaps();
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, ShadowCubeMapStateEnum NewState);
+	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
 
 	IDirect3DTexture9*		ShadowMapTexture[3];
 	IDirect3DSurface9*		ShadowMapSurface[3];
@@ -54,6 +55,7 @@ public:
 	IDirect3DVertexShader9* ShadowCubeMapVertexShader;
 	IDirect3DPixelShader9*	ShadowCubeMapPixelShader;
 	D3DVIEWPORT9			ShadowCubeMapViewPort;
+	NiPointLight*			ShadowCubeMapLights[4];
 	ShaderRecord*			CurrentVertex;
 	ShaderRecord*			CurrentPixel;
 	TESObjectCELL*			CurrentCell;

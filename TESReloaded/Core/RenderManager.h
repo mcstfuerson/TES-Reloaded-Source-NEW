@@ -29,6 +29,7 @@ public:
 	void				SetSceneGraph();
 
 	D3DXMATRIX			InvViewProjMatrix;
+	D3DXMATRIX			WorldViewProjMatrix;
 	D3DXVECTOR4			CameraForward;
 	D3DXVECTOR4			CameraPosition;
 	IDirect3DSurface9*	BackBuffer;

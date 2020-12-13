@@ -1,4 +1,3 @@
-#define HookD3DDevice 0
 #define WaitForDebugger 0
 
 #include "RenderHook.h"
@@ -14,12 +13,7 @@
 #include "FlyCam.h"
 #include "PluginVersion.h"
 #include "MemoryManagement.h"
-
-#ifdef _DEBUG
-#if HookD3DDevice
 #include "D3D9Hook.h"
-#endif
-#endif
 
 extern "C" {
 
@@ -34,13 +28,8 @@ extern "C" {
 
 	bool OBSEPlugin_Load(const PluginInterface* Interface) {
 
-#ifdef _DEBUG
 #if WaitForDebugger
 		while (!IsDebuggerPresent()) Sleep(10);
-#endif
-#if HookD3DDevice
-		if (!Interface->IsEditor) CreateD3D9Hook();
-#endif
 #endif
 		Logger::CreateLog("OblivionReloaded.log");
 		new CommandManager();
@@ -70,6 +59,7 @@ extern "C" {
 			if (TheSettingManager->SettingsMain.Dodge.Enabled) CreateDodgeHook();
 			if (TheSettingManager->SettingsMain.FlyCam.Enabled) CreateFlyCamHook();
 			if (TheSettingManager->SettingsMain.WeatherMode.Enabled) CreateWeatherModeHook();
+			if (TheSettingManager->SettingsMain.Develop.LogShaders) CreateD3D9Hook();
 
 			WriteRelJump(0x0049849A, 0x004984A0); // Skips antialiasing deactivation if HDR is enabled on the D3DDevice
 			WriteRelJump(0x004984BD, 0x004984CD); // Skips antialiasing deactivation if AllowScreenshot is enabled
@@ -78,7 +68,6 @@ extern "C" {
 			WriteRelJump(0x00497D5A, 0x00497D63); // Unlocks antialising bar if HDR is enabled (video menu)
 			WriteRelJump(0x005DF8E9, 0x005DF983); // Skips antialising deactivation changing HDR (video menu)
 			WriteRelJump(0x006738B1, 0x00673935); // Cancels the fPlayerDeathReloadTime
-			WriteRelJump(0x007D1AC9, 0x007D1C28); // Fixes cyan hair because OR disables Lighting30Shaders
 		}
 		else {
 			CreateEditorShadowsHook();
