@@ -12,11 +12,6 @@
 static const UInt32 kRenderInterface = 0x007144D3;
 static const UInt32 kRenderInterfaceReturn = 0x007144D8;
 static const UInt32 kRenderInterfaceMethod = 0x007134D0;
-static const UInt32 kRenderFirstPersonNode = 0x00870F74;
-static const UInt32 kRenderFirstPersonNodeRepeat = 0x00870F30;
-static const UInt32 kRenderFirstPersonNodeReturn = 0x00870F9B;
-static const UInt32 kClearDepth = 0x008751BF;
-static const UInt32 kClearDepthReturn = 0x008751CB;
 static const UInt32 kSetTileShaderConstants = 0x00BCAAD7;
 static const UInt32 kSetTileShaderConstantsReturn = 0x00BCAADE;
 static const UInt32 kMultiBoundWaterHeightFix1 = 0x006FAE04;
@@ -26,7 +21,6 @@ static const UInt32 kDetectorWindowCreateTreeView = 0x004D6476;
 static const UInt32 kDetectorWindowCreateTreeViewReturn = 0x004D647F;
 static const UInt32 kDetectorWindowDumpAttributes = 0x004D6A2E;
 static const UInt32 kDetectorWindowDumpAttributesReturn = 0x004D69C5;
-static UInt32 ClearMode = 0;
 #elif defined(OBLIVION)
 #define kRender 0x0040C830
 #define kProcessImageSpaceShaders 0x007B48E0
@@ -67,24 +61,25 @@ static UInt32 ClearMode = 0;
 
 class RenderHook {
 public:
-	void* TrackShowDetectorWindow(HWND, HINSTANCE, NiNode*, char*, int, int, int, int);
-	bool TrackBeginScene();
+	void*	TrackShowDetectorWindow(HWND, HINSTANCE, NiNode*, char*, int, int, int, int);
+	bool	TrackBeginScene();
 #if defined(NEWVEGAS)
-	void TrackRender(BSRenderedTexture* RenderedTexture, int Arg2, int Arg3);
-	void TrackRenderWorldSceneGraph(Sun* SkySun, UInt8 IsFirstPerson, UInt8 WireFrame, UInt8 Arg4);
-	float TrackGetWaterHeightLOD();
+	void	TrackRender(BSRenderedTexture* RenderedTexture, int Arg2, int Arg3);
+	void	TrackRenderWorldSceneGraph(Sun* SkySun, UInt8 IsFirstPerson, UInt8 WireFrame, UInt8 Arg4);
+	void	TrackRenderFirstPerson(NiDX9Renderer* Renderer, NiGeometry* Geo, Sun* SkySun, BSRenderedTexture* RenderedTexture);
+	float	TrackGetWaterHeightLOD();
 #elif defined (OBLIVION)
-	void TrackRender(BSRenderedTexture*);
-	bool TrackEndTargetGroup(NiCamera*, NiRenderTargetGroup*);
-	void TrackHDRRender(NiScreenElements*, BSRenderedTexture**, BSRenderedTexture**, UInt8);
-	UInt32 TrackSetupShaderPrograms(NiGeometry*, NiSkinInstance*, NiSkinPartition::Partition*, NiGeometryBufferData*, NiPropertyState*, NiDynamicEffectState*, NiTransform*, UInt32);
-	void TrackCullingBSFadeNode(NiCullingProcess*);
-	float TrackFarPlane();
+	void	TrackRender(BSRenderedTexture*);
+	bool	TrackEndTargetGroup(NiCamera*, NiRenderTargetGroup*);
+	void	TrackHDRRender(NiScreenElements*, BSRenderedTexture**, BSRenderedTexture**, UInt8);
+	UInt32	TrackSetupShaderPrograms(NiGeometry*, NiSkinInstance*, NiSkinPartition::Partition*, NiGeometryBufferData*, NiPropertyState*, NiDynamicEffectState*, NiTransform*, UInt32);
+	void	TrackCullingBSFadeNode(NiCullingProcess*);
+	float	TrackFarPlane();
 	HRESULT TrackSetSamplerState(UInt32, D3DSAMPLERSTATETYPE, UInt32, UInt8);
 #elif defined(SKYRIM)
-	void TrackRender(BSRenderedTexture* RenderedTexture, int Arg2, int Arg3);
-	bool TrackSetupRenderingPass(UInt32 Arg1, UInt32 Arg2);
-	void TrackRenderWorldSceneGraph(Sun* SkySun, UInt8 IsFirstPerson, UInt8 WireFrame);
+	void	TrackRender(BSRenderedTexture* RenderedTexture, int Arg2, int Arg3);
+	bool	TrackSetupRenderingPass(UInt32 Arg1, UInt32 Arg2);
+	void	TrackRenderWorldSceneGraph(Sun* SkySun, UInt8 IsFirstPerson, UInt8 WireFrame);
 #endif
 
 };
@@ -165,9 +160,23 @@ void __cdecl TrackSetupRenderingPass(UInt32 PassIndex, NiD3DShader* Shader) {
 void (__thiscall RenderHook::* RenderWorldSceneGraph)(Sun*, UInt8, UInt8, UInt8);
 void (__thiscall RenderHook::* TrackRenderWorldSceneGraph)(Sun*, UInt8, UInt8, UInt8);
 void RenderHook::TrackRenderWorldSceneGraph(Sun* SkySun, UInt8 IsFirstPerson, UInt8 WireFrame, UInt8 Arg4) {
+	
+	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
 
 	(this->*RenderWorldSceneGraph)(SkySun, IsFirstPerson, WireFrame, Arg4);
-	if (!IsFirstPerson) TheRenderManager->ResolveDepthBuffer();
+	if (CameraMode || Player->IsThirdPersonView(CameraMode, TheRenderManager->FirstPersonView)) TheRenderManager->ResolveDepthBuffer();
+
+}
+
+void (__thiscall RenderHook::* RenderFirstPerson)(NiDX9Renderer*, NiGeometry*, Sun*, BSRenderedTexture*);
+void (__thiscall RenderHook::* TrackRenderFirstPerson)(NiDX9Renderer*, NiGeometry*, Sun*, BSRenderedTexture*);
+void RenderHook::TrackRenderFirstPerson(NiDX9Renderer* Renderer, NiGeometry* Geo, Sun* SkySun, BSRenderedTexture* RenderedTexture) {
+	
+	(this->*RenderFirstPerson)(Renderer, Geo, SkySun, RenderedTexture);
+	TheRenderManager->ResolveDepthBuffer();
+	TheRenderManager->Clear(NULL, NiRenderer::kClear_ZBUFFER);
+	ThisCall(0x00874C10, Global);
+	(this->*RenderFirstPerson)(Renderer, Geo, SkySun, RenderedTexture);
 
 }
 
@@ -178,64 +187,9 @@ float RenderHook::TrackGetWaterHeightLOD() {
 	TESWorldSpace* Worldspace = (TESWorldSpace*)this;
 	float r = Worldspace->waterHeight;
 
-	if (*(void**)Worldspace == (void*)0x0103195C) {
-		r = Worldspace->defaultWaterHeight;
-		TESObjectCELL* Cell = Player->parentCell;
-
-		if (Cell && Cell->flags0 & TESObjectCELL::kFlags0_HasWater) {
-			r = Player->GetWaterHeight();
-		}
-		else {
-			UInt8 GridSize = Tes->gridCellArray->gridSize;
-			for (int x = 0; x < GridSize; x++) {
-				for (int y = 0; y < GridSize; y++) {
-					Cell = Tes->gridCellArray->GetCell(x, y);
-					if (Cell && Cell->flags0 & TESObjectCELL::kFlags0_HasWater) {
-						r = Cell->GetWaterHeight();
-						goto breakall;
-					}
-				}
-			}
-		}
-	}
-breakall:
+	// Due to compiler optimization, the function GetWaterHeightLOD is "shared" as general method that returns ECX + 0x07C
+	if (*(void**)Worldspace == (void*)0x0103195C) r = Tes->GetWaterHeight(Player);
 	return r;
-
-}
-
-static const UInt32 NiDX9RendererClear = 0x007148C0;
-static __declspec(naked) void ClearDepth() {
-
-	__asm
-	{
-		push	ClearMode
-		push	0
-		mov     ecx, [ebp + 0x8]
-		call	NiDX9RendererClear
-		jmp		kClearDepthReturn
-	}
-
-}
-
-static const UInt32 RenderFirstPerson = 0x00875110;
-static __declspec(naked) void RenderFirstPersonNode() {
-
-	__asm
-	{
-		call	RenderFirstPerson
-		cmp		ClearMode, 0
-		jnz		loc_jumpout
-		mov		ClearMode, 4
-		pushad
-		mov		ecx, TheRenderManager
-		call	RenderManager::ResolveDepthBuffer
-		popad
-		jmp		kRenderFirstPersonNodeRepeat
-
-	loc_jumpout :
-		mov		ClearMode, 0
-		jmp		kRenderFirstPersonNodeReturn
-	}
 
 }
 
@@ -292,12 +246,13 @@ void RenderHook::TrackRender(BSRenderedTexture* RenderedTexture) {
 	TheRenderManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
 	if (TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->defaultRTGroup->RenderTargets[1]->data->Surface;
-	if (TheSettingManager->SettingsMain.Develop.TraceShaders && *RenderWindowNode == NULL && TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Develop.TraceShaders)) {
+	if (TheSettingManager->SettingsMain.Develop.TraceShaders && *RenderWindowNode == NULL && TheKeyboardManager->OnKeyPressed(TheSettingManager->SettingsMain.Develop.TraceShaders)) {
 		*RenderWindowNode = (NiNode*)MemoryAlloc(sizeof(NiNode));
 		NiNode* Node = *RenderWindowNode;
 		Node->New(4096);
 		Node->SetName("Passes...");
 	}
+	if (TheSettingManager->SettingsMain.Develop.LogShaders && TheKeyboardManager->OnKeyPressed(TheSettingManager->SettingsMain.Develop.LogShaders)) Logger::Log("START FRAME LOG");
 	(this->*Render)(RenderedTexture);
 
 }
@@ -371,9 +326,10 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 			Node->m_children.Add((NiAVObject**)&Geometry); // Same as above
 			RenderWindowRootNode->AddObject(Node, 1);
 		}
+		if (TheSettingManager->SettingsMain.Develop.LogShaders && TheKeyboardManager->OnKeyPressed(TheSettingManager->SettingsMain.Develop.LogShaders)) Logger::Log("Pass %s (%s %s)", Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
 	}
 	return (this->*SetupShaderPrograms)(Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
-
+	
 }
 
 HRESULT (__thiscall RenderHook::* SetSamplerState)(UInt32, D3DSAMPLERSTATETYPE, UInt32, UInt8);
@@ -410,21 +366,23 @@ NiPixelData* __cdecl TrackSaveGameScreenshot(int* pWidth, int* pHeight) {
 void (__cdecl * SetShaderPackage)(int, int, UInt8, int, char*, int) = (void (__cdecl *)(int, int, UInt8, int, char*, int))0x007B45F0;
 void __cdecl TrackSetShaderPackage(int Arg1, int Arg2, UInt8 Force1XShaders, int Arg4, char* GraphicsName, int Arg6) {
 	
-	SetShaderPackage(Arg1, Arg2, Force1XShaders, Arg4, GraphicsName, 255);
+	UInt32* ShaderPackage = (UInt32*)0x00B42F48;
+	UInt32* ShaderPackageMax = (UInt32*)0x00B42D74;
+
+	SetShaderPackage(Arg1, Arg2, Force1XShaders, Arg4, GraphicsName, Arg6);
+	
+	*ShaderPackage = 7;
+	*ShaderPackageMax = 7;
 
 }
 
 void (__cdecl * RenderObject)(NiCamera*, NiNode*, NiCullingProcess*, NiVisibleArray*) = (void (__cdecl *)(NiCamera*, NiNode*, NiCullingProcess*, NiVisibleArray*))0x0070C0B0;
 void __cdecl TrackRenderObject(NiCamera* Camera, NiNode* Object, NiCullingProcess* CullingProcess, NiVisibleArray* VisibleArray) {
-
+	
 	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
 
-	if (CameraMode) {
-		if (Object == WorldSceneGraph && TheRenderManager->FirstPersonView) Player->niNode->m_flags &= ~NiAVObject::kFlag_AppCulled;
-		if (Object == Player->firstPersonNiNode) return;
-	}
 	RenderObject(Camera, Object, CullingProcess, VisibleArray);
-	if (Object == WorldSceneGraph && (!TheRenderManager->FirstPersonView || CameraMode)) {
+	if (Object == WorldSceneGraph && (CameraMode || Player->IsThirdPersonView(CameraMode, TheRenderManager->FirstPersonView))) {
 		TheRenderManager->ResolveDepthBuffer();
 	}
 	else if (Object == Player->firstPersonNiNode) {
@@ -674,7 +632,6 @@ void DetectorWindowDumpAttributes(HWND TreeView, UInt32 Msg, WPARAM wParam, LPTV
 	Item.hItem = (HTREEITEM)SendMessageA(TreeView, TVM_GETNEXTITEM, TVGN_PARENT, (LPARAM)lParam->hParent);
 	Item.cchTextMax = 260;
 	SendMessageA(TreeView, TVM_GETITEMA, 0, (LPARAM)&Item);
-
 	if (!memcmp(Item.pszText, "Pass", 4))
 		SendMessageA(TreeView, TVM_DELETEITEM, 0, (LPARAM)lParam->hParent);
 	else
@@ -694,63 +651,67 @@ static __declspec(naked) void DetectorWindowDumpAttributesHook() {
 	}
 
 }
+
 void CreateRenderHook() {
 
 	*((int*)&ShowDetectorWindow)			= kShowDetectorWindow;
 	TrackShowDetectorWindow					= &RenderHook::TrackShowDetectorWindow;
-	*((int *)&Render)						= kRender;
+	*((int*)&Render)						= kRender;
 	TrackRender								= &RenderHook::TrackRender;
-	*((int *)&BeginScene)					= kBeginScene;
+	*((int*)&BeginScene)					= kBeginScene;
 	TrackBeginScene							= &RenderHook::TrackBeginScene;
 #if defined(NEWVEGAS)
-	*((int *)&RenderWorldSceneGraph)		= 0x00873200;
+	*((int*)&RenderWorldSceneGraph)			= 0x00873200;
 	TrackRenderWorldSceneGraph				= &RenderHook::TrackRenderWorldSceneGraph;
-	*((int *)&GetWaterHeightLOD)			= 0x0045CD80;
+	*((int*)&RenderFirstPerson)				= 0x00875110;
+	TrackRenderFirstPerson					= &RenderHook::TrackRenderFirstPerson;
+	*((int*)&GetWaterHeightLOD)				= 0x0045CD80;
 	TrackGetWaterHeightLOD					= &RenderHook::TrackGetWaterHeightLOD;
 #elif defined(OBLIVION)
-	*((int *)&SetupShaderPrograms)			= 0x0077A1F0;
+	*((int*)&SetupShaderPrograms)			= 0x0077A1F0;
 	TrackSetupShaderPrograms				= &RenderHook::TrackSetupShaderPrograms;
-	*((int *)&EndTargetGroup)				= 0x007AAA30;
+	*((int*)&EndTargetGroup)				= 0x007AAA30;
 	TrackEndTargetGroup						= &RenderHook::TrackEndTargetGroup;
-	*((int *)&HDRRender)					= 0x007BDFC0;
+	*((int*)&HDRRender)						= 0x007BDFC0;
 	TrackHDRRender							= &RenderHook::TrackHDRRender;
-	*((int *)&CullingBSFadeNode)			= 0x004A0920;
+	*((int*)&CullingBSFadeNode)				= 0x004A0920;
 	TrackCullingBSFadeNode					= &RenderHook::TrackCullingBSFadeNode;
-	*((int *)&FarPlane)						= 0x00410EE0;
+	*((int*)&FarPlane)						= 0x00410EE0;
 	TrackFarPlane							= &RenderHook::TrackFarPlane;
-	*((int *)&SetSamplerState)				= 0x0077B610;
+	*((int*)&SetSamplerState)				= 0x0077B610;
 	TrackSetSamplerState					= &RenderHook::TrackSetSamplerState;
 #elif defined(SKYRIM)
-	*((int *)&SetupRenderingPass)			= 0x00CC4E80;
+	*((int*)&SetupRenderingPass)			= 0x00CC4E80;
 	TrackSetupRenderingPass					= &RenderHook::TrackSetupRenderingPass;
-	*((int *)&RenderWorldSceneGraph)		= 0x00692290;
+	*((int*)&RenderWorldSceneGraph)			= 0x00692290;
 	TrackRenderWorldSceneGraph				= &RenderHook::TrackRenderWorldSceneGraph;
 #endif
 
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&(PVOID&)ShowDetectorWindow,			*((PVOID*)&TrackShowDetectorWindow));
-	DetourAttach(&(PVOID&)Render,						*((PVOID *)&TrackRender));
-	DetourAttach(&(PVOID&)BeginScene,					*((PVOID *)&TrackBeginScene));
-	DetourAttach(&(PVOID&)ProcessImageSpaceShaders,				   &TrackProcessImageSpaceShaders);
+	DetourAttach(&(PVOID&)Render,						*((PVOID*)&TrackRender));
+	DetourAttach(&(PVOID&)BeginScene,					*((PVOID*)&TrackBeginScene));
+	DetourAttach(&(PVOID&)ProcessImageSpaceShaders,				  &TrackProcessImageSpaceShaders);
 #if defined(NEWVEGAS)
-	DetourAttach(&(PVOID&)RenderWorldSceneGraph,		*((PVOID *)&TrackRenderWorldSceneGraph));
-	DetourAttach(&(PVOID&)GetWaterHeightLOD,			*((PVOID *)&TrackGetWaterHeightLOD));
-	DetourAttach(&(PVOID&)SetupRenderingPass,					   &TrackSetupRenderingPass);
-	DetourAttach(&(PVOID&)SetShaderPackage,						   &TrackSetShaderPackage);
+	DetourAttach(&(PVOID&)RenderWorldSceneGraph,		*((PVOID*)&TrackRenderWorldSceneGraph));
+	DetourAttach(&(PVOID&)RenderFirstPerson,			*((PVOID*)&TrackRenderFirstPerson));
+	DetourAttach(&(PVOID&)GetWaterHeightLOD,			*((PVOID*)&TrackGetWaterHeightLOD));
+	DetourAttach(&(PVOID&)SetupRenderingPass,					  &TrackSetupRenderingPass);
+	//DetourAttach(&(PVOID&)SetShaderPackage,						  &TrackSetShaderPackage);
 #elif defined(OBLIVION)
-	DetourAttach(&(PVOID&)SetupShaderPrograms,			*((PVOID *)&TrackSetupShaderPrograms));
-	DetourAttach(&(PVOID&)EndTargetGroup,				*((PVOID *)&TrackEndTargetGroup));
-	DetourAttach(&(PVOID&)HDRRender,					*((PVOID *)&TrackHDRRender));
-	DetourAttach(&(PVOID&)CullingBSFadeNode,			*((PVOID *)&TrackCullingBSFadeNode));
-	DetourAttach(&(PVOID&)FarPlane,						*((PVOID *)&TrackFarPlane));
-	DetourAttach(&(PVOID&)SetSamplerState,				*((PVOID *)&TrackSetSamplerState));
-	DetourAttach(&(PVOID&)SaveGameScreenshot,					   &TrackSaveGameScreenshot);
-	DetourAttach(&(PVOID&)SetShaderPackage,						   &TrackSetShaderPackage);
-	DetourAttach(&(PVOID&)RenderObject,							   &TrackRenderObject);
+	DetourAttach(&(PVOID&)SetupShaderPrograms,			*((PVOID*)&TrackSetupShaderPrograms));
+	DetourAttach(&(PVOID&)EndTargetGroup,				*((PVOID*)&TrackEndTargetGroup));
+	DetourAttach(&(PVOID&)HDRRender,					*((PVOID*)&TrackHDRRender));
+	DetourAttach(&(PVOID&)CullingBSFadeNode,			*((PVOID*)&TrackCullingBSFadeNode));
+	DetourAttach(&(PVOID&)FarPlane,						*((PVOID*)&TrackFarPlane));
+	DetourAttach(&(PVOID&)SetSamplerState,				*((PVOID*)&TrackSetSamplerState));
+	DetourAttach(&(PVOID&)SaveGameScreenshot,					  &TrackSaveGameScreenshot);
+	//DetourAttach(&(PVOID&)SetShaderPackage,						  &TrackSetShaderPackage);
+	DetourAttach(&(PVOID&)RenderObject,							  &TrackRenderObject);
 #elif defined(SKYRIM)
-	DetourAttach(&(PVOID&)SetupRenderingPass,			*((PVOID *)&TrackSetupRenderingPass));
-	DetourAttach(&(PVOID&)RenderWorldSceneGraph,		*((PVOID *)&TrackRenderWorldSceneGraph));
+	DetourAttach(&(PVOID&)SetupRenderingPass,			*((PVOID*)&TrackSetupRenderingPass));
+	DetourAttach(&(PVOID&)RenderWorldSceneGraph,		*((PVOID*)&TrackRenderWorldSceneGraph));
 #endif
     DetourTransactionCommit();
 
@@ -759,18 +720,14 @@ void CreateRenderHook() {
 	WriteRelJump(kDetectorWindowCreateTreeView, (UInt32)DetectorWindowCreateTreeViewHook);
 	WriteRelJump(kDetectorWindowDumpAttributes, (UInt32)DetectorWindowDumpAttributesHook);
 	WriteRelJump(kDetectorWindowScale,			kDetectorWindowScaleReturn); // Avoids to add the scale to the node description in the detector window
-
 #if defined(NEWVEGAS)
-	SafeWrite32(0x00E7624D,	 sizeof(RenderManager)); // Extends the NiDX9Renderer allocation to store additional data
 	WriteRelJump(0x004E4C3B, 0x004E4C42); // Fixes reflections when cell water height is not like worldspace water height
 	WriteRelJump(0x004E4DA4, 0x004E4DAC); // Fixes reflections on distant water
-	WriteRelJump(kClearDepth,					(UInt32)ClearDepth);
-	WriteRelJump(kRenderFirstPersonNode,		(UInt32)RenderFirstPersonNode);
 	WriteRelCall(kMultiBoundWaterHeightFix1,	(UInt32)MultiBoundWaterHeightFix);
 	WriteRelCall(kMultiBoundWaterHeightFix2,	(UInt32)MultiBoundWaterHeightFix);
 	if (TheSettingManager->SettingsMain.Main.ReplaceIntro) WriteRelJump(kSetTileShaderConstants, (UInt32)SetTileShaderConstants);
+	SafeWrite8(0x008751C0, 0); // Stops to clear the depth buffer when rendering the 1st person node
 #elif defined(OBLIVION)
-	SafeWrite32(0x0076BD75, sizeof(RenderManager)); // Extends the NiDX9Renderer allocation to store additional data
 	SafeWrite32(0x0049BFAF, TheSettingManager->SettingsMain.Main.WaterReflectionMapSize); // Constructor
 	SafeWrite32(0x007C1045, TheSettingManager->SettingsMain.Main.WaterReflectionMapSize); // RenderedSurface
 	SafeWrite32(0x007C104F, TheSettingManager->SettingsMain.Main.WaterReflectionMapSize); // RenderedSurface
@@ -778,14 +735,16 @@ void CreateRenderHook() {
 	SafeWrite32(0x007C1103, TheSettingManager->SettingsMain.Main.WaterReflectionMapSize); // RenderedSurface
 	SafeWrite8(0x00A38280, 0x5A); // Fixes the "purple water bug"
 	SafeWrite8(0x0040CE11, 0); // Stops to clear the depth buffer when rendering the 1st person node
+	WriteRelJump(0x00553EAC, 0x00553EB2); // Patches the use of Lighting30Shader only for the hair
+	WriteRelJump(0x007D1BC4, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
+	WriteRelJump(0x007D1BCD, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
 	if (TheSettingManager->SettingsMain.Main.AnisotropicFilter >= 2) {
 		SafeWrite8(0x007BE1D3, TheSettingManager->SettingsMain.Main.AnisotropicFilter);
 		SafeWrite8(0x007BE32B, TheSettingManager->SettingsMain.Main.AnisotropicFilter);
 	}
 	if (TheSettingManager->SettingsMain.Main.RemovePrecipitations) WriteRelJump(0x00543167, 0x00543176);
-	*LocalWaterHiRes = 1; //Fixes a bug on the WaterHeightMapConstructor (the constructor is called before initializing the value with the bUseWaterHiRes ini value)
+	*LocalWaterHiRes = 1; // Fixes a bug on the WaterHeightMapConstructor
 #elif defined(SKYRIM)
-	SafeWrite32(0x00CDB659, sizeof(RenderManager)); // Extends the NiDX9Renderer allocation to store additional data
 	WriteRelJump(kClearDepth,				(UInt32)ClearDepth);
 	WriteRelJump(kRenderFirstPersonNode,	(UInt32)RenderFirstPersonNode);
 	if (TheSettingManager->SettingsMain.ShadowMode.NearQuality) {

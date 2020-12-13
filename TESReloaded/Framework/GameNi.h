@@ -2572,7 +2572,14 @@ assert(sizeof(SpeedTreeLeafShader) == 0x398);
 
 class ShadowLightShader : public BSShader {
 public:
-	UInt32				Unk07C[8];		// 07C
+	UInt32					Unk07C;					// 07C
+	UInt32					Unk080;					// 080
+	UInt32					Unk084;					// 084
+	UInt32					Unk088;					// 088
+	NiD3DShaderConstantMap* PixelConstantMapSLS;	// 08C
+	NiD3DShaderConstantMap* VertexConstantMapSLS;	// 090
+	NiD3DShaderConstantMap* PixelConstantMapSLS2;	// 094
+	NiD3DShaderConstantMap* VertexConstantMapSLS2;	// 098
 };
 assert(sizeof(ShadowLightShader) == 0x09C);
 
@@ -2593,7 +2600,7 @@ assert(sizeof(SkinShader) == 0x114);
 class ShaderDefinition {
 public:
 	NiDX9ShaderDeclaration* ShaderDeclaration;
-	BSShader* Shader;
+	BSShader*				Shader;
 };
 assert(sizeof(ShaderDefinition) == 0x008);
 

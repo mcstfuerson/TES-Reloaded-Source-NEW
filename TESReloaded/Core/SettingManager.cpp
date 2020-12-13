@@ -90,10 +90,10 @@ SettingManager::SettingManager() {
 		strcpy(SettingsMain.Main.ScreenshotPath, CurrentPath);
 		strcat(SettingsMain.Main.ScreenshotPath, value);
 	}
-	else
+	else {
 		strcpy(SettingsMain.Main.ScreenshotPath, value);
-	if (SettingsMain.Main.ScreenshotPath[strlen(SettingsMain.Main.ScreenshotPath) - 1] != '\\')
-		strcat(SettingsMain.Main.ScreenshotPath, "\\");
+	}
+	if (SettingsMain.Main.ScreenshotPath[strlen(SettingsMain.Main.ScreenshotPath) - 1] != '\\') strcat(SettingsMain.Main.ScreenshotPath, "\\");
 	SettingsMain.Main.ScreenshotType = GetPrivateProfileIntA("Main", "ScreenshotType", 1, Filename);
 	SettingsMain.Main.ScreenshotKey = GetPrivateProfileIntA("Main", "ScreenshotKey", 87, Filename);
 	SettingsMain.Main.FPSOverlay = GetPrivateProfileIntA("Main", "FPSOverlay", 0, Filename);
@@ -424,6 +424,7 @@ SettingManager::SettingManager() {
 	SettingsMain.Develop.CompileShaders = GetPrivateProfileIntA("Develop", "CompileShaders", 0, Filename);
 	SettingsMain.Develop.CompileEffects = GetPrivateProfileIntA("Develop", "CompileEffects", 0, Filename);
 	SettingsMain.Develop.TraceShaders = GetPrivateProfileIntA("Develop", "TraceShaders", 0, Filename);
+	SettingsMain.Develop.LogShaders = GetPrivateProfileIntA("Develop", "LogShaders", 0, Filename);
 
 	GameLoading = false;
 
@@ -935,6 +936,8 @@ void SettingManager::LoadSettings() {
 	SettingsVolumetricFog.ColorCoeff = atof(value);
 	GetPrivateProfileStringA("Default", "Amount", "0.8", value, SettingStringBuffer, Filename);
 	SettingsVolumetricFog.Amount = atof(value);
+	GetPrivateProfileStringA("Default", "MaxDistance", "100000.0", value, SettingStringBuffer, Filename);
+	SettingsVolumetricFog.MaxDistance = atof(value);
 
 	typedef std::vector<std::string> ValueList;
 	strcpy(Filename, SettingsMain.Main.WeatherFile);
@@ -2475,10 +2478,14 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 		}
 		else if (!strcmp(Definition, "Shadows")) {
 			if (!strcmp(Section, "Exteriors")) {
-				if (!strcmp(Setting, "Darkness"))
+				if (!strcmp(Setting, "Darkness")) {
 					SettingsShadows.Exteriors.Darkness = Value;
-				else if (!strcmp(Setting, "Quality"))
+				}
+				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.Exteriors.Quality = Value;
+					// Special case for forward or post-process shadowing
+					TheShaderManager->SwitchShaderStatus("ShadowsExteriors");
+				}
 			}
 			else if (!strcmp(Section, "ExteriorsNear")) {
 				if (!strcmp(Setting, "Enabled"))
@@ -2493,14 +2500,20 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar] = Value;
 			}
 			else if (!strcmp(Section, "Interiors")) {
-				if (!strcmp(Setting, "Enabled"))
+				if (!strcmp(Setting, "Enabled")) {
 					SettingsShadows.Interiors.Enabled = Value;
-				else if (!strcmp(Setting, "AlphaEnabled"))
+				}
+				else if (!strcmp(Setting, "AlphaEnabled")) {
 					SettingsShadows.Interiors.AlphaEnabled = Value;
-				else if (!strcmp(Setting, "Darkness"))
+				}
+				else if (!strcmp(Setting, "Darkness")) {
 					SettingsShadows.Interiors.Darkness = Value;
-				else if (!strcmp(Setting, "Quality"))
+				}
+				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.Interiors.Quality = Value;
+					// Special case for forward or post-process shadowing
+					TheShaderManager->SwitchShaderStatus("ShadowsInteriors");
+				}
 			}
 		}
 		else if (!strcmp(Definition, "Sharpening")) {
@@ -2982,7 +2995,6 @@ bool Settings::TrackReadSetting(GameSetting* Setting) {
 	return r;
 
 }
-
 
 bool (__thiscall Settings::* SaveSettings)();
 bool (__thiscall Settings::* TrackSaveSettings)();

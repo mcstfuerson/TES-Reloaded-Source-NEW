@@ -20,6 +20,8 @@ enum EffectRecordType
 	EffectRecordType_Sharpening,
 	EffectRecordType_VolumetricFog,
 	EffectRecordType_Precipitations,
+	EffectRecordType_ShadowsExteriors,
+	EffectRecordType_ShadowsInteriors,
 	EffectRecordType_Extra,
 };
 
@@ -30,90 +32,163 @@ enum ShaderType
 };
 
 struct ShaderConstants {
-	D3DXVECTOR4		ReciprocalResolution;
-	D3DXVECTOR4		ReciprocalResolutionWater;
-	D3DXVECTOR4		SunDir;
-	D3DXVECTOR4		SunTiming;
-	D3DXVECTOR4		SunAmount;
-	D3DXVECTOR4		GameTime;
-	D3DXVECTOR4		Tick;
-	D3DXVECTOR4		TextureData;
-	TESWeather*		pWeather;
-	float			currentsunGlare;
-	float			currentwindSpeed;
-	UInt8			oldsunGlare;
-	UInt8			oldwindSpeed;
-	D3DXVECTOR4		fogColor;
-	D3DXVECTOR4		oldfogColor;
-	D3DXVECTOR4		sunColor;
-	D3DXVECTOR4		oldsunColor;
-	D3DXVECTOR4		fogData;
-	float			currentfogStart;
-	float			oldfogStart;
-	float			currentfogEnd;
-	float			oldfogEnd;
-	bool			HasWater;
-	D3DXMATRIXA16	ShadowWorld;
-	D3DXMATRIX		ShadowViewProj;
-	D3DXMATRIX		ShadowCameraToLight[3];
-	D3DXVECTOR4		ShadowCubeMapLightPosition;
-	D3DXVECTOR4		ShadowLightPosition[4];
-	D3DXVECTOR4		ShadowCubeMapFarPlanes;
-	D3DXVECTOR4		Water_waterCoefficients;
-	D3DXVECTOR4		Water_waveParams;
-	D3DXVECTOR4		Water_waterVolume;
-	D3DXVECTOR4		Water_waterSettings;
-	D3DXVECTOR4		Water_deepColor;
-	D3DXVECTOR4		Water_shallowColor;
-	D3DXVECTOR4		Water_shorelineParams;
-	D3DXVECTOR4		HDR_ToneMapping;
-	D3DXVECTOR4		Grass_Scale;
-	D3DXVECTOR4		POM_ParallaxData;
-	D3DXVECTOR4		Terrain_Data;
-	D3DXVECTOR4		Skin_SkinData;
-	D3DXVECTOR4		Skin_SkinColor;
-	D3DXVECTOR4		Shadow_Data;
-	D3DXVECTOR4		Rain_Data;
-	D3DXVECTOR4		Snow_Data;
-	D3DXVECTOR4		WaterLens_Time;
-	float			WaterLens_TimeAmount;
-	float			WaterLens_Percent;
-	D3DXVECTOR4		GodRays_Ray;
-	D3DXVECTOR4		GodRays_RayColor;
-	D3DXVECTOR4		GodRays_Data;
-	bool			DepthOfField_Enabled;
-	D3DXVECTOR4		DepthOfField_Blur;
-	D3DXVECTOR4		DepthOfField_Data;
-	bool			AmbientOcclusion_Enabled;
-	D3DXVECTOR4		AmbientOcclusion_AOData;
-	D3DXVECTOR4		AmbientOcclusion_Data;
-	D3DXVECTOR4		Coloring_ColorCurve;
-	D3DXVECTOR4		Coloring_EffectGamma;
-	D3DXVECTOR4		Coloring_Data;
-	D3DXVECTOR4		Coloring_Values;
-	D3DXVECTOR4		Cinema_Data;
-	D3DXVECTOR4		Bloom_BloomData;
-	D3DXVECTOR4		Bloom_BloomValues;
-	D3DXVECTOR4		SnowAccumulation_Params;
-	D3DXVECTOR4		BloodLens_Params;
-	D3DXVECTOR4		BloodLens_BloodColor;
-	D3DXVECTOR4		BloodLens_Time;
-	float			BloodLens_Percent;
-	D3DXVECTOR4		MotionBlur_BlurParams;
-	D3DXVECTOR4		MotionBlur_Data;
-	float			MotionBlur_oldAngleX;
-	float			MotionBlur_oldAngleZ;
-	float			MotionBlur_oldAmountX;
-	float			MotionBlur_oldAmountY;
-	float			MotionBlur_oldoldAmountX;
-	float			MotionBlur_oldoldAmountY;
-	D3DXVECTOR4		LowHF_Data;
-	float			LowHF_HealthCoeff;
-	float			LowHF_FatigueCoeff;
-	D3DXVECTOR4		WetWorld_Coeffs;
-	D3DXVECTOR4		WetWorld_Data;
-	D3DXVECTOR4		Sharpening_Data;
-	D3DXVECTOR4		VolumetricFog_Data;
+	
+	struct ShadowMapStruct {
+		D3DXMATRIXA16	ShadowWorld;
+		D3DXMATRIX		ShadowViewProj;
+		D3DXMATRIX		ShadowCameraToLight[3];
+		D3DXVECTOR4		ShadowCubeMapLightPosition;
+		D3DXVECTOR4		ShadowLightPosition[4];
+		D3DXVECTOR4		ShadowCubeMapFarPlanes;
+		D3DXVECTOR4		ShadowCubeMapBlend;
+	};
+	struct WaterStruct {
+		D3DXVECTOR4		waterCoefficients;
+		D3DXVECTOR4		waveParams;
+		D3DXVECTOR4		waterVolume;
+		D3DXVECTOR4		waterSettings;
+		D3DXVECTOR4		deepColor;
+		D3DXVECTOR4		shallowColor;
+		D3DXVECTOR4		shorelineParams;
+	};
+	struct HDRStruct {
+		D3DXVECTOR4		ToneMapping;
+	};
+	struct GrassStruct {
+		D3DXVECTOR4		Scale;
+	};
+	struct POMStruct {
+		D3DXVECTOR4		ParallaxData;
+	};
+	struct TerrainStruct {
+		D3DXVECTOR4		Data;
+	};
+	struct SkinStruct {
+		D3DXVECTOR4		SkinData;
+		D3DXVECTOR4		SkinColor;
+	};
+	struct ShadowStruct {
+		D3DXVECTOR4		Data;
+		D3DXVECTOR4		OrthoData;
+	};
+	struct PrecipitationsStruct {
+		D3DXVECTOR4		RainData;
+		D3DXVECTOR4		SnowData;
+	};
+	struct WaterLensStruct {
+		D3DXVECTOR4		Time;
+		float			TimeAmount;
+		float			Percent;
+	};
+	struct GodRaysStruct {
+		D3DXVECTOR4		Ray;
+		D3DXVECTOR4		RayColor;
+		D3DXVECTOR4		Data;
+	};
+	struct DepthOfFieldStruct {
+		bool			Enabled;
+		D3DXVECTOR4		Blur;
+		D3DXVECTOR4		Data;
+	};
+	struct AmbientOcclusionStruct {
+		bool			Enabled;
+		D3DXVECTOR4		AOData;
+		D3DXVECTOR4		Data;
+	};
+	struct ColoringStruct {
+		D3DXVECTOR4		ColorCurve;
+		D3DXVECTOR4		EffectGamma;
+		D3DXVECTOR4		Data;
+		D3DXVECTOR4		Values;
+	};
+	struct CinemaStruct {
+		D3DXVECTOR4		Data;
+	};
+	struct BloomStruct {
+		D3DXVECTOR4		BloomData;
+		D3DXVECTOR4		BloomValues;
+	};
+	struct SnowAccumulationStruct {
+		D3DXVECTOR4		Params;
+	};
+	struct BloodLensStruct {
+		D3DXVECTOR4		Params;
+		D3DXVECTOR4		BloodColor;
+		D3DXVECTOR4		Time;
+		float			Percent;
+	};
+	struct MotionBlurStruct {
+		D3DXVECTOR4		BlurParams;
+		D3DXVECTOR4		Data;
+		float			oldAngleX;
+		float			oldAngleZ;
+		float			oldAmountX;
+		float			oldAmountY;
+		float			oldoldAmountX;
+		float			oldoldAmountY;
+	};
+	struct LowHFStruct {
+		D3DXVECTOR4		Data;
+		float			HealthCoeff;
+		float			FatigueCoeff;
+	};
+	struct WetWorldStruct {
+		D3DXVECTOR4		Coeffs;
+		D3DXVECTOR4		Data;
+	};
+	struct SharpeningStruct {
+		D3DXVECTOR4		Data;
+	};
+	struct VolumetricFogStruct {
+		D3DXVECTOR4		Data;
+	};
+
+	D3DXVECTOR4				ReciprocalResolution;
+	D3DXVECTOR4				ReciprocalResolutionWater;
+	D3DXVECTOR4				SunDir;
+	D3DXVECTOR4				SunTiming;
+	D3DXVECTOR4				SunAmount;
+	D3DXVECTOR4				GameTime;
+	D3DXVECTOR4				Tick;
+	D3DXVECTOR4				TextureData;
+	TESWeather*				pWeather;
+	float					currentsunGlare;
+	float					currentwindSpeed;
+	UInt8					oldsunGlare;
+	UInt8					oldwindSpeed;
+	D3DXVECTOR4				fogColor;
+	D3DXVECTOR4				oldfogColor;
+	D3DXVECTOR4				sunColor;
+	D3DXVECTOR4				oldsunColor;
+	D3DXVECTOR4				fogData;
+	float					currentfogStart;
+	float					oldfogStart;
+	float					currentfogEnd;
+	float					oldfogEnd;
+	bool					HasWater;
+	ShadowMapStruct			ShadowMap;
+	WaterStruct				Water;
+	HDRStruct				HDR;
+	GrassStruct				Grass;
+	POMStruct				POM;
+	TerrainStruct			Terrain;
+	SkinStruct				Skin;
+	ShadowStruct			Shadow;
+	PrecipitationsStruct	Precipitations;
+	WaterLensStruct			WaterLens;
+	GodRaysStruct			GodRays;
+	DepthOfFieldStruct		DepthOfField;
+	AmbientOcclusionStruct	AmbientOcclusion;
+	ColoringStruct			Coloring;
+	CinemaStruct			Cinema;
+	BloomStruct				Bloom;
+	SnowAccumulationStruct	SnowAccumulation;
+	BloodLensStruct			BloodLens;
+	MotionBlurStruct		MotionBlur;
+	LowHFStruct				LowHF;
+	WetWorldStruct			WetWorld;
+	SharpeningStruct		Sharpening;
+	VolumetricFogStruct		VolumetricFog;
 };
 
 struct ShaderValue {
@@ -229,6 +304,8 @@ public:
 	EffectRecord*			VolumetricFogEffect;
 	EffectRecord*			RainEffect;
 	EffectRecord*			SnowEffect;
+	EffectRecord*			ShadowsExteriorsEffect;
+	EffectRecord*			ShadowsInteriorsEffect;
 	ExtraEffectsList		ExtraEffects;
 	NiD3DVertexShader*		WaterHeightMapVertexShader;
 	NiD3DPixelShader*		WaterHeightMapPixelShader;
