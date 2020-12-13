@@ -32,8 +32,8 @@ LowHSoundScript::LowHSoundScript() {
 void LowHSoundScript::Run() {
 
 	if (MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
-		if (TheShaderManager->ShaderConst.LowHF_Data.x || ElapsedTime != -1.0f) {
-			float HealthCoeff = TheShaderManager->ShaderConst.LowHF_HealthCoeff;
+		if (TheShaderManager->ShaderConst.LowHF.Data.x || ElapsedTime != -1.0f) {
+			float HealthCoeff = TheShaderManager->ShaderConst.LowHF.HealthCoeff;
 
 			if (Player->GetLifeState(0)) {
 				if (HealthCoeff) {
@@ -63,8 +63,8 @@ LowFSoundScript::LowFSoundScript() {
 void LowFSoundScript::Run() {
 
 	if (MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
-		if (TheShaderManager->ShaderConst.LowHF_Data.x || ElapsedTime != -1.0f) {
-			float FatigueCoeff = TheShaderManager->ShaderConst.LowHF_FatigueCoeff;
+		if (TheShaderManager->ShaderConst.LowHF.Data.x || ElapsedTime != -1.0f) {
+			float FatigueCoeff = TheShaderManager->ShaderConst.LowHF.FatigueCoeff;
 
 			if (Player->GetLifeState(0)) {
 				if (FatigueCoeff) {

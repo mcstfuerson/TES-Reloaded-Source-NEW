@@ -34,6 +34,7 @@ void RenderManager::SetupSceneCamera() {
 		NiPoint3 Up = { 0.0f, 0.0f, 0.0f };
 		NiPoint3 Right = { 0.0f, 0.0f, 0.0f };
 		NiPoint3* CameraWorldTranslate = (NiPoint3*)kCameraWorldTranslate;
+		D3DMATRIX* World = &TheRenderManager->worldMatrix;
 		D3DMATRIX* View = &TheRenderManager->viewMatrix;
 		D3DMATRIX* InvView = &TheRenderManager->invViewMatrix;
 		D3DMATRIX* Proj = &TheRenderManager->projMatrix;
@@ -58,6 +59,24 @@ void RenderManager::SetupSceneCamera() {
 		Right.x = WorldRotate->data[0][2];
 		Right.y = WorldRotate->data[1][2];
 		Right.z = WorldRotate->data[2][2];
+
+		// We set up the world matrix always to default (image space) because we use it only in image space shaders
+		World->_11 = 1.0f;
+		World->_12 = 0.0f;
+		World->_13 = 0.0f;
+		World->_14 = 0.0f;
+		World->_21 = 0.0f;
+		World->_22 = 1.0f;
+		World->_23 = 0.0f;
+		World->_24 = 0.0f;
+		World->_31 = 0.0f;
+		World->_32 = 0.0f;
+		World->_33 = 1.0f;
+		World->_34 = 0.0f;
+		World->_41 = -WorldTranslate->x;
+		World->_42 = -WorldTranslate->y;
+		World->_43 = -WorldTranslate->z;
+		World->_44 = 1.0f;
 
 		View->_11 = Right.x;
 		View->_12 = Up.x;
@@ -112,6 +131,8 @@ void RenderManager::SetupSceneCamera() {
 
 		D3DXMatrixInverse(&InvProj, NULL, (D3DXMATRIX*)Proj);
 		InvViewProjMatrix = InvProj * invViewMatrix;
+
+		WorldViewProjMatrix = worldMatrix * viewMatrix * projMatrix;
 
 		CameraForward.x = Forward.x;
 		CameraForward.y = Forward.y;

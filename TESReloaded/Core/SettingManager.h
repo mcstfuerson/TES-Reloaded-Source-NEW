@@ -280,6 +280,7 @@ struct SettingsMainStruct {
 		bool	CompileShaders;
 		bool	CompileEffects;
 		UInt8	TraceShaders;
+		UInt8	LogShaders;
 	};
 
 	MainStruct					Main;
@@ -562,6 +563,7 @@ struct SettingsVolumetricFogStruct {
 	float Exponent;
 	float ColorCoeff;
 	float Amount;
+	float MaxDistance;
 };
 
 struct SettingsWeatherStruct {

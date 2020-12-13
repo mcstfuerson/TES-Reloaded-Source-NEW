@@ -2357,8 +2357,7 @@ public:
 
 		kChanged_Inventory = 0x08000000,
 	};
-	
-	float				GetWaterHeight() { if (renderData) return renderData->waterHeight; return parentCell->GetWaterHeight(); }
+
 	NiNode*				GetNode() { return (renderData != NULL ? renderData->niNode : NULL); };
 
 	TESChildCell		childCell;				// 018
@@ -2936,7 +2935,7 @@ public:
 	UInt32				unk5F8;							// 5F8
 	TList<Actor>		teammates;						// 5FC
 	UInt32				unk604[(0x648 - 0x604) >> 2];	// 604
-	UInt8				unk648;							// 648
+	UInt8				unkThirdPersonPrev;				// 648
 	UInt8				unk649;							// 649
 	UInt8				unkThirdPerson;					// 64A
 	UInt8				isThirdPersonBody;				// 64B
@@ -2944,7 +2943,7 @@ public:
 	UInt8				DisableFading;					// 64D
 	UInt8				unk64E;							// 64E
 	UInt8				isPipBoy;						// 64F
-	UInt8				unk650;							// 650
+	UInt8				PipBoyPrevThird;				// 650
 	UInt8				AlwaysRun;						// 651
 	UInt8				AutoMove;						// 652
 	UInt8				unk653;							// 653
@@ -4155,7 +4154,28 @@ public:
 	virtual void		Fn_00(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5);
 	
 	void				PurgeCells() {}
+	float				GetWaterHeight(TESObjectREFR* Ref) {
+							TESObjectCELL* Cell = Ref->parentCell;
+							float r = worldSpace->defaultWaterHeight;
 
+							if (Cell && Cell->flags0 & TESObjectCELL::kFlags0_HasWater) {
+								if (Ref->renderData) r = Ref->renderData->waterHeight; else r = Cell->GetWaterHeight();
+							}
+							else {
+								UInt8 GridSize = gridCellArray->gridSize;
+								for (int x = 0; x < GridSize; x++) {
+									for (int y = 0; y < GridSize; y++) {
+										Cell = gridCellArray->GetCell(x, y);
+										if (Cell && Cell->flags0 & TESObjectCELL::kFlags0_HasWater) {
+											r = Cell->GetWaterHeight();
+											goto breakall;
+										}
+									}
+								}
+							}
+							breakall:
+							return r;
+						}
 	UInt32								unk04;				// 04
 	GridCellArray*						gridCellArray;		// 08
 	NiNode*								objectLODRoot;		// 0C
@@ -4176,7 +4196,7 @@ public:
 	TList<void>							activeIMODs;		// 6C TList<ImageSpaceModifierInstance>
 	UInt32								unk74[3];			// 74
 	float								unk80[2];			// 80
-	TESWorldSpace						*currentWrldspc;	// 88
+	TESWorldSpace*						worldSpace;			// 88
 	TList<void>							list8C;				// 8C
 	TList<void>							list94;				// 94
 	TList<void>							list9C;				// 9C
@@ -4946,7 +4966,7 @@ assert(sizeof(OSGlobal) == 0x0A4);
 
 class MenuInterfaceManager {
 public:
-	bool					IsActive(UInt32 MenuType) { if (MenuType == Menu::MenuType::kMenuType_Main) return (menuStack[0] == Menu::MenuType::kMenuType_Loading && menuStack[1] == Menu::MenuType::kMenuType_Start) || (menuStack[0] == menuStack[1] == Menu::MenuType::kMenuType_Console && menuStack[1] == Menu::MenuType::kMenuType_Loading && menuStack[2] == Menu::MenuType::kMenuType_Start); return menuStack[0] == MenuType; }
+	bool					IsActive(UInt32 MenuType) { if (MenuType == Menu::MenuType::kMenuType_Main) return (menuStack[0] == Menu::MenuType::kMenuType_Loading && menuStack[1] == Menu::MenuType::kMenuType_Start) || (menuStack[0] == Menu::MenuType::kMenuType_Console && menuStack[1] == Menu::MenuType::kMenuType_Loading && menuStack[2] == Menu::MenuType::kMenuType_Start); return menuStack[0] == MenuType; }
 	bool					ShowMessageBox(const char* Message, void* Callback, const char* Button0, const char* Button1 = NULL, const char* Button2 = NULL, const char* Button3 = NULL, const char* Button4 = NULL, const char* Button5 = NULL, const char* Button6 = NULL, const char* Button7 = NULL, const char* Button8 = NULL, const char* Button9 = NULL) { bool (__cdecl* ShowUIMessageBox)(const char*, UInt32, UInt32, void*, UInt32, UInt32, float, float, const char*, ...) = (bool (__cdecl*)(const char*, UInt32, UInt32, void*, UInt32, UInt32, float, float, const char*, ...))0x00703E80; return ShowUIMessageBox(Message, 0, 0, Callback, 0, 23, 0.0f, 0.0f, Button0, Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8, Button9, NULL); }
 	void					ShowMessage(const char* Message) { bool (__cdecl* ShowUIMessage)(const char*, UInt32, const char*, const char*, float, bool) = (bool (__cdecl*)(const char*, UInt32, const char*, const char*, float, bool))0x007052F0; ShowUIMessage(Message, 0, NULL, NULL, 2.0f, 0); }
 	UInt8					GetMessageBoxButton() { UInt8 B = msgBoxButton; msgBoxButton = -1; return B; }
@@ -6424,7 +6444,6 @@ public:
 	virtual void			Unk_68();
 	virtual void			Unk_69();
 	
-	float							GetWaterHeight() { return parentCell->GetWaterHeight(); }
 	NiNode*							GetNode() { return niNode; };
 	InventoryChanges::EntryData*	GetInventoryItem(UInt32 Index) { return (InventoryChanges::EntryData*)ThisCall(0x004D88F0, this, Index, 0); }
 
@@ -8072,6 +8091,7 @@ public:
 	};
 	
 	void				PurgeCells() { ThisCall(0x00442630, this, 1, 0); ThisCall(0x0043FC20, this, 0); }
+	float				GetWaterHeight(TESObjectREFR* Ref) { return Ref->parentCell->GetWaterHeight(); }
 
 	GridDistantArray*	gridDistantArray;		// 04
 	GridCellArray*		gridCellArray;			// 08
@@ -8776,6 +8796,7 @@ static bool  (__cdecl* ExtractArgs)(CommandParam*, void*, UInt32*, TESObjectREFR
 static void  (__cdecl* DrawGrass)(TESObjectCELL*, NiNode*, float, float, float, float, float, int, float, float, float) = (void (__cdecl*)(TESObjectCELL*, NiNode*, float, float, float, float, float, int, float, float, float))0x004EB3F0;
 static bool  (__cdecl* LoadForm)(TESForm*, UInt32) = (bool (__cdecl*)(TESForm*, UInt32))0x00447050;
 static void  (* PrintToConsole)(const char*, ...) = (void (*)(const char*, ...))0x00579B60;
+static ShaderDefinition* (__cdecl* GetShaderDefinition)(UInt32) = (ShaderDefinition* (__cdecl*)(UInt32))0x007B4290;
 #elif defined(SKYRIM)
 static const void* RTTI_BSExtraData = (void*)0x0123C200;
 static const void* RTTI_ExtraEditorID = (void*)0x0123C21C;

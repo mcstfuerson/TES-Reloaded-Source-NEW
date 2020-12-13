@@ -198,5 +198,13 @@ void PerformGameInitialization() {
 	DetourAttach(&(PVOID&)NewQueuedModelLoader,		*((PVOID*)&TrackNewQueuedModelLoader));
 	DetourTransactionCommit();
 
+#if defined(NEWVEGAS)
+	SafeWrite32(0x00E7624D, sizeof(RenderManager)); // Extends the NiDX9Renderer allocation to store additional data
+#elif defined(OBLIVION)
+	SafeWrite32(0x0076BD75, sizeof(RenderManager)); // Extends the NiDX9Renderer allocation to store additional data
+#elif defined(SKYRIM)
+	SafeWrite32(0x00CDB659, sizeof(RenderManager)); // Extends the NiDX9Renderer allocation to store additional data
+#endif
+
 }
 
