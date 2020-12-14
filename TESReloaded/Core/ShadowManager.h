@@ -62,7 +62,7 @@ public:
 	TESObjectCELL*			CurrentCell;
 	ShadowCubeMapStateEnum	ShadowCubeMapState;
 	bool					AlphaEnabled;
-	int						ShadowCubeLightCount;
+	int                     ShadowCubeLightCount;
 };
 
 void CreateShadowsHook();
