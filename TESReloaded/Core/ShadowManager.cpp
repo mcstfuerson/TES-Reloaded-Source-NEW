@@ -55,6 +55,7 @@ ShadowManager::ShadowManager() {
 
 	CurrentCell = NULL;
 	ShadowCubeMapState = ShadowCubeMapStateEnum::None;
+	int ShadowCubeLightCount = 0;
 
 	ShadowMapVertex = new ShaderRecord();
 	if (ShadowMapVertex->LoadShader("ShadowMap.vso")) Device->CreateVertexShader((const DWORD*)ShadowMapVertex->Function, &ShadowMapVertexShader);
@@ -603,6 +604,9 @@ void ShadowManager::RenderShadowMaps() {
 		AlphaEnabled = ShadowsInteriors->AlphaEnabled;
 		if (CurrentCell != Player->parentCell) { ShadowCubeMapState = ShadowCubeMapStateEnum::None; CurrentCell = Player->parentCell; }
 
+		if (LightIndex < ShadowCubeLightCount) { ClearShadowCubeMaps(Device, LightIndex); }
+		ShadowCubeLightCount = LightIndex;
+
 		RenderShadowCubeMap(Lights, LightIndex, ShadowsInteriors);
 
 		ClearShadowCubeMaps(Device, LightIndex, ShadowCubeMapStateEnum::Interior);
@@ -616,18 +620,19 @@ void ShadowManager::RenderShadowMaps() {
 }
 
 void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, ShadowCubeMapStateEnum NewState) {
-
 	if (ShadowCubeMapState != NewState) {
-		for (int L = From + 1; L < 4; L++) {
-			TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[L].w = 0.0f;
-			for (int Face = 0; Face < 6; Face++) {
-				Device->SetRenderTarget(0, ShadowCubeMapSurface[L][Face]);
-				Device->Clear(0L, NULL, D3DCLEAR_TARGET, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
-			}
-		}
+		ClearShadowCubeMaps(Device, From);
 		ShadowCubeMapState = NewState;
 	}
-	
+}
+
+void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From) {
+	for (int L = From + 1; L < 4; L++) {
+		for (int Face = 0; Face < 6; Face++) {
+			Device->SetRenderTarget(0, ShadowCubeMapSurface[L][Face]);
+			Device->Clear(0L, NULL, D3DCLEAR_TARGET, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+		}
+	}
 }
 
 void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
