@@ -579,7 +579,8 @@ void ShadowManager::RenderShadowMaps() {
 		NiTList<ShadowSceneLight>::Entry* Entry = SceneNode->lights.start;
 		while (Entry) {
 			NiPointLight* Light = Entry->data->sourceLight;
-			SceneLights[(int)Light->GetDistance(&Player->pos)] = Light;
+			int distance = (int)Light->GetDistance(&Player->pos);
+			AddSceneLight(Light, distance, SceneLights);
 			Entry = Entry->next;
 		}
 
@@ -669,6 +670,11 @@ void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
 		if (ShadowCubeMapBlend->w < 1.0f) ShadowCubeMapBlend->w += 0.1f;
 	}
 	
+}
+
+void ShadowManager::AddSceneLight(NiPointLight* Light, int Key, std::map<int, NiPointLight*>& SceneLights) {
+	while (SceneLights[Key]) { --Key; }
+	SceneLights[Key] = Light;
 }
 
 static __declspec(naked) void RenderShadowMapHook() {
