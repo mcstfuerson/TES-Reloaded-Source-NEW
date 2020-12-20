@@ -629,6 +629,7 @@ void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, Shad
 
 void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From) {
 	for (int L = From + 1; L < 4; L++) {
+		TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[L].w = 0.0f;
 		for (int Face = 0; Face < 6; Face++) {
 			Device->SetRenderTarget(0, ShadowCubeMapSurface[L][Face]);
 			Device->Clear(0L, NULL, D3DCLEAR_TARGET, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
