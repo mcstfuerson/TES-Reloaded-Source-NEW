@@ -34,7 +34,9 @@ public:
 	void					RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors);
 	void					RenderShadowMaps();
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, ShadowCubeMapStateEnum NewState);
+	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int LightIndex);
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
+	void                    AddSceneLight(NiPointLight* Light, int Key, std::map<int, NiPointLight*>& SceneLights);
 
 	IDirect3DTexture9*		ShadowMapTexture[3];
 	IDirect3DSurface9*		ShadowMapSurface[3];
@@ -61,6 +63,7 @@ public:
 	TESObjectCELL*			CurrentCell;
 	ShadowCubeMapStateEnum	ShadowCubeMapState;
 	bool					AlphaEnabled;
+	int                     ShadowCubeLightCount;
 };
 
 void CreateShadowsHook();
