@@ -524,6 +524,7 @@ void ShadowManager::RenderShadowMaps() {
 	IDirect3DSurface9* DepthSurface = NULL;
 	D3DXVECTOR4* ShadowData = &TheShaderManager->ShaderConst.Shadow.Data;
 	D3DXVECTOR4* OrthoData = &TheShaderManager->ShaderConst.Shadow.OrthoData;
+	D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
 
 #if defined(OBLIVION)
 	// This part "creates" a fake canopy map only one time to avoid random canopy shadows if i forgot to replace a shader.
@@ -537,10 +538,15 @@ void ShadowManager::RenderShadowMaps() {
 	}
 #endif
 
+	if (Player->GetWorldSpace() && SunDir->z < 0.1f) {
+		ClearShadowMap(Device);
+		Global->RenderShadowMaps();
+		return;
+	}
+
 	Device->GetDepthStencilSurface(&DepthSurface);
 	TheRenderManager->SetupSceneCamera();
 	if (Player->GetWorldSpace()) {
-		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
 		D3DXVECTOR4 OrthoDir = D3DXVECTOR3(0.05f, 0.05f, 1.0f);
 		NiNode* PlayerNode = Player->GetNode();
 		D3DXVECTOR3 At;
@@ -565,8 +571,7 @@ void ShadowManager::RenderShadowMaps() {
 			if (ShadowData->y > 1.0f) ShadowData->y = 1.0f;
 		}
 		ShadowData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapNear];
-		ShadowData->w = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapFar];
-		
+		ShadowData->w = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapFar];		
 		OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
 	}
 	else {
@@ -618,6 +623,21 @@ void ShadowManager::RenderShadowMaps() {
 	}
 	Device->SetDepthStencilSurface(DepthSurface);
 
+}
+
+void ShadowManager::ClearShadowMap(IDirect3DDevice9* Device) {
+	Device->SetRenderTarget(0, ShadowMapSurface[MapNear]);
+	Device->SetDepthStencilSurface(ShadowMapDepthSurface[MapNear]);
+	Device->SetViewport(&ShadowMapViewPort[MapNear]);
+	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+	Device->SetRenderTarget(0, ShadowMapSurface[MapFar]);
+	Device->SetDepthStencilSurface(ShadowMapDepthSurface[MapFar]);
+	Device->SetViewport(&ShadowMapViewPort[MapFar]);
+	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+	Device->SetRenderTarget(0, ShadowMapSurface[MapOrtho]);
+	Device->SetDepthStencilSurface(ShadowMapDepthSurface[MapOrtho]);
+	Device->SetViewport(&ShadowMapViewPort[MapOrtho]);
+	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
 }
 
 void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, ShadowCubeMapStateEnum NewState) {

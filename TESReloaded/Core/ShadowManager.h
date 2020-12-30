@@ -33,6 +33,7 @@ public:
 	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir);
 	void					RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors);
 	void					RenderShadowMaps();
+	void					ClearShadowMap(IDirect3DDevice9* Device);
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, ShadowCubeMapStateEnum NewState);
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int LightIndex);
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);

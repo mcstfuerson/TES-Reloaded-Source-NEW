@@ -8682,6 +8682,7 @@ assert(sizeof(SoundGlobal) == 0x328);
 
 class OSGlobal {
 public:
+	void			RenderShadowMaps() { ThisCall(0x004073D0, this); }
 	InputGlobal*	GetInputKeyboard() { return this->input; }
 	InputGlobal*	GetInputMouse() { return this->input; }
 	SoundGlobal*	GetSound() { return this->sound; }
