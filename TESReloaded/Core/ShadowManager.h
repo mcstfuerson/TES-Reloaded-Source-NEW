@@ -1,5 +1,5 @@
-#include <list>
 #pragma once
+#include <list>
 
 class ShadowManager { // Never disposed
 public:
