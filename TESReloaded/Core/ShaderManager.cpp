@@ -1905,8 +1905,15 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 && currentWorldSpace) {
-		ShadowsExteriorsEffect->SetCT();
-		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
+		if (SunDir->z > 0.01f) {
+			ShadowsExteriorsEffect->SetCT();
+			ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		}
+		else {
+			ShadowsInteriorsEffect->SetCT();
+			ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		}
 	}
 	if (TheSettingManager->SettingsShadows.Interiors.Quality == -1 && !currentWorldSpace) {
 		ShadowsInteriorsEffect->SetCT();

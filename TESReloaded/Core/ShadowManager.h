@@ -1,3 +1,4 @@
+#include <list>
 #pragma once
 
 class ShadowManager { // Never disposed
@@ -31,13 +32,21 @@ public:
 	void					RenderObject(NiAVObject* Node, bool HasWater);
 	void					Render(NiGeometry* Geo);
 	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir);
-	void					RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors);
+	void					RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors);
+	void					RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors);
+	void                    RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, std::list<NiNode*>& refList, bool enabled);
 	void					RenderShadowMaps();
 	void					ClearShadowMap(IDirect3DDevice9* Device);
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, ShadowCubeMapStateEnum NewState);
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int LightIndex);
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
 	void                    AddSceneLight(NiPointLight* Light, int Key, std::map<int, NiPointLight*>& SceneLights);
+	int                     GetExtSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex);
+	int                     GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex);
+	void                    SetAllShadowMapLightPos(NiPointLight** Lights, int LightIndex);
+	void                    SetShadowMapLightPos(NiPointLight** Lights, int index);
+
+
 
 	IDirect3DTexture9*		ShadowMapTexture[3];
 	IDirect3DSurface9*		ShadowMapSurface[3];
