@@ -536,7 +536,6 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, s
 				std::list<NiNode*>::iterator RefNode;
 				for (RefNode = refList.begin(); RefNode != refList.end(); ++RefNode) {
 					if ((*RefNode)->GetDistance(LightPos) - (*RefNode)->GetWorldBoundRadius() <= FarPlane * 1.2f) {
-					//if ((*RefNode)->GetDistance(LightPos) <= FarPlane * 1.2f){
 						RenderObject((*RefNode), TheShaderManager->ShaderConst.HasWater);
 					}
 				}
