@@ -1081,6 +1081,24 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Interiors.ShadowCubeMapSize = GetPrivateProfileIntA("Interiors", "ShadowCubeMapSize", 512, Filename);
 	GetPrivateProfileStringA("Interiors", "Darkness", "1.0", value, SettingStringBuffer, Filename);
 	SettingsShadows.Interiors.Darkness = atof(value);
+
+	SettingsShadows.ExteriorsNight.Enabled = GetPrivateProfileIntA("ExteriorsNight", "Enabled", 1, Filename);
+	SettingsShadows.ExteriorsNight.AlphaEnabled = GetPrivateProfileIntA("ExteriorsNight", "AlphaEnabled", 1, Filename);
+	SettingsShadows.ExteriorsNight.Forms.Activators = GetPrivateProfileIntA("ExteriorsNight", "Activators", 1, Filename);
+	SettingsShadows.ExteriorsNight.Forms.Actors = GetPrivateProfileIntA("ExteriorsNight", "Actors", 1, Filename);
+	SettingsShadows.ExteriorsNight.Forms.Apparatus = GetPrivateProfileIntA("ExteriorsNight", "Apparatus", 1, Filename);
+	SettingsShadows.ExteriorsNight.Forms.Books = GetPrivateProfileIntA("ExteriorsNight", "Books", 0, Filename);
+	SettingsShadows.ExteriorsNight.Forms.Containers = GetPrivateProfileIntA("ExteriorsNight", "Containers", 1, Filename);
+	SettingsShadows.ExteriorsNight.Forms.Doors = GetPrivateProfileIntA("ExteriorsNight", "Doors", 0, Filename);
+	SettingsShadows.ExteriorsNight.Forms.Furniture = GetPrivateProfileIntA("ExteriorsNight", "Furniture", 1, Filename);
+	SettingsShadows.ExteriorsNight.Forms.Misc = GetPrivateProfileIntA("ExteriorsNight", "Misc", 0, Filename);
+	SettingsShadows.ExteriorsNight.Forms.Statics = GetPrivateProfileIntA("ExteriorsNight", "Statics", 1, Filename);
+	SettingsShadows.ExteriorsNight.Quality = GetPrivateProfileIntA("ExteriorsNight", "Quality", 0, Filename);
+	SettingsShadows.ExteriorsNight.LightPoints = GetPrivateProfileIntA("ExteriorsNight", "LightPoints", 2, Filename);
+	SettingsShadows.ExteriorsNight.TorchesCastShadows = GetPrivateProfileIntA("ExteriorsNight", "TorchesCastShadows", 0, Filename);
+	SettingsShadows.ExteriorsNight.ShadowCubeMapSize = GetPrivateProfileIntA("ExteriorsNight", "ShadowCubeMapSize", 512, Filename);
+	GetPrivateProfileStringA("ExteriorsNight", "Darkness", "1.0", value, SettingStringBuffer, Filename);
+	SettingsShadows.ExteriorsNight.Darkness = atof(value);
 	
 	ValueList FormValue;
 	char Form[12] = { NULL };
@@ -1088,11 +1106,13 @@ void SettingManager::LoadSettings() {
 	char FormID[12] = { NULL };
 	bool FormStatus = false;
 	size_t EC = 0;
+	size_t NC = 0;
 	size_t IC = 0;
 	GetPrivateProfileSectionA("FormIDs", Sections, 32767, Filename);
 	for (int i = 0; i < 2; i++) {
 		if (i == 1) {
 			SettingsShadows.Exteriors.ExcludedForms.reserve(EC);
+			SettingsShadows.ExteriorsNight.ExcludedForms.reserve(NC);
 			SettingsShadows.Interiors.ExcludedForms.reserve(IC);
 		}
 		pNextSection = Sections;
@@ -1117,11 +1137,18 @@ void SettingManager::LoadSettings() {
 					else
 						SettingsShadows.Interiors.ExcludedForms.push_back(atoi(FormID));
 				}
+				if (FormType[0] == 'X' || FormType[0] == 'N') {
+					if (i == 0)
+						NC += 1;
+					else
+						SettingsShadows.ExteriorsNight.ExcludedForms.push_back(atoi(FormID));
+				}
 			}
 			pNextSection = pNextSection + strlen(pNextSection) + 1;
 		}
 	}
 	if (EC) std::sort(SettingsShadows.Exteriors.ExcludedForms.begin(), SettingsShadows.Exteriors.ExcludedForms.end());
+	if (IC) std::sort(SettingsShadows.ExteriorsNight.ExcludedForms.begin(), SettingsShadows.ExteriorsNight.ExcludedForms.end());
 	if (IC) std::sort(SettingsShadows.Interiors.ExcludedForms.begin(), SettingsShadows.Interiors.ExcludedForms.end());
 
 }
@@ -1327,6 +1354,10 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("ExteriorsNear", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsFar", "Enabled", ToString(SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsFar", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsNight", "Enabled", ToString(SettingsShadows.ExteriorsNight.Enabled).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsNight", "AlphaEnabled", ToString(SettingsShadows.ExteriorsNight.AlphaEnabled).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsNight", "Darkness", ToString(SettingsShadows.ExteriorsNight.Darkness).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsNight", "Quality", ToString(SettingsShadows.ExteriorsNight.Quality).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Enabled", ToString(SettingsShadows.Interiors.Enabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "AlphaEnabled", ToString(SettingsShadows.Interiors.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Darkness", ToString(SettingsShadows.Interiors.Darkness).c_str(), Filename);
@@ -1593,7 +1624,8 @@ SectionsList SettingManager::GetMenuSections(const char* Item, const char* Defin
 			Sections[0] = "Exteriors";
 			Sections[1] = "ExteriorsNear";
 			Sections[2] = "ExteriorsFar";
-			Sections[3] = "Interiors";
+			Sections[3] = "ExteriorsNight";
+			Sections[4] = "Interiors";
 		}
 		else if (!strcmp(Definition, "Water")) {
 			SettingsWaterList::iterator v = SettingsWater.begin();
@@ -1881,6 +1913,12 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["AlphaEnabled"] = SettingsShadows.Interiors.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.Interiors.Darkness;
 				Settings["Quality"] = SettingsShadows.Interiors.Quality;
+			}
+			else if (!strcmp(Section, "ExteriorsNight")) {
+				Settings["Enabled"] = SettingsShadows.ExteriorsNight.Enabled;
+				Settings["AlphaEnabled"] = SettingsShadows.ExteriorsNight.AlphaEnabled;
+				Settings["Darkness"] = SettingsShadows.ExteriorsNight.Darkness;
+				Settings["Quality"] = SettingsShadows.ExteriorsNight.Quality;
 			}
 		}
 		else if (!strcmp(Definition, "Sharpening")) {
@@ -2513,6 +2551,22 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsShadows.Interiors.Quality = Value;
 					// Special case for forward or post-process shadowing
 					TheShaderManager->SwitchShaderStatus("ShadowsInteriors");
+				}
+			}
+			else if (!strcmp(Section, "ExteriorsNight")) {
+				if (!strcmp(Setting, "Enabled")) {
+					SettingsShadows.ExteriorsNight.Enabled = Value;
+				}
+				else if (!strcmp(Setting, "AlphaEnabled")) {
+					SettingsShadows.ExteriorsNight.AlphaEnabled = Value;
+				}
+				else if (!strcmp(Setting, "Darkness")) {
+					SettingsShadows.ExteriorsNight.Darkness = Value;
+				}
+				else if (!strcmp(Setting, "Quality")) {
+					SettingsShadows.ExteriorsNight.Quality = Value;
+					// Special case for forward or post-process shadowing
+					TheShaderManager->SwitchShaderStatus("ExteriorsNight");
 				}
 			}
 		}

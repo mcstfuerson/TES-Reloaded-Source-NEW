@@ -21,6 +21,7 @@ enum EffectRecordType
 	EffectRecordType_VolumetricFog,
 	EffectRecordType_Precipitations,
 	EffectRecordType_ShadowsExteriors,
+	EffectRecordType_ShadowsExteriorsNight,
 	EffectRecordType_ShadowsInteriors,
 	EffectRecordType_Extra,
 };
@@ -305,6 +306,7 @@ public:
 	EffectRecord*			RainEffect;
 	EffectRecord*			SnowEffect;
 	EffectRecord*			ShadowsExteriorsEffect;
+	EffectRecord*           ShadowsExteriorsNightEffect;
 	EffectRecord*			ShadowsInteriorsEffect;
 	ExtraEffectsList		ExtraEffects;
 	NiD3DVertexShader*		WaterHeightMapVertexShader;

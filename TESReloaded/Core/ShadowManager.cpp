@@ -51,8 +51,10 @@ ShadowManager::ShadowManager() {
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
+	SettingsShadowStruct::InteriorsStruct* ShadowsExteriorsNight = &TheSettingManager->SettingsShadows.ExteriorsNight;
 	UINT ShadowMapSize = 0;
-	UINT ShadowCubeMapSize = ShadowsInteriors->ShadowCubeMapSize;
+	//Choose smaller of two for now
+	UINT ShadowCubeMapSize = min(ShadowsInteriors->ShadowCubeMapSize, ShadowsExteriorsNight->ShadowCubeMapSize);
 
 	CurrentCell = NULL;
 	ShadowCubeMapState = ShadowCubeMapStateEnum::None;
@@ -420,13 +422,8 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 
 }
 
-void ShadowManager::RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors) {
+void ShadowManager::RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowSettings) {
 
-	IDirect3DDevice9* Device = TheRenderManager->device;
-	NiDX9RenderState* RenderState = TheRenderManager->renderState;
-	D3DXMATRIX View, Proj;
-	D3DXVECTOR3 Eye, At, Up;
-	ShadowMapTypeEnum ShadowMapType = MapNear;
 	std::list<NiNode*> refList;
 
 	for (UInt32 x = 0; x < *SettingGridsToLoad-1; x++) {
@@ -434,7 +431,7 @@ void ShadowManager::RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex
 			if (TESObjectCELL* Cell = Tes->gridCellArray->GetCell(x, y)) {
 				TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
 				while (Entry) {
-					if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowsExteriors->Forms[ShadowMapType], &ShadowsExteriors->ExcludedForms)) {
+					if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowSettings->Forms, &ShadowSettings->ExcludedForms)) {
 						refList.push_back(Ref->GetNode());
 					}
 					Entry = Entry->next;
@@ -442,25 +439,21 @@ void ShadowManager::RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex
 			}
 		}
 	}
-	RenderShadowCubeMap(Lights, LightIndex, refList, ShadowsExteriors->Enabled);
+	RenderShadowCubeMap(Lights, LightIndex, refList, ShadowSettings->Enabled);
 }
 
-void ShadowManager::RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors) {
+void ShadowManager::RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowSettings) {
 
-	IDirect3DDevice9* Device = TheRenderManager->device;
-	NiDX9RenderState* RenderState = TheRenderManager->renderState;
-	D3DXMATRIX View, Proj;
-	D3DXVECTOR3 Eye, At, Up;
 	std::list<NiNode*> refList;
 
 	TList<TESObjectREFR>::Entry* Entry = &Player->parentCell->objectList.First;
 	while (Entry) {
-		if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowsInteriors->Forms, &ShadowsInteriors->ExcludedForms)) {
+		if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowSettings->Forms, &ShadowSettings->ExcludedForms)) {
 			refList.push_back(Ref->GetNode());
 		}
 		Entry = Entry->next;
 	}
-	RenderShadowCubeMap(Lights, LightIndex, refList, ShadowsInteriors->Enabled);
+	RenderShadowCubeMap(Lights, LightIndex, refList, ShadowSettings->Enabled);
 }
 
 void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, std::list<NiNode*>& refList, bool enabled) {
@@ -549,9 +542,6 @@ void ShadowManager::RenderShadowMaps() {
 	
 	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
-	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
-	SettingsShadowStruct::FormsStruct* ShadowsInteriorsForms = &ShadowsInteriors->Forms;
-	SettingsShadowStruct::ExcludedFormsList* ShadowsInteriorsExcludedForms = &ShadowsInteriors->ExcludedForms;
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	IDirect3DSurface9* DepthSurface = NULL;
@@ -578,7 +568,7 @@ void ShadowManager::RenderShadowMaps() {
 		NiNode* PlayerNode = Player->GetNode();
 		D3DXVECTOR3 At, Eye;
 		std::map<int, NiPointLight*> SceneLights;
-		NiPointLight* Lights[8] = { NULL };
+		NiPointLight* Lights[4] = { NULL };
 		int LightIndex = -1;
 
 		CurrentVertex = ShadowMapVertex;
@@ -610,32 +600,41 @@ void ShadowManager::RenderShadowMaps() {
 		OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
 	}
 	else if (!Player->GetWorldSpace() || SunDir->z <= 0.01f){
+		SettingsShadowStruct::InteriorsStruct* ShadowSettings; 
+		if (Player->GetWorldSpace()) {
+			ShadowSettings = &TheSettingManager->SettingsShadows.ExteriorsNight;
+		}
+		else {
+			ShadowSettings = &TheSettingManager->SettingsShadows.Interiors;
+		}
 		ShadowSceneNode* SceneNode = *(ShadowSceneNode**)kShadowSceneNode; // ShadowSceneNode array, first element is for gamemode
 		std::map<int, NiPointLight*> SceneLights;
-		NiPointLight* Lights[8] = { NULL };
+		NiPointLight* Lights[4] = { NULL };
 		int LightIndex = -1;
-		LightIndex = GetShadowSceneLights(SceneLights, Lights, LightIndex);
+		LightIndex = GetShadowSceneLights(SceneLights, Lights, LightIndex, ShadowSettings);
 
 		CurrentVertex = ShadowCubeMapVertex;
 		CurrentPixel = ShadowCubeMapPixel;
-		AlphaEnabled = ShadowsInteriors->AlphaEnabled;
 		if (CurrentCell != Player->parentCell) { ShadowCubeMapState = ShadowCubeMapStateEnum::None; CurrentCell = Player->parentCell; }
 
 		if (LightIndex < ShadowCubeLightCount) { ClearShadowCubeMaps(Device, LightIndex); }
 		ShadowCubeLightCount = LightIndex;
 
+		AlphaEnabled = ShadowSettings->AlphaEnabled;
 		if (Player->GetWorldSpace()) {
-			RenderShadowCubeMapExt(Lights, LightIndex, ShadowsExteriors);
+			RenderShadowCubeMapExt(Lights, LightIndex, ShadowSettings);
+			ClearShadowCubeMaps(Device, LightIndex, ShadowCubeMapStateEnum::Exterior_Night);
 		}
 		else {
-			RenderShadowCubeMapInt(Lights, LightIndex, ShadowsInteriors);
+			RenderShadowCubeMapInt(Lights, LightIndex, ShadowSettings);
+			ClearShadowCubeMaps(Device, LightIndex, ShadowCubeMapStateEnum::Interior);
 		}
 
-		ClearShadowCubeMaps(Device, LightIndex, ShadowCubeMapStateEnum::Interior);
+		ShadowData->x = ShadowSettings->Quality;
+		ShadowData->y = ShadowSettings->Darkness;
+		ShadowData->z = 1.0f / (float)ShadowSettings->ShadowCubeMapSize;
+		
 		CalculateBlend(Lights, LightIndex);
-		ShadowData->x = ShadowsInteriors->Quality;
-		ShadowData->y = ShadowsInteriors->Darkness;
-		ShadowData->z = 1.0f / (float)ShadowsInteriors->ShadowCubeMapSize;
 	}
 	Device->SetDepthStencilSurface(DepthSurface);
 }
@@ -710,7 +709,7 @@ void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
 }
 
 int ShadowManager::GetExtSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex) {
-	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
+	int lightPoints = 4; //TODO: move to config/setting?
 	ShadowSceneNode* SceneNode = *(ShadowSceneNode**)kShadowSceneNode; // ShadowSceneNode array, first element is for gamemode
 
 	NiTList<ShadowSceneLight>::Entry* Entry = SceneNode->lights.start;
@@ -726,15 +725,14 @@ int ShadowManager::GetExtSceneLights(std::map<int, NiPointLight*>& SceneLights, 
 		NiPointLight* Light = v->second;
 		LightIndex += 1;
 		Lights[LightIndex] = Light;
-		if (LightIndex == ShadowsInteriors->LightPoints - 1 || LightIndex == 3) break;
+		if (LightIndex == lightPoints - 1 || LightIndex == 3) break;
 		v++;
 	}
 
 	return LightIndex;
 }
 
-int ShadowManager::GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex) {
-	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
+int ShadowManager::GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowSettings) {
 	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
 	ShadowSceneNode* SceneNode = *(ShadowSceneNode**)kShadowSceneNode; // ShadowSceneNode array, first element is for gamemode
 	bool TorchOnBeltEnabled = EquipmentModeSettings->Enabled && EquipmentModeSettings->TorchKey != 255;
@@ -759,7 +757,7 @@ int ShadowManager::GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLight
 			LightIndex += 1;
 			Lights[LightIndex] = Light;
 		}
-		if (LightIndex == ShadowsInteriors->LightPoints - 1 || LightIndex == 3) break;
+		if (LightIndex == ShadowSettings->LightPoints - 1 || LightIndex == 3) break;
 		v++;
 	}
 

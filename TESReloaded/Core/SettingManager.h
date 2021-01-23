@@ -345,6 +345,7 @@ struct SettingsShadowStruct {
 
 	ExteriorsStruct		Exteriors;
 	InteriorsStruct		Interiors;
+	InteriorsStruct		ExteriorsNight;
 };
 
 struct SettingsWaterStruct {

@@ -594,6 +594,7 @@ ShaderManager::ShaderManager() {
 	RainEffect = NULL;
 	SnowEffect = NULL;
 	ShadowsExteriorsEffect = NULL;
+	ShadowsExteriorsNightEffect = NULL;
 	ShadowsInteriorsEffect = NULL;
 	WaterHeightMapVertexShader = NULL;
 	WaterHeightMapPixelShader = NULL;
@@ -654,6 +655,7 @@ void ShaderManager::CreateEffects() {
 	if (Effects->Precipitations) CreateEffect(EffectRecordType_Precipitations);
 	if (Effects->Extra) CreateEffect(EffectRecordType_Extra);
 	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriors);
+	if (TheSettingManager->SettingsShadows.ExteriorsNight.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriorsNight);
 	if (TheSettingManager->SettingsShadows.Interiors.Quality == -1) CreateEffect(EffectRecordType_ShadowsInteriors);
 
 }
@@ -1804,6 +1806,11 @@ void ShaderManager::CreateEffect(EffectRecordType EffectType) {
 			ShadowsExteriorsEffect = new EffectRecord();
 			TheSettingManager->SettingsShadows.Exteriors.Quality = ((int)LoadEffect(ShadowsExteriorsEffect, Filename, NULL)) * -1;
 			break;
+		case EffectRecordType_ShadowsExteriorsNight:
+			strcat(Filename, "Shadows\\ShadowsExteriorsNight.fx");
+			ShadowsExteriorsNightEffect = new EffectRecord();
+			TheSettingManager->SettingsShadows.ExteriorsNight.Quality = ((int)LoadEffect(ShadowsExteriorsNightEffect, Filename, NULL)) * -1;
+			break;
 		case EffectRecordType_ShadowsInteriors:
 			strcat(Filename, "Shadows\\ShadowsInteriors.fx");
 			ShadowsInteriorsEffect = new EffectRecord();
@@ -1878,6 +1885,7 @@ void ShaderManager::DisposeEffect(EffectRecord* TheEffect) {
 	else if (TheEffect == RainEffect) RainEffect = NULL;
 	else if (TheEffect == SnowEffect) SnowEffect = NULL;
 	else if (TheEffect == ShadowsExteriorsEffect) ShadowsExteriorsEffect = NULL;
+	else if (TheEffect == ShadowsExteriorsNightEffect) ShadowsExteriorsNightEffect = NULL;
 	else if (TheEffect == ShadowsInteriorsEffect) ShadowsInteriorsEffect = NULL;
 
 	if (TheEffect) delete TheEffect;
@@ -1889,6 +1897,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
+	D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
 
 	TheRenderManager->SetupSceneCamera();
 	Device->SetStreamSource(0, EffectVertex, 0, sizeof(EffectQuad));
@@ -1904,16 +1913,13 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 && currentWorldSpace) {
-		D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
-		if (SunDir->z > 0.01f) {
-			ShadowsExteriorsEffect->SetCT();
-			ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
-		}
-		else {
-			ShadowsInteriorsEffect->SetCT();
-			ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
-		}
+	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 && currentWorldSpace && SunDir->z > 0.01f) {
+		ShadowsExteriorsEffect->SetCT();
+		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	}
+	if (TheSettingManager->SettingsShadows.ExteriorsNight.Quality == -1 && currentWorldSpace && SunDir->z <= 0.01f) {
+		ShadowsExteriorsNightEffect->SetCT();
+		ShadowsExteriorsNightEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (TheSettingManager->SettingsShadows.Interiors.Quality == -1 && !currentWorldSpace) {
 		ShadowsInteriorsEffect->SetCT();
@@ -2188,6 +2194,10 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 	else if (!strcmp(Name, "ShadowsExteriors")) {
 		DisposeEffect(ShadowsExteriorsEffect);
 		if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriors);
+	}
+	else if (!strcmp(Name, "ShadowsExteriorsNight")) {
+		DisposeEffect(ShadowsExteriorsNightEffect);
+		if (TheSettingManager->SettingsShadows.ExteriorsNight.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriorsNight);
 	}
 	else if (!strcmp(Name, "ShadowsInteriors")) {
 		DisposeEffect(ShadowsInteriorsEffect);
