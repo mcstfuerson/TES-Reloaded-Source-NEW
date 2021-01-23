@@ -331,6 +331,7 @@ struct SettingsShadowStruct {
 		ExcludedFormsList	ExcludedForms;
 	};
 	
+	//TODO: rename to something more appropriate
 	struct InteriorsStruct {
 		FormsStruct			Forms;
 		bool				Enabled;
