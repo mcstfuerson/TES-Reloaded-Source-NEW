@@ -53,7 +53,8 @@ ShadowManager::ShadowManager() {
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsExteriorsNight = &TheSettingManager->SettingsShadows.ExteriorsNight;
 	UINT ShadowMapSize = 0;
-	//Choose smaller of two for now
+
+	//TODO: should this setting be on it's own? choose smaller of two for now
 	UINT ShadowCubeMapSize = min(ShadowsInteriors->ShadowCubeMapSize, ShadowsExteriorsNight->ShadowCubeMapSize);
 
 	CurrentCell = NULL;
@@ -815,10 +816,17 @@ static __declspec(naked) void RenderShadowMapHook() {
 
 void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* LightPoint) {
 	
-	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
+	SettingsShadowStruct::InteriorsStruct* ShadowSettings;
+
+	if (Player->GetWorldSpace()) {
+		ShadowSettings = &TheSettingManager->SettingsShadows.ExteriorsNight;
+	}
+	else {
+		ShadowSettings = &TheSettingManager->SettingsShadows.Interiors;
+	}
 
 	if (Light->lightFlags & TESObjectLIGH::LightFlags::kLightFlags_CanCarry) {
-		LightPoint->CastShadows = ShadowsInteriors->TorchesCastShadows;
+		LightPoint->CastShadows = ShadowSettings->TorchesCastShadows;
 		LightPoint->CanCarry = 1;
 		if (Ref == Player) {
 			if (Player->isThirdPerson) {
