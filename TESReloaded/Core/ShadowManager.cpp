@@ -478,7 +478,7 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, s
 	Device->SetDepthStencilSurface(ShadowCubeMapDepthSurface);
 	for (int L = 0; L <= LightIndex; L++) {
 		NiPoint3* LightPos = &Lights[L]->m_worldTransform.pos;
-		SetShadowMapLightPos(Lights, L);
+		SetShadowCubeMapRegisters(L);
 		float FarPlane = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[L].w;
 		switch (L) {
 		case 0:
@@ -632,6 +632,8 @@ void ShadowManager::RenderShadowMaps() {
 		ShadowCubeLightCount = LightIndex;
 
 		AlphaEnabled = ShadowSettings->AlphaEnabled;
+		SetAllShadowMapLightPos(Lights, LightIndex);
+
 		if (Player->GetWorldSpace()) {
 			RenderShadowCubeMapExt(Lights, LightIndex, ShadowSettings);
 			ClearShadowCubeMaps(Device, LightIndex, ShadowCubeMapStateEnum::Exterior_Night);
@@ -789,11 +791,18 @@ void ShadowManager::SetShadowMapLightPos(NiPointLight** Lights, int index) {
 	Eye.x = LightPos->x - TheRenderManager->CameraPosition.x;
 	Eye.y = LightPos->y - TheRenderManager->CameraPosition.y;
 	Eye.z = LightPos->z - TheRenderManager->CameraPosition.z;
-	TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition.x = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].x = Eye.x;
-	TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition.y = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].y = Eye.y;
-	TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition.z = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].z = Eye.z;
-	TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition.w = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].w = FarPlane;
-	TheShaderManager->ShaderConst.Shadow.Data.z = FarPlane;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].x = Eye.x;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].y = Eye.y;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].z = Eye.z;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].w = FarPlane;
+}
+
+void ShadowManager::SetShadowCubeMapRegisters(int index) {
+	TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition.x = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].x;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition.y = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].y;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition.z = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].z;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition.w = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].w;
+	TheShaderManager->ShaderConst.Shadow.Data.z = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[index].w;
 }
 
 void ShadowManager::AddSceneLight(NiPointLight* Light, int Key, std::map<int, NiPointLight*>& SceneLights) {

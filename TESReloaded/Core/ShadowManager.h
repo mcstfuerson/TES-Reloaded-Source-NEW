@@ -46,6 +46,7 @@ public:
 	int                     GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowSettings);
 	void                    SetAllShadowMapLightPos(NiPointLight** Lights, int LightIndex);
 	void                    SetShadowMapLightPos(NiPointLight** Lights, int index);
+	void                    SetShadowCubeMapRegisters(int index);
 
 
 
