@@ -1,4 +1,5 @@
 #pragma once
+#include <list>
 
 class ShadowManager { // Never disposed
 public:
@@ -10,9 +11,10 @@ public:
 		MapOrtho	= 2,
 	};
 	enum ShadowCubeMapStateEnum {
-		None		= 0,
-		Exterior	= 1,
-		Interior	= 2,
+		None		   = 0,
+		Exterior	   = 1,
+		Exterior_Night = 2,
+		Interior	   = 3
 	};
 	enum PlaneEnum {
 		PlaneNear	= 0,
@@ -31,13 +33,22 @@ public:
 	void					RenderObject(NiAVObject* Node, bool HasWater);
 	void					Render(NiGeometry* Geo);
 	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir);
-	void					RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors);
+	void					RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsExteriors);
+	void					RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors);
+	void                    RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, std::map<int, std::list<NiNode*>>& refMap, bool enabled);
 	void					RenderShadowMaps();
 	void					ClearShadowMap(IDirect3DDevice9* Device);
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, ShadowCubeMapStateEnum NewState);
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int LightIndex);
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
 	void                    AddSceneLight(NiPointLight* Light, int Key, std::map<int, NiPointLight*>& SceneLights);
+	int                     GetExtSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex);
+	int                     GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowSettings);
+	void                    SetAllShadowMapLightPos(NiPointLight** Lights, int LightIndex);
+	void                    SetShadowMapLightPos(NiPointLight** Lights, int index);
+	void                    SetShadowCubeMapRegisters(int index);
+
+
 
 	IDirect3DTexture9*		ShadowMapTexture[3];
 	IDirect3DSurface9*		ShadowMapSurface[3];
