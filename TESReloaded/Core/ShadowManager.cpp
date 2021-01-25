@@ -437,7 +437,7 @@ void ShadowManager::RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex
 							NiPoint3* LightPos = &Lights[L]->m_worldTransform.pos;
 							float FarPlane = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[L].w;
 							if (Ref->GetNode()->GetDistance(LightPos) - Ref->GetNode()->GetWorldBoundRadius() <= FarPlane * 1.2f) {
-								refMap[L].push_back(Ref->GetNode());
+								refMap[L].emplace_back(Ref->GetNode());
 							}
 						}
 					}
@@ -460,7 +460,7 @@ void ShadowManager::RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex
 				NiPoint3* LightPos = &Lights[L]->m_worldTransform.pos;
 				float FarPlane = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[L].w;
 				if (Ref->GetNode()->GetDistance(LightPos) <= FarPlane * 1.2f) {
-					refMap[L].push_back(Ref->GetNode());
+					refMap[L].emplace_back(Ref->GetNode());
 				}
 			}
 		}
@@ -469,7 +469,7 @@ void ShadowManager::RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex
 	RenderShadowCubeMap(Lights, LightIndex, refMap, ShadowSettings->Enabled);
 }
 
-void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, std::map<int, std::list<NiNode*>> refMap, bool enabled) {
+void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, std::map<int, std::list<NiNode*>>& refMap, bool enabled) {
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	D3DXMATRIX View, Proj;
@@ -610,7 +610,7 @@ void ShadowManager::RenderShadowMaps() {
 		ShadowData->w = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapFar];		
 		OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
 	}
-	else if (!Player->GetWorldSpace() || SunDir->z <= 0.01f){
+	else {
 		SettingsShadowStruct::InteriorsStruct* ShadowSettings; 
 		if (Player->GetWorldSpace()) {
 			ShadowSettings = &TheSettingManager->SettingsShadows.ExteriorsNight;
