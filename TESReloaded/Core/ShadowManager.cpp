@@ -584,6 +584,7 @@ void ShadowManager::RenderShadowMaps() {
 
 		CurrentVertex = ShadowMapVertex;
 		CurrentPixel = ShadowMapPixel;
+
 		ClearShadowCubeMaps(Device, -1, ShadowCubeMapStateEnum::Exterior);
 
 		At.x = PlayerNode->m_worldTransform.pos.x - TheRenderManager->CameraPosition.x;
@@ -611,27 +612,28 @@ void ShadowManager::RenderShadowMaps() {
 		OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
 	}
 	else {
-		SettingsShadowStruct::InteriorsStruct* ShadowSettings; 
+		SettingsShadowStruct::InteriorsStruct* ShadowSettings;
+
 		if (Player->GetWorldSpace()) {
 			ShadowSettings = &TheSettingManager->SettingsShadows.ExteriorsNight;
 		}
 		else {
 			ShadowSettings = &TheSettingManager->SettingsShadows.Interiors;
 		}
-		ShadowSceneNode* SceneNode = *(ShadowSceneNode**)kShadowSceneNode; // ShadowSceneNode array, first element is for gamemode
-		std::map<int, NiPointLight*> SceneLights;
-		NiPointLight* Lights[4] = { NULL };
-		int LightIndex = -1;
-		LightIndex = GetShadowSceneLights(SceneLights, Lights, LightIndex, ShadowSettings);
+
+		if (CurrentCell != Player->parentCell) { ShadowCubeMapState = ShadowCubeMapStateEnum::None; CurrentCell = Player->parentCell; }
 
 		CurrentVertex = ShadowCubeMapVertex;
 		CurrentPixel = ShadowCubeMapPixel;
-		if (CurrentCell != Player->parentCell) { ShadowCubeMapState = ShadowCubeMapStateEnum::None; CurrentCell = Player->parentCell; }
+		AlphaEnabled = ShadowSettings->AlphaEnabled;
 
+		std::map<int, NiPointLight*> SceneLights;
+		NiPointLight* Lights[4] = { NULL };
+		int LightIndex = -1;
+
+		LightIndex = GetShadowSceneLights(SceneLights, Lights, LightIndex, ShadowSettings);
 		if (LightIndex < ShadowCubeLightCount) { ClearShadowCubeMaps(Device, LightIndex); }
 		ShadowCubeLightCount = LightIndex;
-
-		AlphaEnabled = ShadowSettings->AlphaEnabled;
 		SetAllShadowMapLightPos(Lights, LightIndex);
 
 		if (Player->GetWorldSpace()) {
