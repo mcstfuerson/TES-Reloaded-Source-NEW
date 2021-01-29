@@ -35,7 +35,7 @@ public:
 	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir);
 	void					RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsExteriors);
 	void					RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors);
-	void                    RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, std::map<int, std::list<NiNode*>>& refMap, bool enabled);
+	void                    RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, std::map<int, std::vector<NiNode*>>& refMap, bool enabled);
 	void					RenderShadowMaps();
 	void					ClearShadowMap(IDirect3DDevice9* Device);
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, ShadowCubeMapStateEnum NewState);

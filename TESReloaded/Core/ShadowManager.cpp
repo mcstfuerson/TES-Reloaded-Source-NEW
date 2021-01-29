@@ -425,7 +425,7 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 
 void ShadowManager::RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowSettings) {
 
-	std::map<int, std::list<NiNode*>> refMap;
+	std::map<int, std::vector<NiNode*>> refMap;
 
 	for (UInt32 x = 0; x < *SettingGridsToLoad - 1; x++) {
 		for (UInt32 y = 0; y < *SettingGridsToLoad; y++) {
@@ -451,7 +451,7 @@ void ShadowManager::RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex
 
 void ShadowManager::RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowSettings) {
 
-	std::map<int, std::list<NiNode*>> refMap;
+	std::map<int, std::vector<NiNode*>> refMap;
 
 	TList<TESObjectREFR>::Entry* Entry = &Player->parentCell->objectList.First;
 	while (Entry) {
@@ -469,7 +469,7 @@ void ShadowManager::RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex
 	RenderShadowCubeMap(Lights, LightIndex, refMap, ShadowSettings->Enabled);
 }
 
-void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, std::map<int, std::list<NiNode*>>& refMap, bool enabled) {
+void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, std::map<int, std::vector<NiNode*>>& refMap, bool enabled) {
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	D3DXMATRIX View, Proj;
@@ -539,7 +539,7 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, s
 				Device->SetViewport(&ShadowCubeMapViewPort);
 				RenderState->SetVertexShader(ShadowCubeMapVertexShader, false);
 				RenderState->SetPixelShader(ShadowCubeMapPixelShader, false);
-				std::list<NiNode*>::iterator RefNode;
+				std::vector<NiNode*>::iterator RefNode;
 				for (RefNode = refMap[L].begin(); RefNode != refMap[L].end(); ++RefNode) {
 					RenderObject((*RefNode), TheShaderManager->ShaderConst.HasWater);
 				}
