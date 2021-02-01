@@ -828,6 +828,7 @@ static __declspec(naked) void RenderShadowMapHook() {
 void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* LightPoint) {
 	
 	SettingsShadowStruct::InteriorsStruct* ShadowSettings;
+	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
 
 	if (Player->GetWorldSpace()) {
 		ShadowSettings = &TheSettingManager->SettingsShadows.ExteriorsNight;
@@ -839,14 +840,16 @@ void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* L
 	if (Light->lightFlags & TESObjectLIGH::LightFlags::kLightFlags_CanCarry) {
 		LightPoint->CastShadows = ShadowSettings->TorchesCastShadows;
 		LightPoint->CanCarry = 1;
-		if (Ref == Player) {
-			if (Player->isThirdPerson) {
-				if (Player->firstPersonSkinInfo->LightForm == Light) LightPoint->CastShadows = 0;
+		if (EquipmentModeSettings->Enabled) {
+			if (Ref == Player) {
+				if (Player->isThirdPerson) {
+					if (Player->firstPersonSkinInfo->LightForm == Light) LightPoint->CastShadows = 0;
+				}
+				else {
+					if (Player->ActorSkinInfo->LightForm == NULL && Player->firstPersonSkinInfo->LightForm == Light) LightPoint->CastShadows = 0;
+				}
+				LightPoint->CanCarry = 2;
 			}
-			else {
-				if (Player->ActorSkinInfo->LightForm == NULL && Player->firstPersonSkinInfo->LightForm == Light) LightPoint->CastShadows = 0;
-			}
-			LightPoint->CanCarry = 2;
 		}
 	}		
 	else {
