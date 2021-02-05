@@ -117,10 +117,30 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[2];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition3"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[3];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition4"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[4];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition5"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[5];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition6"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[6];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition7"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[7];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition8"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[8];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition9"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[9];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition10"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[10];
+	else if (!strcmp(Name, "TESR_ShadowLightPosition11"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[11];
 	else if (!strcmp(Name, "TESR_ShadowCubeMapFarPlanes"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapFarPlanes;
 	else if (!strcmp(Name, "TESR_ShadowCubeMapBlend"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
+	else if (!strcmp(Name, "TESR_ShadowCubeMapBlend2"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend2;
+	else if (!strcmp(Name, "TESR_ShadowCubeMapBlend3"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend3;
 	else if (!strcmp(Name, "TESR_ReciprocalResolution"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ReciprocalResolution;
 	else if (!strcmp(Name, "TESR_ReciprocalResolutionWater"))

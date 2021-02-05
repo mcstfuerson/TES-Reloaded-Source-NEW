@@ -61,15 +61,15 @@ public:
 	D3DXPLANE				ShadowMapFrustum[3][6];
 	NiVector4				BillboardRight;
 	NiVector4				BillboardUp;
-	IDirect3DCubeTexture9*	ShadowCubeMapTexture[4];
-	IDirect3DSurface9*		ShadowCubeMapSurface[4][6];
+	IDirect3DCubeTexture9*	ShadowCubeMapTexture[12];
+	IDirect3DSurface9*		ShadowCubeMapSurface[12][6];
 	IDirect3DSurface9*		ShadowCubeMapDepthSurface;
 	ShaderRecord*			ShadowCubeMapVertex;
 	ShaderRecord*			ShadowCubeMapPixel;
 	IDirect3DVertexShader9* ShadowCubeMapVertexShader;
 	IDirect3DPixelShader9*	ShadowCubeMapPixelShader;
 	D3DVIEWPORT9			ShadowCubeMapViewPort;
-	NiPointLight*			ShadowCubeMapLights[4];
+	NiPointLight*			ShadowCubeMapLights[12];
 	ShaderRecord*			CurrentVertex;
 	ShaderRecord*			CurrentPixel;
 	TESObjectCELL*			CurrentCell;

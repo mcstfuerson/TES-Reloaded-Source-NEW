@@ -78,7 +78,7 @@ ShadowManager::ShadowManager() {
 		Device->CreateDepthStencilSurface(ShadowMapSize, ShadowMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &ShadowMapDepthSurface[i], NULL);
 		ShadowMapViewPort[i] = { 0, 0, ShadowMapSize, ShadowMapSize, 0.0f, 1.0f };
 	}
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 12; i++) {
 		Device->CreateCubeTexture(ShadowCubeMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &ShadowCubeMapTexture[i], NULL);
 		for (int j = 0; j < 6; j++) {
 			ShadowCubeMapTexture[i]->GetCubeMapSurface((D3DCUBEMAP_FACES)j, 0, &ShadowCubeMapSurface[i][j]);
@@ -87,7 +87,7 @@ ShadowManager::ShadowManager() {
 	Device->CreateDepthStencilSurface(ShadowCubeMapSize, ShadowCubeMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &ShadowCubeMapDepthSurface, NULL);
 	ShadowCubeMapViewPort = { 0, 0, ShadowCubeMapSize, ShadowCubeMapSize, 0.0f, 1.0f };
 	
-	ShadowCubeMapLights[4] = { NULL };
+	ShadowCubeMapLights[12] = { NULL };
 
 }
 
@@ -474,6 +474,7 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, s
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	D3DXMATRIX View, Proj;
 	D3DXVECTOR3 Eye, At, Up;
+	Logger::Log("Light index is %d", LightIndex);
 
 	Device->SetDepthStencilSurface(ShadowCubeMapDepthSurface);
 	for (int L = 0; L <= LightIndex; L++) {
@@ -579,7 +580,7 @@ void ShadowManager::RenderShadowMaps() {
 		NiNode* PlayerNode = Player->GetNode();
 		D3DXVECTOR3 At, Eye;
 		std::map<int, NiPointLight*> SceneLights;
-		NiPointLight* Lights[4] = { NULL };
+		NiPointLight* Lights[12] = { NULL };
 		int LightIndex = -1;
 
 		CurrentVertex = ShadowMapVertex;
@@ -628,7 +629,7 @@ void ShadowManager::RenderShadowMaps() {
 		AlphaEnabled = ShadowSettings->AlphaEnabled;
 
 		std::map<int, NiPointLight*> SceneLights;
-		NiPointLight* Lights[4] = { NULL };
+		NiPointLight* Lights[12] = { NULL };
 		int LightIndex = -1;
 
 		LightIndex = GetShadowSceneLights(SceneLights, Lights, LightIndex, ShadowSettings);
@@ -678,7 +679,7 @@ void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, Shad
 }
 
 void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From) {
-	for (int L = From + 1; L < 4; L++) {
+	for (int L = From + 1; L < 12; L++) {
 		TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[L].w = 0.0f;
 		for (int Face = 0; Face < 6; Face++) {
 			Device->SetRenderTarget(0, ShadowCubeMapSurface[L][Face]);
@@ -690,10 +691,12 @@ void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From) {
 void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
 
 	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
+	D3DXVECTOR4* ShadowCubeMapBlend2 = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend2;
+	D3DXVECTOR4* ShadowCubeMapBlend3 = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend3;
 	float* Blend = NULL;
 	bool Found = false;
 
-	if (memcmp(Lights, ShadowCubeMapLights, 16)) {
+	if (memcmp(Lights, ShadowCubeMapLights, 48)) {
 		for (int i = 0; i <= LightIndex; i++) {
 			for (int j = 0; j <= LightIndex; j++) {
 				if (Lights[i] == ShadowCubeMapLights[j]) {
@@ -709,16 +712,40 @@ void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
 				Blend = &ShadowCubeMapBlend->z;
 			else if (i == 3)
 				Blend = &ShadowCubeMapBlend->w;
+			else if (i == 4)
+				Blend = &ShadowCubeMapBlend2->x;
+			else if (i == 5)
+				Blend = &ShadowCubeMapBlend2->y;
+			else if (i == 6)
+				Blend = &ShadowCubeMapBlend2->z;
+			else if (i == 7)
+				Blend = &ShadowCubeMapBlend2->w;
+			else if (i == 8)
+				Blend = &ShadowCubeMapBlend3->x;
+			else if (i == 9)
+				Blend = &ShadowCubeMapBlend3->y;
+			else if (i == 10)
+				Blend = &ShadowCubeMapBlend3->z;
+			else if (i == 11)
+				Blend = &ShadowCubeMapBlend3->w;
 			if (!Found) *Blend = 0.0f;
 			Found = false;
 		}
-		memcpy(ShadowCubeMapLights, Lights, 16);
+		memcpy(ShadowCubeMapLights, Lights, 48);
 	}
 	else {
 		if (ShadowCubeMapBlend->x < 1.0f) ShadowCubeMapBlend->x += 0.1f;
 		if (ShadowCubeMapBlend->y < 1.0f) ShadowCubeMapBlend->y += 0.1f;
 		if (ShadowCubeMapBlend->z < 1.0f) ShadowCubeMapBlend->z += 0.1f;
 		if (ShadowCubeMapBlend->w < 1.0f) ShadowCubeMapBlend->w += 0.1f;
+		if (ShadowCubeMapBlend2->x < 1.0f) ShadowCubeMapBlend2->x += 0.1f;
+		if (ShadowCubeMapBlend2->y < 1.0f) ShadowCubeMapBlend2->y += 0.1f;
+		if (ShadowCubeMapBlend2->z < 1.0f) ShadowCubeMapBlend2->z += 0.1f;
+		if (ShadowCubeMapBlend2->w < 1.0f) ShadowCubeMapBlend2->w += 0.1f;
+		if (ShadowCubeMapBlend3->x < 1.0f) ShadowCubeMapBlend3->x += 0.1f;
+		if (ShadowCubeMapBlend3->y < 1.0f) ShadowCubeMapBlend3->y += 0.1f;
+		if (ShadowCubeMapBlend3->z < 1.0f) ShadowCubeMapBlend3->z += 0.1f;
+		if (ShadowCubeMapBlend3->w < 1.0f) ShadowCubeMapBlend3->w += 0.1f;
 	}
 	
 }
@@ -772,7 +799,7 @@ int ShadowManager::GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLight
 			LightIndex += 1;
 			Lights[LightIndex] = Light;
 		}
-		if (LightIndex == ShadowSettings->LightPoints - 1 || LightIndex == 3) break;
+		if (LightIndex == ShadowSettings->LightPoints - 1 || LightIndex == 12) break;
 		v++;
 	}
 
