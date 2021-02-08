@@ -1358,10 +1358,12 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("ExteriorsNight", "AlphaEnabled", ToString(SettingsShadows.ExteriorsNight.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNight", "Darkness", ToString(SettingsShadows.ExteriorsNight.Darkness).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNight", "Quality", ToString(SettingsShadows.ExteriorsNight.Quality).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsNight", "LightPoints", ToString(SettingsShadows.ExteriorsNight.LightPoints).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Enabled", ToString(SettingsShadows.Interiors.Enabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "AlphaEnabled", ToString(SettingsShadows.Interiors.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Darkness", ToString(SettingsShadows.Interiors.Darkness).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Quality", ToString(SettingsShadows.Interiors.Quality).c_str(), Filename);
+			WritePrivateProfileStringA("Interiors", "LightPoints", ToString(SettingsShadows.Interiors.LightPoints).c_str(), Filename);
 		}
 		else if (!strcmp(Definition, "Sharpening")) {
 			WritePrivateProfileStringA("Effects", "Sharpening", ToString(SettingsMain.Effects.Sharpening).c_str(), SettingsMain.Main.MainFile);
@@ -1913,12 +1915,14 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["AlphaEnabled"] = SettingsShadows.Interiors.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.Interiors.Darkness;
 				Settings["Quality"] = SettingsShadows.Interiors.Quality;
+				Settings["LightPoints"] = SettingsShadows.Interiors.LightPoints;
 			}
 			else if (!strcmp(Section, "ExteriorsNight")) {
 				Settings["Enabled"] = SettingsShadows.ExteriorsNight.Enabled;
 				Settings["AlphaEnabled"] = SettingsShadows.ExteriorsNight.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.ExteriorsNight.Darkness;
 				Settings["Quality"] = SettingsShadows.ExteriorsNight.Quality;
+				Settings["LightPoints"] = SettingsShadows.ExteriorsNight.LightPoints;
 			}
 		}
 		else if (!strcmp(Definition, "Sharpening")) {
@@ -2547,6 +2551,9 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				else if (!strcmp(Setting, "Darkness")) {
 					SettingsShadows.Interiors.Darkness = Value;
 				}
+				else if (!strcmp(Setting, "LightPoints")) {
+					SettingsShadows.Interiors.LightPoints = Value;
+				}
 				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.Interiors.Quality = Value;
 					// Special case for forward or post-process shadowing
@@ -2562,6 +2569,9 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				}
 				else if (!strcmp(Setting, "Darkness")) {
 					SettingsShadows.ExteriorsNight.Darkness = Value;
+				}
+				else if (!strcmp(Setting, "LightPoints")) {
+					SettingsShadows.ExteriorsNight.LightPoints = Value;
 				}
 				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.ExteriorsNight.Quality = Value;
