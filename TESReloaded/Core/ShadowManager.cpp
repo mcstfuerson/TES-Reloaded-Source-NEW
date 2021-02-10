@@ -474,7 +474,6 @@ void ShadowManager::RenderShadowCubeMap(NiPointLight** Lights, int LightIndex, s
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	D3DXMATRIX View, Proj;
 	D3DXVECTOR3 Eye, At, Up;
-	Logger::Log("Light index is %d", LightIndex);
 
 	Device->SetDepthStencilSurface(ShadowCubeMapDepthSurface);
 	for (int L = 0; L <= LightIndex; L++) {
