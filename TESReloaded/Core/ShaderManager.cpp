@@ -77,6 +77,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Skin.SkinColor;
 	else if (!strcmp(Name, "TESR_ShadowData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Shadow.Data;
+	else if (!strcmp(Name, "TESR_ShadowCubeData"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowCube.Data;
 	else if (!strcmp(Name, "TESR_OrthoData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Shadow.OrthoData;
 	else if (!strcmp(Name, "TESR_RainData"))
@@ -1937,7 +1939,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		ShadowsExteriorsEffect->SetCT();
 		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.ExteriorsNight.Quality == -1 && currentWorldSpace && SunDir->z <= 0.01f) {
+	if (TheSettingManager->SettingsShadows.ExteriorsNight.Quality == -1 && currentWorldSpace/* && SunDir->z <= 0.01f*/) {
 		ShadowsExteriorsNightEffect->SetCT();
 		ShadowsExteriorsNightEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}

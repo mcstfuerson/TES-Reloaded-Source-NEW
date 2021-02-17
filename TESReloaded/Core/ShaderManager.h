@@ -177,6 +177,7 @@ struct ShaderConstants {
 	TerrainStruct			Terrain;
 	SkinStruct				Skin;
 	ShadowStruct			Shadow;
+	ShadowStruct			ShadowCube;
 	PrecipitationsStruct	Precipitations;
 	WaterLensStruct			WaterLens;
 	GodRaysStruct			GodRays;
