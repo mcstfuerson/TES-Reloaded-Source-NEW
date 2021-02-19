@@ -735,9 +735,9 @@ void ShaderManager::UpdateConstants() {
 			if (ShaderConst.GameTime.y > ShaderConst.SunTiming.w || ShaderConst.GameTime.y < ShaderConst.SunTiming.x)
 				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
 			else if (ShaderConst.GameTime.y > ShaderConst.SunTiming.z && fabs(deltaz) - ShaderConst.SunDir.z <= 0.0f)
-				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
+				ShaderConst.SunDir.z = deltaz;
 			else if (ShaderConst.GameTime.y < ShaderConst.SunTiming.y && fabs(deltaz) - ShaderConst.SunDir.z >= 0.0f)
-				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
+				ShaderConst.SunDir.z = deltaz;
 		}
 
 		if (currentWorldSpace) {
