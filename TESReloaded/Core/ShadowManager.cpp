@@ -370,7 +370,7 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 
 }
 
-void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir, D3DXVECTOR4* ShadowData) {
+void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* ShadowLightDir, D3DXVECTOR4* ShadowData) {
 	
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
@@ -382,11 +382,11 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 
 	AlphaEnabled = ShadowsExteriors->AlphaEnabled[ShadowMapType];
 
-	Eye.x = At->x - FarPlane * SunDir->x * -1;
-	Eye.y = At->y - FarPlane * SunDir->y * -1;
-	Eye.z = At->z - FarPlane * SunDir->z * -1;
+	Eye.x = At->x - FarPlane * ShadowLightDir->x * -1;
+	Eye.y = At->y - FarPlane * ShadowLightDir->y * -1;
+	Eye.z = At->z - FarPlane * ShadowLightDir->z * -1;
 	D3DXMatrixLookAtRH(&View, &Eye, At, &Up);
-	D3DXMatrixOrthoRH(&Proj, 2.0f * Radius, (1 + SunDir->z) * Radius, 0.0f, 2.0f * FarPlane);
+	D3DXMatrixOrthoRH(&Proj, 2.0f * Radius, (1 + ShadowLightDir->z) * Radius, 0.0f, 2.0f * FarPlane);
 	TheShaderManager->ShaderConst.ShadowMap.ShadowViewProj = View * Proj;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowCameraToLight[ShadowMapType] = TheRenderManager->InvViewProjMatrix * TheShaderManager->ShaderConst.ShadowMap.ShadowViewProj;
 	BillboardRight = { View._11, View._21, View._31, 0.0f };
@@ -396,7 +396,7 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 	Device->SetDepthStencilSurface(ShadowMapDepthSurface[ShadowMapType]);
 	Device->SetViewport(&ShadowMapViewPort[ShadowMapType]);
 	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
-	if (ShadowsExteriors->Enabled[ShadowMapType] && SunDir->z > 0.0f) {
+	if (ShadowsExteriors->Enabled[ShadowMapType] && ShadowLightDir->z > 0.0f) {
 		RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
 		RenderState->SetRenderState(D3DRS_ZWRITEENABLE, 1, RenderStateArgs);
 		RenderState->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE, RenderStateArgs);
@@ -472,10 +472,10 @@ void ShadowManager::RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex
 void ShadowManager::RenderShadowCubeMapFakeInt(int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowSettings, D3DXVECTOR4* ShadowData) {
 	D3DXVECTOR3 At, Eye;
 	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
-	D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
-	Eye.x = (SunDir->x * 6000) - TheRenderManager->CameraPosition.x;
-	Eye.y = (SunDir->y * 6000) - TheRenderManager->CameraPosition.y;
-	Eye.z = (SunDir->z * 6000) - TheRenderManager->CameraPosition.z;
+	D3DXVECTOR4* ShadowLightDir = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
+	Eye.x = (ShadowLightDir->x * 6000) - TheRenderManager->CameraPosition.x;
+	Eye.y = (ShadowLightDir->y * 6000) - TheRenderManager->CameraPosition.y;
+	Eye.z = (ShadowLightDir->z * 6000) - TheRenderManager->CameraPosition.z;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].x = Eye.x;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].y = Eye.y;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].z = Eye.z;
@@ -558,6 +558,7 @@ void ShadowManager::RenderShadowCubeMap(int LightIndex, std::map<int, std::vecto
 	}
 }
 
+//TODO: rename
 void ShadowManager::RenderExteriorShadows() {
 
 	if (!Player->GetWorldSpace()) {
@@ -568,14 +569,7 @@ void ShadowManager::RenderExteriorShadows() {
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	D3DXVECTOR4* ShadowData = &TheShaderManager->ShaderConst.Shadow.Data;
 	D3DXVECTOR4* OrthoData = &TheShaderManager->ShaderConst.Shadow.OrthoData;
-	D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
-
-	if (SunDir->z < 0.00f) {
-		//moon shadows: approximate moon position
-		SunDir->y = SunDir->x * -1;
-		SunDir->x = 0.75;
-		SunDir->z = SunDir->z * -1;
-	}
+	D3DXVECTOR4* ShadowLightDir = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
 
 	D3DXVECTOR4 OrthoDir = D3DXVECTOR3(0.05f, 0.05f, 1.0f);
 	NiNode* PlayerNode = Player->GetNode();
@@ -598,15 +592,15 @@ void ShadowManager::RenderExteriorShadows() {
 	ShadowCubeLightCount = LightIndex;
 
 	SetAllShadowMapLightPos(Lights, LightIndex);
-	RenderShadowMap(MapNear, ShadowsExteriors, &At, SunDir, ShadowData);
-	RenderShadowMap(MapFar, ShadowsExteriors, &At, SunDir, ShadowData);
+	RenderShadowMap(MapNear, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
+	RenderShadowMap(MapFar, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
 	RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir, ShadowData);
 
 	ShadowData->x = ShadowsExteriors->Quality;
 	ShadowData->y = ShadowsExteriors->Darkness;
-	if (SunDir->z < 0.1f) {
+	if (ShadowLightDir->z < 0.1f) {
 		if (ShadowData->y == 0.0f) ShadowData->y = 0.1f;
-		ShadowData->y += log(SunDir->z) / -10.0f;
+		ShadowData->y += log(ShadowLightDir->z) / -10.0f;
 		if (ShadowData->y > 1.0f) ShadowData->y = 1.0f;
 	}
 	ShadowData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapNear];
@@ -614,10 +608,11 @@ void ShadowManager::RenderExteriorShadows() {
 	OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
 }
 
+//TODO: rename, doesn't apply solely to interiors
 void ShadowManager::RenderInteriorShadows() {
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	D3DXVECTOR4* ShadowData = &TheShaderManager->ShaderConst.ShadowCube.Data;
-	D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
+	D3DXVECTOR4* ShadowLightDir = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
 	SettingsShadowStruct::InteriorsStruct* ShadowSettings;
 
 	if (Player->GetWorldSpace()) {
@@ -637,7 +632,7 @@ void ShadowManager::RenderInteriorShadows() {
 	NiPointLight* Lights[12] = { NULL };
 	int LightIndex = -1;
 
-	if (!(Player->parentCell->flags0 & Player->parentCell->kFlags0_BehaveLikeExterior && SunDir->z > 0.01f)) {
+	if (!(Player->parentCell->flags0 & Player->parentCell->kFlags0_BehaveLikeExterior && ShadowLightDir->z > 0.01f)) {
 		LightIndex = GetShadowSceneLights(SceneLights, Lights, LightIndex, ShadowSettings);
 		SetAllShadowMapLightPos(Lights, LightIndex);
 

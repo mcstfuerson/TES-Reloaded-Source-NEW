@@ -1,6 +1,6 @@
 #include "PluginVersion.h"
 
-char PluginVersion::VersionString[64];
+char PluginVersion::VersionString[128];
 
 void PluginVersion::CreateVersionString() {
 

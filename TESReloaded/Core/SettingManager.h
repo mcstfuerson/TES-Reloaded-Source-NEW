@@ -191,6 +191,7 @@ struct SettingsMainStruct {
 		bool Coloring;
 		bool DepthOfField;
 		bool GodRays;
+		bool KhajiitRays;
 		bool LowHF;
 		bool MotionBlur;
 		bool Precipitations;
@@ -432,6 +433,36 @@ struct SettingsGodRaysStruct {
 	float Saturate;
 };
 
+struct SettingsKhajiitRaysStruct {
+	bool mTimeEnabled;
+	bool mSunGlareEnabled;
+	int mLightShaftPasses;
+	float mRayIntensity;
+	float mRayLength;
+	float mRayDensity;
+	float mRayVisibility;
+	float mLuminance;
+	float mGlobalMultiplier;
+	float mRayR;
+	float mRayG;
+	float mRayB;
+	float mSaturate;
+
+	bool sTimeEnabled;
+	bool sSunGlareEnabled;
+	int sLightShaftPasses;
+	float sRayIntensity;
+	float sRayLength;
+	float sRayDensity;
+	float sRayVisibility;
+	float sLuminance;
+	float sGlobalMultiplier;
+	float sRayR;
+	float sRayG;
+	float sRayB;
+	float sSaturate;
+};
+
 struct SettingsDepthOfFieldStruct {
 	bool Enabled;
 	bool DistantBlur;
@@ -627,6 +658,7 @@ public:
 	SettingsTerrainStruct			SettingsTerrain;
 	SettingsSkinStruct				SettingsSkin;
 	SettingsGodRaysStruct			SettingsGodRays;
+	SettingsKhajiitRaysStruct		SettingsKhajiitRays;
 	SettingsCinemaStruct			SettingsCinema;
 	SettingsPrecipitationsStruct	SettingsPrecipitations;
 	SettingsBloodStruct				SettingsBlood;

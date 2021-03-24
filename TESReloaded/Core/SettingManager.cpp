@@ -305,6 +305,7 @@ SettingManager::SettingManager() {
 	SettingsMain.Effects.Underwater = GetPrivateProfileIntA("Effects", "Underwater", 0, Filename);
 	SettingsMain.Effects.WaterLens = GetPrivateProfileIntA("Effects", "WaterLens", 0, Filename);
 	SettingsMain.Effects.GodRays = GetPrivateProfileIntA("Effects", "GodRays", 0, Filename);
+	SettingsMain.Effects.KhajiitRays = GetPrivateProfileIntA("Effects", "KhajiitRays", 0, Filename);
 	SettingsMain.Effects.DepthOfField = GetPrivateProfileIntA("Effects", "DepthOfField", 0, Filename);
 	SettingsMain.Effects.AmbientOcclusion = GetPrivateProfileIntA("Effects", "AmbientOcclusion", 0, Filename);
 	SettingsMain.Effects.Coloring = GetPrivateProfileIntA("Effects", "Coloring", 0, Filename);
@@ -644,6 +645,58 @@ void SettingManager::LoadSettings() {
 	SettingsGodRays.RayB = atof(value);
 	GetPrivateProfileStringA("Default", "Saturate", "0.55", value, SettingStringBuffer, Filename);
 	SettingsGodRays.Saturate = atof(value);
+
+	strcpy(Filename, CurrentPath);
+	strcat(Filename, SettingsPath);
+	strcat(Filename, "KhajiitRays\\KhajiitRays.ini");
+	//Masser
+	SettingsKhajiitRays.mTimeEnabled = GetPrivateProfileIntA("Default", "MasserTimeEnabled", 1, Filename);
+	SettingsKhajiitRays.mSunGlareEnabled = GetPrivateProfileIntA("Default", "MasserSunGlareEnabled", 1, Filename);
+	SettingsKhajiitRays.mLightShaftPasses = GetPrivateProfileIntA("Default", "MasserLightShaftPasses", 30, Filename);
+	GetPrivateProfileStringA("Default", "MasserRayIntensity", "3.2", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayIntensity = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayLength", "1.0", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayLength = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayDensity", "0.8", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayDensity = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayVisibility", "0.4", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayVisibility = atof(value);
+	GetPrivateProfileStringA("Default", "MasserLuminance", "0.4", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mLuminance = atof(value);
+	GetPrivateProfileStringA("Default", "MasserGlobalMultiplier", "1.5", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mGlobalMultiplier = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayR", "0.5", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayR = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayG", "0.9", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayG = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayB", "0.8", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayB = atof(value);
+	GetPrivateProfileStringA("Default", "MasserSaturate", "0.55", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mSaturate = atof(value);
+	//Secunda
+	SettingsKhajiitRays.sTimeEnabled = GetPrivateProfileIntA("Default", "SecundaTimeEnabled", 1, Filename);
+	SettingsKhajiitRays.sSunGlareEnabled = GetPrivateProfileIntA("Default", "SecundaSunGlareEnabled", 1, Filename);
+	SettingsKhajiitRays.sLightShaftPasses = GetPrivateProfileIntA("Default", "SecundaLightShaftPasses", 30, Filename);
+	GetPrivateProfileStringA("Default", "SecundaRayIntensity", "3.2", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayIntensity = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayLength", "1.0", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayLength = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayDensity", "0.8", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayDensity = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayVisibility", "0.4", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayVisibility = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaLuminance", "0.4", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sLuminance = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaGlobalMultiplier", "1.5", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sGlobalMultiplier = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayR", "0.5", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayR = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayG", "0.9", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayG = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayB", "0.8", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayB = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaSaturate", "0.55", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sSaturate = atof(value);
 
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
@@ -1287,6 +1340,38 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("Default", "TimeEnabled", ToString(SettingsGodRays.TimeEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "RayVisibility", ToString(SettingsGodRays.RayVisibility).c_str(), Filename);
 		}
+		else if (!strcmp(Definition, "KhajiitRays")) {
+			WritePrivateProfileStringA("Effects", "KhajiitRays", ToString(SettingsMain.Effects.KhajiitRays).c_str(), SettingsMain.Main.MainFile);
+			strcat(Filename, "KhajiitRays\\KhajiitRays.ini");
+			//Masser
+			WritePrivateProfileStringA("Default", "MasserRayDensity", ToString(SettingsKhajiitRays.mRayDensity).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayIntensity", ToString(SettingsKhajiitRays.mRayIntensity).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayLength", ToString(SettingsKhajiitRays.mRayLength).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserGlobalMultiplier", ToString(SettingsKhajiitRays.mGlobalMultiplier).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserSaturate", ToString(SettingsKhajiitRays.mSaturate).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserLightShaftPasses", ToString(SettingsKhajiitRays.mLightShaftPasses).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserLuminance", ToString(SettingsKhajiitRays.mLuminance).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayR", ToString(SettingsKhajiitRays.mRayR).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayG", ToString(SettingsKhajiitRays.mRayG).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayB", ToString(SettingsKhajiitRays.mRayB).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserSunGlareEnabled", ToString(SettingsKhajiitRays.mSunGlareEnabled).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserTimeEnabled", ToString(SettingsKhajiitRays.mTimeEnabled).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayVisibility", ToString(SettingsKhajiitRays.mRayVisibility).c_str(), Filename);
+			//Secunda
+			WritePrivateProfileStringA("Default", "SecundaRayDensity", ToString(SettingsKhajiitRays.sRayDensity).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayIntensity", ToString(SettingsKhajiitRays.sRayIntensity).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayLength", ToString(SettingsKhajiitRays.sRayLength).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaGlobalMultiplier", ToString(SettingsKhajiitRays.sGlobalMultiplier).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaSaturate", ToString(SettingsKhajiitRays.sSaturate).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaLightShaftPasses", ToString(SettingsKhajiitRays.sLightShaftPasses).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaLuminance", ToString(SettingsKhajiitRays.sLuminance).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayR", ToString(SettingsKhajiitRays.sRayR).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayG", ToString(SettingsKhajiitRays.sRayG).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayB", ToString(SettingsKhajiitRays.sRayB).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaSunGlareEnabled", ToString(SettingsKhajiitRays.sSunGlareEnabled).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaTimeEnabled", ToString(SettingsKhajiitRays.sTimeEnabled).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayVisibility", ToString(SettingsKhajiitRays.sRayVisibility).c_str(), Filename);
+		}
 		else if (!strcmp(Definition, "Grass")) {
 			strcat(Filename, "Grass\\Grass.ini");
 			WritePrivateProfileStringA("Default", "GrassDensity", ToString(SettingsGrass.GrassDensity).c_str(), Filename);
@@ -1523,6 +1608,7 @@ DefinitionsList SettingManager::GetMenuDefinitions(const char* Item) {
 		Definitions["Coloring"] = "Coloring";
 		Definitions["DepthOfField"] = "Depth Of Field";
 		Definitions["GodRays"] = "God Rays";
+		Definitions["KhajiitRays"] = "Khajiit Rays";
 #if defined(OBLIVION)
 		Definitions["Grass"] = "Grass";
 		Definitions["HDR"] = "High Dynamic Range";
@@ -1857,6 +1943,36 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["Saturate"] = SettingsGodRays.Saturate;
 			Settings["SunGlareEnabled"] = SettingsGodRays.SunGlareEnabled;
 			Settings["TimeEnabled"] = SettingsGodRays.TimeEnabled;
+		}
+		else if (!strcmp(Definition, "KhajiitRays")) {
+			//Masser
+			Settings["MasserGlobalMultiplier"] = SettingsKhajiitRays.mGlobalMultiplier;
+			Settings["MasserLightShaftPasses"] = SettingsKhajiitRays.mLightShaftPasses;
+			Settings["MasserLuminance"] = SettingsKhajiitRays.mLuminance;
+			Settings["MasserRayDensity"] = SettingsKhajiitRays.mRayDensity;
+			Settings["MasserRayIntensity"] = SettingsKhajiitRays.mRayIntensity;
+			Settings["MasserRayLength"] = SettingsKhajiitRays.mRayLength;
+			Settings["MasserRayVisibility"] = SettingsKhajiitRays.mRayVisibility;
+			Settings["MasserRayR"] = SettingsKhajiitRays.mRayR;
+			Settings["MasserRayG"] = SettingsKhajiitRays.mRayG;
+			Settings["MasserRayB"] = SettingsKhajiitRays.mRayB;
+			Settings["MasserSaturate"] = SettingsKhajiitRays.mSaturate;
+			Settings["MasserSunGlareEnabled"] = SettingsKhajiitRays.mSunGlareEnabled;
+			Settings["MasserTimeEnabled"] = SettingsKhajiitRays.mTimeEnabled;
+			//Secunda
+			Settings["SecundaGlobalMultiplier"] = SettingsKhajiitRays.sGlobalMultiplier;
+			Settings["SecundaLightShaftPasses"] = SettingsKhajiitRays.sLightShaftPasses;
+			Settings["SecundaLuminance"] = SettingsKhajiitRays.sLuminance;
+			Settings["SecundaRayDensity"] = SettingsKhajiitRays.sRayDensity;
+			Settings["SecundaRayIntensity"] = SettingsKhajiitRays.sRayIntensity;
+			Settings["SecundaRayLength"] = SettingsKhajiitRays.sRayLength;
+			Settings["SecundaRayVisibility"] = SettingsKhajiitRays.sRayVisibility;
+			Settings["SecundaRayR"] = SettingsKhajiitRays.sRayR;
+			Settings["SecundaRayG"] = SettingsKhajiitRays.sRayG;
+			Settings["SecundaRayB"] = SettingsKhajiitRays.sRayB;
+			Settings["SecundaSaturate"] = SettingsKhajiitRays.sSaturate;
+			Settings["SecundaSunGlareEnabled"] = SettingsKhajiitRays.sSunGlareEnabled;
+			Settings["SecundaTimeEnabled"] = SettingsKhajiitRays.sTimeEnabled;
 		}
 		else if (!strcmp(Definition, "Grass")) {
 			Settings["GrassDensity"] = SettingsGrass.GrassDensity;
@@ -2451,6 +2567,60 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 			else if (!strcmp(Setting, "RayVisibility"))
 				SettingsGodRays.RayVisibility = Value;
 		}
+		else if (!strcmp(Definition, "KhajiitRays")) {
+			if (!strcmp(Setting, "MasserRayDensity"))
+				SettingsKhajiitRays.mRayDensity = Value;
+			else if (!strcmp(Setting, "MasserRayIntensity"))
+				SettingsKhajiitRays.mRayIntensity = Value;
+			else if (!strcmp(Setting, "MasserRayLength"))
+				SettingsKhajiitRays.mRayLength = Value;
+			else if (!strcmp(Setting, "MasserGlobalMultiplier"))
+				SettingsKhajiitRays.mGlobalMultiplier = Value;
+			else if (!strcmp(Setting, "MasserSaturate"))
+				SettingsKhajiitRays.mSaturate = Value;
+			else if (!strcmp(Setting, "MasserLightShaftPasses"))
+				SettingsKhajiitRays.mLightShaftPasses = Value;
+			else if (!strcmp(Setting, "MasserLuminance"))
+				SettingsKhajiitRays.mLuminance = Value;
+			else if (!strcmp(Setting, "MasserRayR"))
+				SettingsKhajiitRays.mRayR = Value;
+			else if (!strcmp(Setting, "MasserRayG"))
+				SettingsKhajiitRays.mRayG = Value;
+			else if (!strcmp(Setting, "MasserRayB"))
+				SettingsKhajiitRays.mRayB = Value;
+			else if (!strcmp(Setting, "MasserTimeEnabled"))
+				SettingsKhajiitRays.mTimeEnabled = Value;
+			else if (!strcmp(Setting, "MasserSunGlareEnabled"))
+				SettingsKhajiitRays.mSunGlareEnabled = Value;
+			else if (!strcmp(Setting, "MasserRayVisibility"))
+				SettingsKhajiitRays.mRayVisibility = Value;
+			else if (!strcmp(Setting, "SecundaRayDensity"))
+				SettingsKhajiitRays.sRayDensity = Value;
+			else if (!strcmp(Setting, "SecundaRayIntensity"))
+				SettingsKhajiitRays.sRayIntensity = Value;
+			else if (!strcmp(Setting, "SecundaRayLength"))
+				SettingsKhajiitRays.sRayLength = Value;
+			else if (!strcmp(Setting, "SecundaGlobalMultiplier"))
+				SettingsKhajiitRays.sGlobalMultiplier = Value;
+			else if (!strcmp(Setting, "SecundaSaturate"))
+				SettingsKhajiitRays.sSaturate = Value;
+			else if (!strcmp(Setting, "SecundaLightShaftPasses"))
+				SettingsKhajiitRays.sLightShaftPasses = Value;
+			else if (!strcmp(Setting, "SecundaLuminance"))
+				SettingsKhajiitRays.sLuminance = Value;
+			else if (!strcmp(Setting, "SecundaRayR"))
+				SettingsKhajiitRays.sRayR = Value;
+			else if (!strcmp(Setting, "SecundaRayG"))
+				SettingsKhajiitRays.sRayG = Value;
+			else if (!strcmp(Setting, "SecundaRayB"))
+				SettingsKhajiitRays.sRayB = Value;
+			else if (!strcmp(Setting, "SecundaTimeEnabled"))
+				SettingsKhajiitRays.sTimeEnabled = Value;
+			else if (!strcmp(Setting, "SecundaSunGlareEnabled"))
+				SettingsKhajiitRays.sSunGlareEnabled = Value;
+			else if (!strcmp(Setting, "SecundaRayVisibility"))
+				SettingsKhajiitRays.sRayVisibility = Value;
+		}
 		else if (!strcmp(Definition, "Grass")) {
 			if (!strcmp(Setting, "GrassDensity"))
 				SettingsGrass.GrassDensity = Value;
@@ -2901,6 +3071,8 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name)
 		Value = SettingsMain.Effects.DepthOfField;
 	else if (!strcmp(Name, "GodRays"))
 		Value = SettingsMain.Effects.GodRays;
+	else if (!strcmp(Name, "KhajiitRays"))
+		Value = SettingsMain.Effects.KhajiitRays;
 	else if (!strcmp(Name, "Grass"))
 		Value = SettingsMain.Shaders.Grass;
 	else if (!strcmp(Name, "HDR"))

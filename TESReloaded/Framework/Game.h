@@ -7881,9 +7881,9 @@ assert(sizeof(TESAnimGroup) == 0x02C);
 
 class SkyObject {
 public:
-	virtual NiNode* GetObjectNode();						
+	virtual NiNode* GetObjectNode();
 	virtual void	Initialize(UInt32 u1);			
-	virtual void	func_03(UInt32 u1, UInt32 u2);	
+	virtual void	func_03(UInt32 u1, UInt32 u2);
 
 	NiNode*			RootNode;						// 04	
 };
@@ -7953,15 +7953,112 @@ public:
 	UInt32			unk4C;					// 4C
 	char*			texture_three_wax;		// 50
 	UInt32			unk54;					// 54
-	float			unk58;					// 58
-	float			unk5C;					// 5C
+	float			AngleFadeStart;			// 58  (masser = 55, sec = 55)
+	float			AngleFadeEnd;			// 5C  (masser = 45 sec = 40)
 	float			unk60;					// 60
 	float			unk64;					// 64
-	float			unk68;					// 68
+	float			ZOffset;				// 68 
 	UInt32			unk6C;					// 6C
 	UInt32			unk70;					// 70
-	float			unk74;					// 74
+	float			degree;					// 74
 	float			unk78;					// 78
+
+	/*float			fadeValue() { // 1 = full visible, 0 = not visible
+		float fVar1;
+		float fVar2;
+
+		//fVar1 = 180.0 - (this->unk58);
+		//fVar2 = 180.0 - (this->unk5C);
+	    fVar1 = 180.0 - (this->unk58);
+		fVar2 = 180.0 - (this->unk5C);
+		if ((this->degree) <= 180.0) {
+			if (((this->degree) <= (this->unk58)) && ((this->unk5C) < (this->degree) != ((this->unk5C) == (this->degree)))) {
+				return (((this-> degree) - (this->unk5C)) / ((this->unk58) - (this->unk5C)));
+			}
+			if ((fVar1 < (this->degree) != (fVar1 == (this->degree))) && ((this->degree) <= fVar2)) {
+				return ((fVar2 - (this->degree)) / (fVar2 - fVar1));
+			}
+			if (((this->unk58) <(this->degree)) && ((this->degree) < fVar1)) {
+				return 1;
+			}
+		}
+		return 0;
+	}*/
+
+	float			fadeValue() {
+		float result;
+		if ((this->degree) <= 180.0) {
+
+			if ((this->degree) > 90) {
+				result = (180.0f - this->degree) / 15.0f;
+				return result > 1.0f ? 1.0f : result;
+			}
+			else {
+				result = this->degree / 15.0f;
+				return result > 1.0f ? 1.0f : result;
+			}
+		}
+
+		return 0;
+	}
+
+	//TODO: doesn't really belong in Moon struct
+	float			getPhaseLumCoeff(int phaseLength, int phaseDay) {
+		if (phaseDay < phaseLength * 1) {
+			return 1.0f;
+		}
+		if (phaseDay < phaseLength * 2) {
+			return 0.75f;
+		}
+		if (phaseDay < phaseLength * 3) {
+			return 0.50f;
+		}
+		if (phaseDay < phaseLength * 4) {
+			return 0.25f;
+		}
+		if (phaseDay < phaseLength * 5) {
+			return 0.0f;
+		}
+		if (phaseDay < phaseLength * 6) {
+			return 0.25f;
+		}
+		if (phaseDay < phaseLength * 7) {
+			return 0.50f;
+		}
+		else {
+			return 0.75f;
+		}
+	}
+
+	/*
+	float			someFloat() { 	 
+		float fVar1;
+		float fVar2;
+		float fVar3;
+		float fVar4;
+
+		fVar1 = (this->AngleFadeEnd);
+		fVar2 = (this->AngleFadeEnd) - (this-> unk60);
+		fVar4 = 180.0 - fVar1;
+		fVar3 = 180.0 - fVar2;
+		if ((this-> degree) <= 180.0) {
+			if (((this-> degree) < fVar1 != ((this-> degree) == fVar1)) &&
+				(fVar2 <= (this-> degree))) {
+				return (((this-> degree) - fVar2) / (fVar1 - fVar2));
+			}
+			if ((fVar4 < (this-> degree) != (fVar4 == (this-> degree))) &&
+				((this-> degree) <= fVar3)) {
+				return ((fVar3 - (this-> degree)) / (fVar3 - fVar4));
+			}
+			if (((((this-> degree) < fVar1) << 8 |
+				((this-> degree) == fVar1) << 0xe) == 0) &&
+				((this-> degree) < fVar4)) {
+				return 1;
+			}
+		}
+		return 0;
+	}*/
+
 };
 assert(sizeof(Moon) == 0x07C);
 
@@ -8773,6 +8870,7 @@ public:
 	TESGlobal* TimeScale;		// 14
 
 	static float GetGameTime() { TimeGlobals* Globals = (TimeGlobals*)0x00B332E0; return Globals->GameHour->data * 60.0f * 60.0f; }
+	static int GetGameDaysPassed() { TimeGlobals* Globals = (TimeGlobals*)0x00B332E0; return Globals->GameDaysPassed->data;}
 
 };
 assert(sizeof(TimeGlobals) == 0x018); // Static class, size could be larger

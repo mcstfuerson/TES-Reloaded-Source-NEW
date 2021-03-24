@@ -6,6 +6,9 @@ enum EffectRecordType
 	EffectRecordType_Underwater,
 	EffectRecordType_WaterLens,
 	EffectRecordType_GodRays,
+	EffectRecordType_KhajiitRays,
+	EffectRecordType_MasserRays,
+	EffectRecordType_SecundaRays,
 	EffectRecordType_DepthOfField,
 	EffectRecordType_AmbientOcclusion,
 	EffectRecordType_Coloring,
@@ -44,6 +47,7 @@ struct ShaderConstants {
 		D3DXVECTOR4		ShadowCubeMapBlend;
 		D3DXVECTOR4		ShadowCubeMapBlend2;
 		D3DXVECTOR4		ShadowCubeMapBlend3;
+		D3DXVECTOR4		ShadowLightDir;
 	};
 	struct WaterStruct {
 		D3DXVECTOR4		waterCoefficients;
@@ -145,12 +149,25 @@ struct ShaderConstants {
 	struct VolumetricFogStruct {
 		D3DXVECTOR4		Data;
 	};
+	struct SimpleWeatherStruct {
+		TESWeather::ColorData		colors[10];
+		float			hdrInfo[14];
+	};
+	typedef std::map<std::string, SimpleWeatherStruct> WeatherMap;	
 
 	D3DXVECTOR4				ReciprocalResolution;
 	D3DXVECTOR4				ReciprocalResolutionWater;
+	D3DXVECTOR4				DirectionalLight; //currently only used for moon lighting
+	bool					OverrideVanillaDirectionalLight;
 	D3DXVECTOR4				SunDir;
 	D3DXVECTOR4				SunTiming;
 	D3DXVECTOR4				SunAmount;
+	D3DXVECTOR4				MasserDir;
+	D3DXVECTOR4				MasserAmount;
+	D3DXVECTOR4				SecundaDir;
+	D3DXVECTOR4				SecundaAmount;
+	WeatherMap				OrigWeathers;
+	float					MoonPhaseCoeff;
 	D3DXVECTOR4				GameTime;
 	D3DXVECTOR4				Tick;
 	D3DXVECTOR4				TextureData;
@@ -181,6 +198,8 @@ struct ShaderConstants {
 	PrecipitationsStruct	Precipitations;
 	WaterLensStruct			WaterLens;
 	GodRaysStruct			GodRays;
+	GodRaysStruct			KhajiitRaysMasser;
+	GodRaysStruct			KhajiitRaysSecunda;
 	DepthOfFieldStruct		DepthOfField;
 	AmbientOcclusionStruct	AmbientOcclusion;
 	ColoringStruct			Coloring;
@@ -277,6 +296,7 @@ public:
 	void					SetCustomConstant(const char* Name, D3DXVECTOR4 Value);
 	void					SetExtraEffectEnabled(const char* Name, bool Value);
 
+	int						GameDay;
 	struct					EffectQuad { float x, y, z; float u, v; };
 	LONGLONG				PerformanceFrequency;
 	ShaderConstants			ShaderConst;
@@ -293,6 +313,8 @@ public:
 	EffectRecord*			UnderwaterEffect;
 	EffectRecord*			WaterLensEffect;
 	EffectRecord*			GodRaysEffect;
+	EffectRecord*			MasserRaysEffect;
+	EffectRecord*			SecundaRaysEffect;
 	EffectRecord*			DepthOfFieldEffect;
 	EffectRecord*			AmbientOcclusionEffect;
 	EffectRecord*			ColoringEffect;
