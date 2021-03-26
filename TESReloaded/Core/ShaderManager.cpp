@@ -843,8 +843,8 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.y = 0.0f;
 						ShaderConst.SunAmount.z = 0.0f;
 						ShaderConst.SunAmount.w = 1.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.x ) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x);
-						ShaderConst.MasserAmount.x = (Masser->fadeValue() - ShaderConst.SunAmount.x) * ShaderConst.MoonPhaseCoeff;
-						ShaderConst.SecundaAmount.x = (Secunda->fadeValue() - ShaderConst.SunAmount.x) * ShaderConst.MoonPhaseCoeff;
+						ShaderConst.MasserAmount.x = (Masser->fadeValue() - (ShaderConst.SunAmount.x / 0.4f)) * ShaderConst.MoonPhaseCoeff;
+						ShaderConst.SecundaAmount.x = (Secunda->fadeValue() - (ShaderConst.SunAmount.x / 0.4f)) * ShaderConst.MoonPhaseCoeff;
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;				
 					}
@@ -878,8 +878,8 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.y = 0.0f;
 						ShaderConst.SunAmount.z = 2.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 / (ShaderConst.SunTiming.w - ShaderConst.SunTiming.z);
 						ShaderConst.SunAmount.w = (ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 / (ShaderConst.SunTiming.w - ShaderConst.SunTiming.z) - 1.0f;
-						ShaderConst.MasserAmount.x = (Masser->fadeValue() - ShaderConst.SunAmount.z) * ShaderConst.MoonPhaseCoeff;
-						ShaderConst.SecundaAmount.x = (Secunda->fadeValue() - ShaderConst.SunAmount.z) * ShaderConst.MoonPhaseCoeff;
+						ShaderConst.MasserAmount.x = (Masser->fadeValue() - (ShaderConst.SunAmount.z / 0.3f)) * ShaderConst.MoonPhaseCoeff;
+						ShaderConst.SecundaAmount.x = (Secunda->fadeValue() - (ShaderConst.SunAmount.z / 0.3f)) * ShaderConst.MoonPhaseCoeff;
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 					}
@@ -2137,12 +2137,12 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 			AmbientOcclusionEffect->SetCT();
 			AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		if (Effects->GodRays && currentWorldSpace) {
+		if (Effects->GodRays && currentWorldSpace && (ShaderConst.SunAmount.x >= 0.4 || ShaderConst.SunAmount.y > 0 || ShaderConst.SunAmount.z >= 0.3)) {
 			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 			GodRaysEffect->SetCT();
 			GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		if (Effects->KhajiitRays && currentWorldSpace) {
+		if (Effects->KhajiitRays && currentWorldSpace && (ShaderConst.SunAmount.x<0.4 || ShaderConst.SunAmount.z < 0.3)) {
 			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 			SecundaRaysEffect->SetCT();
 			SecundaRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
