@@ -159,6 +159,7 @@ struct ShaderConstants {
 	D3DXVECTOR4				ReciprocalResolutionWater;
 	D3DXVECTOR4				DirectionalLight; //currently only used for moon lighting
 	bool					OverrideVanillaDirectionalLight;
+	bool					DisablePostShadow;
 	D3DXVECTOR4				SunDir;
 	D3DXVECTOR4				SunTiming;
 	D3DXVECTOR4				SunAmount;

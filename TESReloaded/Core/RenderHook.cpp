@@ -315,19 +315,6 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 	NiD3DPixelShaderEx* PixelShader = (NiD3DPixelShaderEx*)Pass->PixelShader;
 	NiNode* RenderWindowRootNode = *RenderWindowNode;
 
-	if (TheShaderManager->ShaderConst.OverrideVanillaDirectionalLight) {
-		Tes->niDirectionalLight->m_direction.x = TheShaderManager->ShaderConst.DirectionalLight.x;
-		Tes->niDirectionalLight->m_direction.y = TheShaderManager->ShaderConst.DirectionalLight.y;
-		Tes->niDirectionalLight->m_direction.z = TheShaderManager->ShaderConst.DirectionalLight.z;
-
-		if (VertexShader && !memcmp(VertexShader->ShaderName, "SLS2042.vso", 11)) {
-			D3DXVECTOR4* lightDir = (D3DXVECTOR4*)0x00B454D8;
-			lightDir->x = TheShaderManager->ShaderConst.DirectionalLight.x * -1;
-			lightDir->y = TheShaderManager->ShaderConst.DirectionalLight.y * -1;
-			lightDir->z = TheShaderManager->ShaderConst.DirectionalLight.z * -1;
-		}
-	}
-
 	if (VertexShader && PixelShader) {
 		if (PixelShader->ShaderProg && Pass->Stages.numObjs && Pass->Stages.data[0]->Texture) {
 			TheShaderManager->ShaderConst.TextureData.x = Pass->Stages.data[0]->Texture->GetWidth();
@@ -351,6 +338,7 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 			Logger::Log("Pass %s (%s %s)", Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
 		}
 	}
+
 	return (this->*SetupShaderPrograms)(Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
 	
 }

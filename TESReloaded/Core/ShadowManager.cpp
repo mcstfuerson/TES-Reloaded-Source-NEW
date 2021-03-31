@@ -248,6 +248,25 @@ void ShadowManager::RenderObject(NiAVObject* Object, D3DXVECTOR4* ShadowData, bo
 
 }
 
+void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType, D3DXVECTOR4* ShadowData ) {
+
+	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
+		void* VFT = *(void**)Object;
+		if (VFT == VFTNiNode) {
+			NiNode* Node = (NiNode*)Object;
+			if (InFrustum(ShadowMapType, Node)) {
+				for (int i = 0; i < Node->m_children.end; i++) {
+					RenderTerrain(Node->m_children.data[i], ShadowMapType, ShadowData);
+				}
+			}
+		}
+		else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
+			Render((NiGeometry*)Object, ShadowData);
+		}
+	}
+
+}
+
 void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 	
 	IDirect3DDevice9* Device = TheRenderManager->device;
@@ -379,6 +398,8 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 	D3DXVECTOR3 Up = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
 	D3DXMATRIX View, Proj;
 	D3DXVECTOR3 Eye;
+	GridCellArray* CellArray = Tes->gridCellArray;
+	UInt32 CellArraySize = CellArray->size * CellArray->size;
 
 	AlphaEnabled = ShadowsExteriors->AlphaEnabled[ShadowMapType];
 
@@ -407,6 +428,11 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 		for (UInt32 x = 0; x < *SettingGridsToLoad; x++) {
 			for (UInt32 y = 0; y < *SettingGridsToLoad; y++) {
 				if (TESObjectCELL* Cell = Tes->gridCellArray->GetCell(x, y)) {
+						NiNode* CellNode = Cell->niNode;
+						for (int i = 2; i < 6; i++) {
+							NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i];
+							if (TerrainNode->m_children.end) RenderTerrain(TerrainNode->m_children.data[0], ShadowMapType, ShadowData);
+						}
 					TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
 					while (Entry) {
 						if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowsExteriors->Forms[ShadowMapType], &ShadowsExteriors->ExcludedForms)) {

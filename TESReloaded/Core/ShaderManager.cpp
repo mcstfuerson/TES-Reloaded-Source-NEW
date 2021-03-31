@@ -1061,6 +1061,16 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.fogData.z = ShaderConst.currentsunGlare;
 		}
 
+		//TODO: shadows draw "over" fog, how to fix shader? for now just disable post processing shadows when foggy.
+		if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 || TheSettingManager->SettingsShadows.ExteriorsNight.Quality == -1) {
+			if ((ShaderConst.currentfogEnd < 15000.0f && weatherPercent > .50f) || (ShaderConst.oldfogEnd < 15000.0f && weatherPercent < .50f)) {
+				ShaderConst.DisablePostShadow = true;
+			}
+			else {
+				ShaderConst.DisablePostShadow = false;
+			}
+		}
+
 		if (TheSettingManager->SettingsMain.Shaders.Water || TheSettingManager->SettingsMain.Effects.Underwater) {
 			SettingsWaterStruct* sws = NULL;
 			TESWaterForm* currentWater = currentCell->GetWaterForm();
@@ -1567,6 +1577,12 @@ void ShaderManager::UpdateConstants() {
 }
 
 void ShaderManager::BeginScene() {
+
+	if (ShaderConst.OverrideVanillaDirectionalLight) {
+		Tes->niDirectionalLight->m_direction.x = TheShaderManager->ShaderConst.DirectionalLight.x;
+		Tes->niDirectionalLight->m_direction.y = TheShaderManager->ShaderConst.DirectionalLight.y;
+		Tes->niDirectionalLight->m_direction.z = TheShaderManager->ShaderConst.DirectionalLight.z;
+	}
 
 	RenderedBufferFilled = false;
 	DepthBufferFilled = false;
@@ -2087,11 +2103,11 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 && currentWorldSpace && SunDir->z > 0.01f) {
+	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 && currentWorldSpace && !ShaderConst.DisablePostShadow) {
 		ShadowsExteriorsEffect->SetCT();
 		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.ExteriorsNight.Quality == -1 && currentWorldSpace/* && SunDir->z <= 0.01f*/) {
+	if (TheSettingManager->SettingsShadows.ExteriorsNight.Quality == -1 && currentWorldSpace && !ShaderConst.DisablePostShadow) {
 		ShadowsExteriorsNightEffect->SetCT();
 		ShadowsExteriorsNightEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
