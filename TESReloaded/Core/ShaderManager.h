@@ -169,6 +169,7 @@ struct ShaderConstants {
 	D3DXVECTOR4				SecundaAmount;
 	WeatherMap				OrigWeathers;
 	float					MoonPhaseCoeff;
+	float					RaysPhaseCoeff;
 	D3DXVECTOR4				GameTime;
 	D3DXVECTOR4				Tick;
 	D3DXVECTOR4				TextureData;
@@ -293,9 +294,12 @@ public:
 	bool					LoadEffect(EffectRecord* TheEffect, char* Filename, char* CustomEffectName);
 	void					DisposeEffect(EffectRecord* TheEffect);
 	void					RenderEffects(IDirect3DSurface9* RenderTarget);
+	void					RenderShadows(IDirect3DSurface9* RenderTarget);
 	void					SwitchShaderStatus(const char* Name);
 	void					SetCustomConstant(const char* Name, D3DXVECTOR4 Value);
 	void					SetExtraEffectEnabled(const char* Name, bool Value);
+	void					SetPhaseLumCoeff(int phaseLength, int phaseDay);
+
 
 	int						GameDay;
 	struct					EffectQuad { float x, y, z; float u, v; };

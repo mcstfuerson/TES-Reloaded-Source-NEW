@@ -97,6 +97,17 @@ SettingManager::SettingManager() {
 	SettingsMain.Main.ScreenshotType = GetPrivateProfileIntA("Main", "ScreenshotType", 1, Filename);
 	SettingsMain.Main.ScreenshotKey = GetPrivateProfileIntA("Main", "ScreenshotKey", 87, Filename);
 	SettingsMain.Main.FPSOverlay = GetPrivateProfileIntA("Main", "FPSOverlay", 0, Filename);
+	SettingsMain.Main.MoonDirectionalLight = GetPrivateProfileIntA("Main", "MoonDirectionalLight", 0, Filename);
+	GetPrivateProfileStringA("Main", "MoonPhaseLumNew", "0.0", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.MoonPhaseLumNew = atof(value);
+	GetPrivateProfileStringA("Main", "MoonPhaseLumQtr", "0.25", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.MoonPhaseLumQtr = atof(value);
+	GetPrivateProfileStringA("Main", "MoonPhaseLumHalf", "0.50", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.MoonPhaseLumHalf = atof(value);
+	GetPrivateProfileStringA("Main", "MoonPhaseLumTQtr", "0.75", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.MoonPhaseLumTQtr = atof(value);
+	GetPrivateProfileStringA("Main", "MoonPhaseLumFull", "1.00", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.MoonPhaseLumFull = atof(value);
 	SettingsMain.Main.SaveSettings = GetPrivateProfileIntA("Main", "SaveSettings", 1, Filename);
 	SettingsMain.Main.ReplaceIntro = GetPrivateProfileIntA("Main", "ReplaceIntro", 0, Filename);
 
@@ -697,6 +708,15 @@ void SettingManager::LoadSettings() {
 	SettingsKhajiitRays.sRayB = atof(value);
 	GetPrivateProfileStringA("Default", "SecundaSaturate", "0.55", value, SettingStringBuffer, Filename);
 	SettingsKhajiitRays.sSaturate = atof(value);
+	//Other
+	GetPrivateProfileStringA("Default", "PhaseLumQtr", "0.25", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.phaseLumQtr = atof(value);
+	GetPrivateProfileStringA("Default", "PhaseLumHalf", "0.50", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.phaseLumHalf = atof(value);
+	GetPrivateProfileStringA("Default", "PhaseLumTQtr", "0.75", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.phaseLumTQtr = atof(value);
+	GetPrivateProfileStringA("Default", "PhaseLumFull", "1,0", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.phaseLumFull = atof(value);
 
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
@@ -1216,6 +1236,11 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 	if (!strcmp(Item, "Main")) {
 		if (!strcmp(Definition, "Main")) {
 			WritePrivateProfileStringA("Main", "FoV", ToString(SettingsMain.Main.FoV).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "MoonPhaseLumNew", ToString(SettingsMain.Main.MoonPhaseLumNew).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "MoonPhaseLumQtr", ToString(SettingsMain.Main.MoonPhaseLumQtr).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "MoonPhaseLumHalf", ToString(SettingsMain.Main.MoonPhaseLumHalf).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "MoonPhaseLumTQtr", ToString(SettingsMain.Main.MoonPhaseLumTQtr).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "MoonPhaseLumFull", ToString(SettingsMain.Main.MoonPhaseLumFull).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "ScreenshotKey", ToString(SettingsMain.Main.ScreenshotKey).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "FPSOverlay", ToString(SettingsMain.Main.FPSOverlay).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("CameraMode", "NearDistanceFirst", ToString(SettingsMain.CameraMode.NearDistanceFirst).c_str(), SettingsMain.Main.MainFile);
@@ -1371,6 +1396,11 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("Default", "SecundaSunGlareEnabled", ToString(SettingsKhajiitRays.sSunGlareEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "SecundaTimeEnabled", ToString(SettingsKhajiitRays.sTimeEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "SecundaRayVisibility", ToString(SettingsKhajiitRays.sRayVisibility).c_str(), Filename);
+			//Other
+			WritePrivateProfileStringA("Default", "PhaseLumQtr", ToString(SettingsKhajiitRays.phaseLumQtr).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "PhaseLumHalf", ToString(SettingsKhajiitRays.phaseLumHalf).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "PhaseLumTQtr", ToString(SettingsKhajiitRays.phaseLumTQtr).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "PhaseLumFull", ToString(SettingsKhajiitRays.phaseLumFull).c_str(), Filename);
 		}
 		else if (!strcmp(Definition, "Grass")) {
 			strcat(Filename, "Grass\\Grass.ini");
@@ -1756,6 +1786,11 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				if (SettingsMain.Main.FoV) Settings["FoV"] = SettingsMain.Main.FoV;
 				Settings["ScreenshotKey"] = SettingsMain.Main.ScreenshotKey;
 				Settings["FPSOverlay"] = SettingsMain.Main.FPSOverlay;
+				Settings["MoonPhaseLumNew"] = SettingsMain.Main.MoonPhaseLumNew;
+				Settings["MoonPhaseLumQtr"] = SettingsMain.Main.MoonPhaseLumQtr;
+				Settings["MoonPhaseLumHalf"] = SettingsMain.Main.MoonPhaseLumHalf;
+				Settings["MoonPhaseLumTQtr"] = SettingsMain.Main.MoonPhaseLumTQtr;
+				Settings["MoonPhaseLumFull"] = SettingsMain.Main.MoonPhaseLumFull;
 			}
 			else if (!strcmp(Section, "CameraMode")) {
 				Settings["NearDistanceFirst"] = SettingsMain.CameraMode.NearDistanceFirst;
@@ -1973,6 +2008,12 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["SecundaSaturate"] = SettingsKhajiitRays.sSaturate;
 			Settings["SecundaSunGlareEnabled"] = SettingsKhajiitRays.sSunGlareEnabled;
 			Settings["SecundaTimeEnabled"] = SettingsKhajiitRays.sTimeEnabled;
+			//Other
+			Settings["PhaseLumQtr"] = SettingsKhajiitRays.phaseLumQtr;
+			Settings["PhaseLumHalf"] = SettingsKhajiitRays.phaseLumHalf;
+			Settings["PhaseLumTQtr"] = SettingsKhajiitRays.phaseLumTQtr;
+			Settings["PhaseLumFull"] = SettingsKhajiitRays.phaseLumFull;
+
 		}
 		else if (!strcmp(Definition, "Grass")) {
 			Settings["GrassDensity"] = SettingsGrass.GrassDensity;
@@ -2237,6 +2278,16 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsMain.Main.ScreenshotKey = Value;
 				else if (!strcmp(Setting, "FPSOverlay"))
 					SettingsMain.Main.FPSOverlay = Value;
+				else if (!strcmp(Setting, "MoonPhaseLumNew"))
+					SettingsMain.Main.MoonPhaseLumNew = Value;
+				else if (!strcmp(Setting, "MoonPhaseLumQtr"))
+					SettingsMain.Main.MoonPhaseLumQtr = Value;
+				else if (!strcmp(Setting, "MoonPhaseLumHalf"))
+					SettingsMain.Main.MoonPhaseLumHalf = Value;
+				else if (!strcmp(Setting, "MoonPhaseLumTQtr"))
+					SettingsMain.Main.MoonPhaseLumTQtr = Value;
+				else if (!strcmp(Setting, "MoonPhaseLumFull"))
+					SettingsMain.Main.MoonPhaseLumFull = Value;
 			}
 			else if (!strcmp(Section, "CameraMode")) {
 				if (!strcmp(Setting, "NearDistanceFirst"))
@@ -2620,6 +2671,14 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				SettingsKhajiitRays.sSunGlareEnabled = Value;
 			else if (!strcmp(Setting, "SecundaRayVisibility"))
 				SettingsKhajiitRays.sRayVisibility = Value;
+			else if (!strcmp(Setting, "PhaseLumQtr"))
+				SettingsKhajiitRays.phaseLumQtr = Value;
+			else if (!strcmp(Setting, "PhaseLumHalf"))
+				SettingsKhajiitRays.phaseLumHalf = Value;
+			else if (!strcmp(Setting, "PhaseLumTQtr"))
+				SettingsKhajiitRays.phaseLumTQtr = Value;
+			else if (!strcmp(Setting, "PhaseLumFull"))
+				SettingsKhajiitRays.phaseLumFull = Value;
 		}
 		else if (!strcmp(Definition, "Grass")) {
 			if (!strcmp(Setting, "GrassDensity"))

@@ -85,6 +85,12 @@ struct SettingsMainStruct {
 		bool	FPSOverlay;
 		bool	SaveSettings;
 		bool	ReplaceIntro;
+		bool	MoonDirectionalLight;
+		float	MoonPhaseLumNew;
+		float	MoonPhaseLumQtr;
+		float	MoonPhaseLumHalf;
+		float	MoonPhaseLumTQtr;
+		float	MoonPhaseLumFull;
 		UInt8	ScreenshotType;
 		UInt8	AnisotropicFilter;
 		UInt16	ScreenshotKey;
@@ -461,6 +467,11 @@ struct SettingsKhajiitRaysStruct {
 	float sRayG;
 	float sRayB;
 	float sSaturate;
+
+	float phaseLumQtr;
+	float phaseLumHalf;
+	float phaseLumTQtr;
+	float phaseLumFull;
 };
 
 struct SettingsDepthOfFieldStruct {
