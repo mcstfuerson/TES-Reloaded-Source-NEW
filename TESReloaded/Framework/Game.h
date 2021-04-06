@@ -8002,34 +8002,6 @@ public:
 		return 0;
 	}
 
-	//TODO: doesn't really belong in Moon struct
-	float			getPhaseLumCoeff(int phaseLength, int phaseDay) {
-		if (phaseDay < phaseLength * 1) {
-			return 1.0f;
-		}
-		if (phaseDay < phaseLength * 2) {
-			return 0.75f;
-		}
-		if (phaseDay < phaseLength * 3) {
-			return 0.50f;
-		}
-		if (phaseDay < phaseLength * 4) {
-			return 0.25f;
-		}
-		if (phaseDay < phaseLength * 5) {
-			return 0.0f;
-		}
-		if (phaseDay < phaseLength * 6) {
-			return 0.25f;
-		}
-		if (phaseDay < phaseLength * 7) {
-			return 0.50f;
-		}
-		else {
-			return 0.75f;
-		}
-	}
-
 	/*
 	float			someFloat() { 	 
 		float fVar1;
