@@ -826,8 +826,7 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.SunAmount.w = 1.0f;
 					ShaderConst.MasserAmount.x = Masser->fadeValue();
 					ShaderConst.SecundaAmount.x = Secunda->fadeValue();
-					if (true/*use directional light override*/)
-					{
+					if (TheSettingManager->SettingsMain.Main.DirectionalLightOverride) {
 						ShaderConst.DirectionalLight.x = TheShaderManager->ShaderConst.MasserDir.x * -1;
 						ShaderConst.DirectionalLight.y = TheShaderManager->ShaderConst.MasserDir.y * -1;
 						ShaderConst.DirectionalLight.z = TheShaderManager->ShaderConst.MasserDir.z * -1;
@@ -1049,6 +1048,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.SunAmount.w = 0.0f;
 			ShaderConst.currentsunGlare = 0.5f;
 			ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
+			ShaderConst.OverrideVanillaDirectionalLight = false;
 			TESObjectCELL::LightingData* LightData = currentCell->lighting;
 			if (!(currentCell->flags0 & currentCell->kFlags0_BehaveLikeExterior)) {
 				ShaderConst.fogColor.x = LightData->fog.r / 255.0f;

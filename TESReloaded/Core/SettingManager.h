@@ -85,7 +85,7 @@ struct SettingsMainStruct {
 		bool	FPSOverlay;
 		bool	SaveSettings;
 		bool	ReplaceIntro;
-		bool	MoonDirectionalLight;
+		bool	DirectionalLightOverride;
 		float	MoonPhaseLumNew;
 		float	MoonPhaseLumQtr;
 		float	MoonPhaseLumHalf;
