@@ -167,6 +167,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SecundaDir;
 	else if (!strcmp(Name, "TESR_SecundaAmount"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SecundaAmount;
+	else if (!strcmp(Name, "TESR_RaysPhaseCoeff"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.RaysPhaseCoeff;
 	else if (!strcmp(Name, "TESR_GameTime"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.GameTime;
 	else if (!strcmp(Name, "TESR_TextureData"))
@@ -767,31 +769,44 @@ void ShaderManager::UpdateConstants() {
 			else if (ShaderConst.GameTime.y < ShaderConst.SunTiming.y && fabs(deltaz) - ShaderConst.SunDir.z >= 0.0f)
 				ShaderConst.SunDir.z = deltaz;
 
-			//TODO: set x properly
-			ShaderConst.MasserDir.x = 0.7f;
-			ShaderConst.MasserDir.y = cos(Masser->degree * M_PI / 180.0);
-			ShaderConst.MasserDir.z = sin(Masser->degree * M_PI / 180.0);
+			//TODO: use kClimate_Masser and kClimate_Secunda but not sure what to compare against?
+			if (Masser && Secunda)  {
+				//TODO: set x properly
+				ShaderConst.MasserDir.x = 0.7f;
+				ShaderConst.MasserDir.y = cos(Masser->degree * M_PI / 180.0);
+				ShaderConst.MasserDir.z = sin(Masser->degree * M_PI / 180.0);
 
-			ShaderConst.SecundaDir.x = 1.2f;
-			ShaderConst.SecundaDir.y = cos(Secunda->degree * M_PI / 180.0);
-			ShaderConst.SecundaDir.z = sin(Secunda->degree * M_PI / 180.0);
+				ShaderConst.SecundaDir.x = 1.2f;
+				ShaderConst.SecundaDir.y = cos(Secunda->degree * M_PI / 180.0);
+				ShaderConst.SecundaDir.z = sin(Secunda->degree * M_PI / 180.0);
 
-			((NiVector4*)&ShaderConst.MasserDir)->Normalize();
-			((NiVector4*)&ShaderConst.SecundaDir)->Normalize();
+				((NiVector4*)&ShaderConst.MasserDir)->Normalize();
+				((NiVector4*)&ShaderConst.SecundaDir)->Normalize();
 
-			//TODO: make configurable
-			Masser->AngleFadeStart = 0.0f;
-			Masser->AngleFadeEnd = 0.0f;
-			Secunda->AngleFadeStart = 0.0f;
-			Secunda->AngleFadeEnd = 0.0f;
+				//TODO: make configurable
+				Masser->AngleFadeStart = 0.0f;
+				Masser->AngleFadeEnd = 0.0f;
+				Secunda->AngleFadeStart = 0.0f;
+				Secunda->AngleFadeEnd = 0.0f;
 
-			/*ShaderConstants::SimpleWeatherStruct sws = ShaderConst.OrigWeathers[((TESWeatherEx*)currentWeather)->EditorName];		
-			if (TheKeyboardManager->OnKeyDown(25)) {
-				float r = ((double)((rand() % 5) + 17) / (20));
-				currentWeather->colors[TESWeather::eColor_SkyLower].colors[TESWeather::eTime_Sunrise].r = sws.colors[TESWeather::eColor_SkyUpper].colors[TESWeather::eTime_Sunrise].b * r;
-				currentWeather->colors[TESWeather::eColor_SkyLower].colors[TESWeather::eTime_Sunrise].g;
-				currentWeather->colors[TESWeather::eColor_SkyLower].colors[TESWeather::eTime_Sunrise].b;
-			}*/
+				ShaderConst.MasserFade = Masser->fadeValue();
+				ShaderConst.SecundaFade = Secunda->fadeValue();
+				ShaderConst.MoonsExist = true;
+			}
+			else {
+				ShaderConst.MasserDir.x = 0.0f;
+				ShaderConst.MasserDir.y = 0.0f;
+				ShaderConst.MasserDir.z = 0.0f;
+
+				ShaderConst.SecundaDir.x = 0.0f;
+				ShaderConst.SecundaDir.y = 0.0f;
+				ShaderConst.SecundaDir.z = 0.0f;
+
+				ShaderConst.MasserFade = 0.0f;
+				ShaderConst.SecundaFade = 0.0f;
+				ShaderConst.MoonsExist = false;
+			}
+
 		}
 
 		//set moon phase Coeff during day to avoid jump in luminance when phases shift
@@ -813,8 +828,8 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.SunAmount.y = 1.0f;
 					ShaderConst.SunAmount.z = 0.0f;
 					ShaderConst.SunAmount.w = 0.0f;
-					ShaderConst.MasserAmount.x = (Masser->fadeValue() - ShaderConst.SunAmount.y);
-					ShaderConst.SecundaAmount.x = (Secunda->fadeValue() - ShaderConst.SunAmount.y);
+					ShaderConst.MasserAmount.x = (ShaderConst.MasserFade - ShaderConst.SunAmount.y);
+					ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - ShaderConst.SunAmount.y);
 					ShaderConst.OverrideVanillaDirectionalLight = false;
 					ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 				}
@@ -824,8 +839,8 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.SunAmount.y = 0.0f;
 					ShaderConst.SunAmount.z = 0.0f;
 					ShaderConst.SunAmount.w = 1.0f;
-					ShaderConst.MasserAmount.x = Masser->fadeValue();
-					ShaderConst.SecundaAmount.x = Secunda->fadeValue();
+					ShaderConst.MasserAmount.x = ShaderConst.MasserFade;
+					ShaderConst.SecundaAmount.x = ShaderConst.SecundaFade;
 					if (TheSettingManager->SettingsMain.Main.DirectionalLightOverride) {
 						ShaderConst.DirectionalLight.x = TheShaderManager->ShaderConst.MasserDir.x * -1;
 						ShaderConst.DirectionalLight.y = TheShaderManager->ShaderConst.MasserDir.y * -1;
@@ -845,8 +860,8 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.y = 0.0f;
 						ShaderConst.SunAmount.z = 0.0f;
 						ShaderConst.SunAmount.w = 1.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.x ) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x);
-						ShaderConst.MasserAmount.x = (Masser->fadeValue() - (ShaderConst.SunAmount.x / 0.4f));
-						ShaderConst.SecundaAmount.x = (Secunda->fadeValue() - (ShaderConst.SunAmount.x / 0.4f));
+						ShaderConst.MasserAmount.x = (ShaderConst.MasserFade - (ShaderConst.SunAmount.x / 0.4f));
+						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.x / 0.4f));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;				
 					}
@@ -856,8 +871,8 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.y = (ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x) - 1.0f;
 						ShaderConst.SunAmount.z = 0.0f;
 						ShaderConst.SunAmount.w = 0.0f;
-						ShaderConst.MasserAmount.x = (Masser->fadeValue() - (ShaderConst.SunAmount.x + ShaderConst.SunAmount.y));
-						ShaderConst.SecundaAmount.x = (Secunda->fadeValue() - (ShaderConst.SunAmount.x + ShaderConst.SunAmount.y));
+						ShaderConst.MasserAmount.x = (ShaderConst.MasserFade - (ShaderConst.SunAmount.x + ShaderConst.SunAmount.y));
+						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.x + ShaderConst.SunAmount.y));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 					}
@@ -869,8 +884,8 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.y = 1.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 / (ShaderConst.SunTiming.w - ShaderConst.SunTiming.z);
 						ShaderConst.SunAmount.z = (ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 / (ShaderConst.SunTiming.w - ShaderConst.SunTiming.z);
 						ShaderConst.SunAmount.w = 0.0f;
-						ShaderConst.MasserAmount.x = (Masser->fadeValue() - (ShaderConst.SunAmount.y + ShaderConst.SunAmount.z));
-						ShaderConst.SecundaAmount.x = (Secunda->fadeValue() - (ShaderConst.SunAmount.y + ShaderConst.SunAmount.z));
+						ShaderConst.MasserAmount.x = (ShaderConst.MasserFade - (ShaderConst.SunAmount.y + ShaderConst.SunAmount.z));
+						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.y + ShaderConst.SunAmount.z));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 					}
@@ -880,8 +895,8 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SunAmount.y = 0.0f;
 						ShaderConst.SunAmount.z = 2.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 / (ShaderConst.SunTiming.w - ShaderConst.SunTiming.z);
 						ShaderConst.SunAmount.w = (ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 / (ShaderConst.SunTiming.w - ShaderConst.SunTiming.z) - 1.0f;
-						ShaderConst.MasserAmount.x = (Masser->fadeValue() - (ShaderConst.SunAmount.z / 0.3f));
-						ShaderConst.SecundaAmount.x = (Secunda->fadeValue() - (ShaderConst.SunAmount.z / 0.3f));
+						ShaderConst.MasserAmount.x = (ShaderConst.MasserFade - (ShaderConst.SunAmount.z / 0.3f));
+						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.z / 0.3f));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 					}
@@ -1359,10 +1374,6 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.KhajiitRaysSecunda.Data.y = TheSettingManager->SettingsKhajiitRays.sLuminance;
 			ShaderConst.KhajiitRaysSecunda.Data.z = TheSettingManager->SettingsKhajiitRays.sGlobalMultiplier;
 			ShaderConst.KhajiitRaysSecunda.Data.w = TheSettingManager->SettingsKhajiitRays.sTimeEnabled;
-
-			//TODO: Masser and Secunda Amount should not change after initial calculation but I am tired. Use separate "Amount" const in future
-			ShaderConst.MasserAmount *= ShaderConst.RaysPhaseCoeff;
-			ShaderConst.SecundaAmount *= ShaderConst.RaysPhaseCoeff;
 		}
 
 		if (TheSettingManager->SettingsMain.Effects.AmbientOcclusion) {
@@ -2194,12 +2205,13 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 			AmbientOcclusionEffect->SetCT();
 			AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		if (Effects->GodRays && currentWorldSpace && (ShaderConst.SunAmount.x >= 0.4 || ShaderConst.SunAmount.y > 0 || ShaderConst.SunAmount.z >= 0.3)) {
+		//TODO: simplify?
+		if (ShaderConst.MoonsExist && Effects->GodRays && currentWorldSpace && (ShaderConst.SunAmount.x >= 0.4 || ShaderConst.SunAmount.y > 0 || ShaderConst.SunAmount.z >= 0.3)) {
 			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 			GodRaysEffect->SetCT();
 			GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		if (Effects->KhajiitRays && currentWorldSpace && (ShaderConst.SunAmount.x<0.4 || ShaderConst.SunAmount.z < 0.3)) {
+		if (Effects->KhajiitRays && currentWorldSpace && (ShaderConst.SunAmount.x < 0.4 || ShaderConst.SunAmount.z < 0.3)) {
 			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 			SecundaRaysEffect->SetCT();
 			SecundaRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -2472,42 +2484,42 @@ void ShaderManager::SetExtraEffectEnabled(const char* Name, bool Value) {
 void ShaderManager::SetPhaseLumCoeff(int phaseLength, int phaseDay) {
 	if (phaseDay < phaseLength * 1) {
 		ShaderConst.MoonPhaseCoeff = TheSettingManager->SettingsMain.Main.MoonPhaseLumFull;
-		ShaderConst.RaysPhaseCoeff = TheSettingManager->SettingsKhajiitRays.phaseLumFull;
+		ShaderConst.RaysPhaseCoeff.x = TheSettingManager->SettingsKhajiitRays.phaseLumFull;
 		return;
 	}
 	if (phaseDay < phaseLength * 2) {
 		ShaderConst.MoonPhaseCoeff = TheSettingManager->SettingsMain.Main.MoonPhaseLumTQtr;
-		ShaderConst.RaysPhaseCoeff = TheSettingManager->SettingsKhajiitRays.phaseLumTQtr;
+		ShaderConst.RaysPhaseCoeff.x = TheSettingManager->SettingsKhajiitRays.phaseLumTQtr;
 		return;
 	}
 	if (phaseDay < phaseLength * 3) {
 		ShaderConst.MoonPhaseCoeff = TheSettingManager->SettingsMain.Main.MoonPhaseLumHalf;
-		ShaderConst.RaysPhaseCoeff = TheSettingManager->SettingsKhajiitRays.phaseLumHalf;
+		ShaderConst.RaysPhaseCoeff.x = TheSettingManager->SettingsKhajiitRays.phaseLumHalf;
 		return;
 	}
 	if (phaseDay < phaseLength * 4) {
 		ShaderConst.MoonPhaseCoeff = TheSettingManager->SettingsMain.Main.MoonPhaseLumQtr;
-		ShaderConst.RaysPhaseCoeff = TheSettingManager->SettingsKhajiitRays.phaseLumQtr;
+		ShaderConst.RaysPhaseCoeff.x = TheSettingManager->SettingsKhajiitRays.phaseLumQtr;
 		return;
 	}
 	if (phaseDay < phaseLength * 5) {
 		ShaderConst.MoonPhaseCoeff = TheSettingManager->SettingsMain.Main.MoonPhaseLumNew;
-		ShaderConst.RaysPhaseCoeff = 0.0f;
+		ShaderConst.RaysPhaseCoeff.x = 0.0f;
 		return;
 	}
 	if (phaseDay < phaseLength * 6) {
 		ShaderConst.MoonPhaseCoeff = TheSettingManager->SettingsMain.Main.MoonPhaseLumQtr;
-		ShaderConst.RaysPhaseCoeff = TheSettingManager->SettingsKhajiitRays.phaseLumQtr;
+		ShaderConst.RaysPhaseCoeff.x = TheSettingManager->SettingsKhajiitRays.phaseLumQtr;
 		return;
 	}
 	if (phaseDay < phaseLength * 7) {
 		ShaderConst.MoonPhaseCoeff = TheSettingManager->SettingsMain.Main.MoonPhaseLumHalf;
-		ShaderConst.RaysPhaseCoeff = TheSettingManager->SettingsKhajiitRays.phaseLumHalf;
+		ShaderConst.RaysPhaseCoeff.x = TheSettingManager->SettingsKhajiitRays.phaseLumHalf;
 		return;
 	}
 	else {
 		ShaderConst.MoonPhaseCoeff = TheSettingManager->SettingsMain.Main.MoonPhaseLumTQtr;
-		ShaderConst.RaysPhaseCoeff = TheSettingManager->SettingsKhajiitRays.phaseLumTQtr;
+		ShaderConst.RaysPhaseCoeff.x = TheSettingManager->SettingsKhajiitRays.phaseLumTQtr;
 		return;
 	}
 }

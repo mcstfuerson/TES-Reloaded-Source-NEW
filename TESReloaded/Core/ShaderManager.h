@@ -165,11 +165,14 @@ struct ShaderConstants {
 	D3DXVECTOR4				SunAmount;
 	D3DXVECTOR4				MasserDir;
 	D3DXVECTOR4				MasserAmount;
+	float					MasserFade;
 	D3DXVECTOR4				SecundaDir;
 	D3DXVECTOR4				SecundaAmount;
+	float					SecundaFade;
+	bool					MoonsExist;
 	WeatherMap				OrigWeathers;
 	float					MoonPhaseCoeff;
-	float					RaysPhaseCoeff;
+	D3DXVECTOR4				RaysPhaseCoeff;
 	D3DXVECTOR4				GameTime;
 	D3DXVECTOR4				Tick;
 	D3DXVECTOR4				TextureData;
