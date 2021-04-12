@@ -1060,7 +1060,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.SunAmount.x = 0.0f;
 			ShaderConst.SunAmount.y = 1.0f;
 			ShaderConst.SunAmount.z = 0.0f;
-			ShaderConst.SunAmount.w = 0.0f;
+			ShaderConst.SunAmount.w = 1.0f;
 			ShaderConst.currentsunGlare = 0.5f;
 			ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 			ShaderConst.OverrideVanillaDirectionalLight = false;
@@ -1081,7 +1081,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.sunColor.x = LightData->ambient.r / 255.0f;
 			ShaderConst.sunColor.y = LightData->ambient.g / 255.0f;
 			ShaderConst.sunColor.z = LightData->ambient.b / 255.0f;
-			ShaderConst.sunColor.w = ShaderConst.SunAmount.w;
+			ShaderConst.sunColor.w = 0.0f;
 
 			ShaderConst.fogData.x = LightData->fogNear;
 			ShaderConst.fogData.y = LightData->fogFar;
@@ -2205,13 +2205,12 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 			AmbientOcclusionEffect->SetCT();
 			AmbientOcclusionEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		//TODO: simplify?
-		if (ShaderConst.MoonsExist && Effects->GodRays && currentWorldSpace && (ShaderConst.SunAmount.x >= 0.4 || ShaderConst.SunAmount.y > 0 || ShaderConst.SunAmount.z >= 0.3)) {
+		if (Effects->GodRays && currentWorldSpace && (ShaderConst.SunAmount.x >= 0.4 || ShaderConst.SunAmount.y > 0 || ShaderConst.SunAmount.z >= 0.3)) {
 			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 			GodRaysEffect->SetCT();
 			GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		if (Effects->KhajiitRays && currentWorldSpace && (ShaderConst.SunAmount.x < 0.4 || ShaderConst.SunAmount.z < 0.3)) {
+		if (ShaderConst.MoonsExist && Effects->KhajiitRays && currentWorldSpace && (ShaderConst.SunAmount.x < 0.4 || ShaderConst.SunAmount.z < 0.3)) {
 			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 			SecundaRaysEffect->SetCT();
 			SecundaRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
