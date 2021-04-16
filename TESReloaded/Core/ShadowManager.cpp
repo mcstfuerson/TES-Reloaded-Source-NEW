@@ -613,11 +613,6 @@ void ShadowManager::RenderExteriorShadows() {
 	At.y = PlayerNode->m_worldTransform.pos.y - TheRenderManager->CameraPosition.y;
 	At.z = PlayerNode->m_worldTransform.pos.z - TheRenderManager->CameraPosition.z;
 
-	LightIndex = GetExtSceneLights(SceneLights, Lights, LightIndex);
-	if (LightIndex < ShadowCubeLightCount) { ClearShadowCubeMaps(Device, LightIndex); }
-	ShadowCubeLightCount = LightIndex;
-
-	SetAllShadowMapLightPos(Lights, LightIndex);
 	RenderShadowMap(MapNear, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
 	RenderShadowMap(MapFar, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
 	RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir, ShadowData);
@@ -659,19 +654,26 @@ void ShadowManager::RenderInteriorShadows() {
 	int LightIndex = -1;
 
 	if (!(Player->parentCell->flags0 & Player->parentCell->kFlags0_BehaveLikeExterior && ShadowLightDir->z > 0.01f)) {
-		LightIndex = GetShadowSceneLights(SceneLights, Lights, LightIndex, ShadowSettings);
-		SetAllShadowMapLightPos(Lights, LightIndex);
 
-		if (Player->GetWorldSpace()) {
-			RenderShadowCubeMapExt(Lights, LightIndex, ShadowSettings, ShadowData);
-			//ClearShadowCubeMaps(Device, LightIndex, ShadowCubeMapStateEnum::Exterior_Night);
+		if (ShadowSettings->Enabled) {
+			LightIndex = GetShadowSceneLights(SceneLights, Lights, LightIndex, ShadowSettings);
+			SetAllShadowMapLightPos(Lights, LightIndex);
+
+			if (Player->GetWorldSpace()) {
+				RenderShadowCubeMapExt(Lights, LightIndex, ShadowSettings, ShadowData);
+			}
+			else {
+				RenderShadowCubeMapInt(Lights, LightIndex, ShadowSettings, ShadowData);
+				ClearShadowCubeMaps(Device, LightIndex, ShadowCubeMapStateEnum::Interior);
+			}
+
+			CalculateBlend(Lights, LightIndex);
 		}
 		else {
-			RenderShadowCubeMapInt(Lights, LightIndex, ShadowSettings, ShadowData);
-			ClearShadowCubeMaps(Device, LightIndex, ShadowCubeMapStateEnum::Interior);
-		}
-
-		CalculateBlend(Lights, LightIndex);
+			LightIndex = GetExtSceneLights(SceneLights, Lights, LightIndex);
+			SetAllShadowMapLightPos(Lights, LightIndex);
+			LightIndex = -1; //clears shadowmaps
+		}	
 	}
 	else {
 		LightIndex = 0;
