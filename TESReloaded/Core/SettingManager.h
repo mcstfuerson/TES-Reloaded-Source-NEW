@@ -353,7 +353,7 @@ struct SettingsShadowStruct {
 
 	ExteriorsStruct		Exteriors;
 	InteriorsStruct		Interiors;
-	InteriorsStruct		ExteriorsNight;
+	InteriorsStruct		ExteriorsPoint;
 };
 
 struct SettingsWaterStruct {

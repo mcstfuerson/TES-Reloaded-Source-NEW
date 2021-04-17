@@ -51,11 +51,11 @@ ShadowManager::ShadowManager() {
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
-	SettingsShadowStruct::InteriorsStruct* ShadowsExteriorsNight = &TheSettingManager->SettingsShadows.ExteriorsNight;
+	SettingsShadowStruct::InteriorsStruct* ShadowsExteriorsPoint = &TheSettingManager->SettingsShadows.ExteriorsPoint;
 	UINT ShadowMapSize = 0;
 
 	//TODO: should this setting be on it's own? choose smaller of two for now
-	UINT ShadowCubeMapSize = min(ShadowsInteriors->ShadowCubeMapSize, ShadowsExteriorsNight->ShadowCubeMapSize);
+	UINT ShadowCubeMapSize = min(ShadowsInteriors->ShadowCubeMapSize, ShadowsExteriorsPoint->ShadowCubeMapSize);
 
 	CurrentCell = NULL;
 	ShadowCubeMapState = ShadowCubeMapStateEnum::None;
@@ -637,7 +637,7 @@ void ShadowManager::RenderInteriorShadows() {
 	SettingsShadowStruct::InteriorsStruct* ShadowSettings;
 
 	if (Player->GetWorldSpace()) {
-		ShadowSettings = &TheSettingManager->SettingsShadows.ExteriorsNight;
+		ShadowSettings = &TheSettingManager->SettingsShadows.ExteriorsPoint;
 	}
 	else {
 		ShadowSettings = &TheSettingManager->SettingsShadows.Interiors;
@@ -914,7 +914,7 @@ void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* L
 	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
 
 	if (Player->GetWorldSpace()) {
-		ShadowSettings = &TheSettingManager->SettingsShadows.ExteriorsNight;
+		ShadowSettings = &TheSettingManager->SettingsShadows.ExteriorsPoint;
 	}
 	else {
 		ShadowSettings = &TheSettingManager->SettingsShadows.Interiors;
