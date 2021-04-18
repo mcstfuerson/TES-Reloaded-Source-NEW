@@ -88,6 +88,12 @@ ShadowManager::ShadowManager() {
 	ShadowCubeMapViewPort = { 0, 0, ShadowCubeMapSize, ShadowCubeMapSize, 0.0f, 1.0f };
 	
 	ShadowCubeMapLights[12] = { NULL };
+	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
+	D3DXVECTOR4* ShadowCubeMapBlend2 = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend2;
+	D3DXVECTOR4* ShadowCubeMapBlend3 = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend3;
+	ShadowCubeMapBlend->x =  1.0f; ShadowCubeMapBlend->y = 1.0f; ShadowCubeMapBlend->z = 1.0f; ShadowCubeMapBlend->w = 1.0f;
+	ShadowCubeMapBlend2->x = 1.0f; ShadowCubeMapBlend2->y = 1.0f; ShadowCubeMapBlend2->z = 1.0f; ShadowCubeMapBlend2->w = 1.0f;
+	ShadowCubeMapBlend3->x = 1.0f; ShadowCubeMapBlend3->y = 1.0f; ShadowCubeMapBlend3->z = 1.0f; ShadowCubeMapBlend3->w = 1.0f;
 
 }
 
@@ -744,66 +750,11 @@ void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From) {
 	}
 }
 
+//TODO: "Blend" code has been removed, keeping code structure until it's removed from shaders
 void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
-
-	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
-	D3DXVECTOR4* ShadowCubeMapBlend2 = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend2;
-	D3DXVECTOR4* ShadowCubeMapBlend3 = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend3;
-	float* Blend = NULL;
-	bool Found = false;
-
 	if (memcmp(Lights, ShadowCubeMapLights, 48)) {
-		for (int i = 0; i <= LightIndex; i++) {
-			for (int j = 0; j <= LightIndex; j++) {
-				if (Lights[i] == ShadowCubeMapLights[j]) {
-					Found = true;
-					break;
-				}
-			}
-			if (i == 0)
-				Blend = &ShadowCubeMapBlend->x;
-			else if (i == 1)
-				Blend = &ShadowCubeMapBlend->y;
-			else if (i == 2)
-				Blend = &ShadowCubeMapBlend->z;
-			else if (i == 3)
-				Blend = &ShadowCubeMapBlend->w;
-			else if (i == 4)
-				Blend = &ShadowCubeMapBlend2->x;
-			else if (i == 5)
-				Blend = &ShadowCubeMapBlend2->y;
-			else if (i == 6)
-				Blend = &ShadowCubeMapBlend2->z;
-			else if (i == 7)
-				Blend = &ShadowCubeMapBlend2->w;
-			else if (i == 8)
-				Blend = &ShadowCubeMapBlend3->x;
-			else if (i == 9)
-				Blend = &ShadowCubeMapBlend3->y;
-			else if (i == 10)
-				Blend = &ShadowCubeMapBlend3->z;
-			else if (i == 11)
-				Blend = &ShadowCubeMapBlend3->w;
-			if (!Found) *Blend = 0.0f;
-			Found = false;
-		}
 		memcpy(ShadowCubeMapLights, Lights, 48);
 	}
-	else {
-		if (ShadowCubeMapBlend->x < 1.0f) ShadowCubeMapBlend->x += 0.1f;
-		if (ShadowCubeMapBlend->y < 1.0f) ShadowCubeMapBlend->y += 0.1f;
-		if (ShadowCubeMapBlend->z < 1.0f) ShadowCubeMapBlend->z += 0.1f;
-		if (ShadowCubeMapBlend->w < 1.0f) ShadowCubeMapBlend->w += 0.1f;
-		if (ShadowCubeMapBlend2->x < 1.0f) ShadowCubeMapBlend2->x += 0.1f;
-		if (ShadowCubeMapBlend2->y < 1.0f) ShadowCubeMapBlend2->y += 0.1f;
-		if (ShadowCubeMapBlend2->z < 1.0f) ShadowCubeMapBlend2->z += 0.1f;
-		if (ShadowCubeMapBlend2->w < 1.0f) ShadowCubeMapBlend2->w += 0.1f;
-		if (ShadowCubeMapBlend3->x < 1.0f) ShadowCubeMapBlend3->x += 0.1f;
-		if (ShadowCubeMapBlend3->y < 1.0f) ShadowCubeMapBlend3->y += 0.1f;
-		if (ShadowCubeMapBlend3->z < 1.0f) ShadowCubeMapBlend3->z += 0.1f;
-		if (ShadowCubeMapBlend3->w < 1.0f) ShadowCubeMapBlend3->w += 0.1f;
-	}
-	
 }
 
 int ShadowManager::GetExtSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex) {
