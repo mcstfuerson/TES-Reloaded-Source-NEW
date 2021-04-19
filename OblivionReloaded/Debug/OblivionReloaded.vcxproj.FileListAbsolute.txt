@@ -1,0 +1,2 @@
+C:\Users\David\source\repos\TES-Reloaded\OblivionReloaded\Debug\OblivionReloaded.dll
+C:\Users\David\source\repos\TES-Reloaded\OblivionReloaded\Debug\OblivionReloaded.pdb

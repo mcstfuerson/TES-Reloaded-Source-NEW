@@ -1,0 +1,12 @@
+﻿  RenderHook.cpp
+  C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+  ShadowManager.cpp
+  C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+     Creating library C:\Users\David\source\repos\TES-Reloaded\OblivionReloaded\Release\OblivionReloaded.lib and object C:\Users\David\source\repos\TES-Reloaded\OblivionReloaded\Release\OblivionReloaded.exp
+  Generating code
+  3 of 2549 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    10 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  OblivionReloaded.vcxproj -> C:\Users\David\source\repos\TES-Reloaded\OblivionReloaded\Release\OblivionReloaded.dll
+          1 file(s) copied.
