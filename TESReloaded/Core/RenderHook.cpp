@@ -73,7 +73,6 @@ public:
 	bool	TrackEndTargetGroup(NiCamera*, NiRenderTargetGroup*);
 	void	TrackHDRRender(NiScreenElements*, BSRenderedTexture**, BSRenderedTexture**, UInt8);
 	UInt32	TrackSetupShaderPrograms(NiGeometry*, NiSkinInstance*, NiSkinPartition::Partition*, NiGeometryBufferData*, NiPropertyState*, NiDynamicEffectState*, NiTransform*, UInt32);
-	void	TrackCullingBSFadeNode(NiCullingProcess*);
 	float	TrackFarPlane();
 	HRESULT TrackSetSamplerState(UInt32, D3DSAMPLERSTATETYPE, UInt32, UInt8);
 	void	TrackSetDirectionalLight(NiTransform* WorldTransform);
@@ -244,6 +243,7 @@ void (__thiscall RenderHook::* Render)(BSRenderedTexture*);
 void (__thiscall RenderHook::* TrackRender)(BSRenderedTexture*);
 void RenderHook::TrackRender(BSRenderedTexture* RenderedTexture) {
 	
+	TheFrameRateManager->UpdatePerformance();
 	TheRenderManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
 	if (TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->defaultRTGroup->RenderTargets[1]->data->Surface;
@@ -273,19 +273,6 @@ void RenderHook::TrackHDRRender(NiScreenElements* ScreenElements, BSRenderedText
 	
 	TheRenderManager->clearColor = D3DCOLOR_ARGB(0, 0, 0, 0);
 	(this->*HDRRender)(ScreenElements, RenderedTexture1, RenderedTexture2, Arg4);
-
-}
-
-void (__thiscall RenderHook::* CullingBSFadeNode)(NiCullingProcess*);
-void (__thiscall RenderHook::* TrackCullingBSFadeNode)(NiCullingProcess*);
-void RenderHook::TrackCullingBSFadeNode(NiCullingProcess* Process) {
-	
-	BSFadeNode* Object = (BSFadeNode*)this;
-
-	if (TheSettingManager->SettingsMain.FrameRate.Enabled && Player->GetWorldSpace()) {
-		if (Object->MultType == 6 && !strstr(Object->m_pcName, "ImperialCity") && TheFrameRateManager->IsOutGrid(Object)) return;
-	}
-	(this->*CullingBSFadeNode)(Process);
 
 }
 
@@ -687,8 +674,6 @@ void CreateRenderHook() {
 	TrackEndTargetGroup						= &RenderHook::TrackEndTargetGroup;
 	*((int*)&HDRRender)						= 0x007BDFC0;
 	TrackHDRRender							= &RenderHook::TrackHDRRender;
-	*((int*)&CullingBSFadeNode)				= 0x004A0920;
-	TrackCullingBSFadeNode					= &RenderHook::TrackCullingBSFadeNode;
 	*((int*)&FarPlane)						= 0x00410EE0;
 	TrackFarPlane							= &RenderHook::TrackFarPlane;
 	*((int*)&SetSamplerState)				= 0x0077B610;
@@ -717,7 +702,6 @@ void CreateRenderHook() {
 	//DetourAttach(&(PVOID&)SetDirectionalLight,			*((PVOID*)&TrackSetDirectionalLight));
 	DetourAttach(&(PVOID&)EndTargetGroup,				*((PVOID*)&TrackEndTargetGroup));
 	DetourAttach(&(PVOID&)HDRRender,					*((PVOID*)&TrackHDRRender));
-	DetourAttach(&(PVOID&)CullingBSFadeNode,			*((PVOID*)&TrackCullingBSFadeNode));
 	DetourAttach(&(PVOID&)FarPlane,						*((PVOID*)&TrackFarPlane));
 	DetourAttach(&(PVOID&)SetSamplerState,				*((PVOID*)&TrackSetSamplerState));
 	DetourAttach(&(PVOID&)SaveGameScreenshot,					  &TrackSaveGameScreenshot);
@@ -752,12 +736,20 @@ void CreateRenderHook() {
 	WriteRelJump(0x00553EAC, 0x00553EB2); // Patches the use of Lighting30Shader only for the hair
 	WriteRelJump(0x007D1BC4, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
 	WriteRelJump(0x007D1BCD, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
+	if (TheSettingManager->SettingsMain.Shaders.Water) {
+		WriteRelJump(0x007E1ACC, 0x007E1B1D); // Disables the first WaterHeightMap shader pass
+		WriteRelJump(0x007E1B76, 0x007E1BC7); // Disables the second WaterHeightMap shader pass
+		WriteRelJump(0x007E1CA1, 0x007E1CEE); // Disables the third WaterHeightMap shader pass
+		WriteRelJump(0x007E1E87, 0x007E1EDD); // Disables the fourth WaterHeightMap shader pass
+		SafeWrite32(0x007E109C, 0); // Disables additional WaterHeightMap shader passes
+		*LocalWaterHiRes = 1;
+	}
 	if (TheSettingManager->SettingsMain.Main.AnisotropicFilter >= 2) {
 		SafeWrite8(0x007BE1D3, TheSettingManager->SettingsMain.Main.AnisotropicFilter);
 		SafeWrite8(0x007BE32B, TheSettingManager->SettingsMain.Main.AnisotropicFilter);
 	}
 	if (TheSettingManager->SettingsMain.Main.RemovePrecipitations) WriteRelJump(0x00543167, 0x00543176);
-	*LocalWaterHiRes = 1; // Fixes a bug on the WaterHeightMapConstructor
+	//*LocalWaterHiRes = 1; // Fixes a bug on the WaterHeightMapConstructor
 #elif defined(SKYRIM)
 	WriteRelJump(kClearDepth,				(UInt32)ClearDepth);
 	WriteRelJump(kRenderFirstPersonNode,	(UInt32)RenderFirstPersonNode);

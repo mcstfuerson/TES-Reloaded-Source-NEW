@@ -49,6 +49,7 @@ extern "C" {
 			CreateAnimationHook();
 			CreateShadowsHook();
 			CreateWeatherModeHook();
+			CreateFrameRateHook();
 			if (TheSettingManager->SettingsMain.Main.MemoryManagement) CreateMemoryManagementHook();
 			if (TheSettingManager->SettingsMain.GrassMode.Enabled) CreateGrassHook();
 			if (TheSettingManager->SettingsMain.CameraMode.Enabled) CreateCameraModeHook();
