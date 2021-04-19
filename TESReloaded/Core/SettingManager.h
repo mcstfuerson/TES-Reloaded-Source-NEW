@@ -132,11 +132,17 @@ struct SettingsMainStruct {
 	};
 	
 	struct FrameRateStruct {
-		bool	SmartControl;
-		bool	SmartBackgroundProcess;
-		UInt32	SmartControlFPS;
-		UInt32  BackgroundThreadPriority;
-		float	FlowControl;
+		bool	Enabled;
+		int		Average;
+		int		Min;
+		int		Critical;
+		int		Gap;
+		int		Delay;
+		int		GridStep;
+		int		FadeMinObjects;
+		int		FadeMinActors;
+		int		GridMin;
+		float	FadeStep;
 	};
 
 	struct GrassModeStruct {

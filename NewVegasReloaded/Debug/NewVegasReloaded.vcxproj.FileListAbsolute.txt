@@ -1,2 +1,0 @@
-C:\Users\David\source\repos\TES-Reloaded\NewVegasReloaded\Debug\NewVegasReloaded.dll
-C:\Users\David\source\repos\TES-Reloaded\NewVegasReloaded\Debug\NewVegasReloaded.pdb

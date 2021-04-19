@@ -33,7 +33,7 @@ private:
 	RECT			RectShadow;
 	RECT			RectInfo;
 	RECT			RectInfoShadow;
-	int				FrameRate;
-	int				FrameCounter;
+	int				FrameRateText;
+	time_t			LastFrameRateTextTime;
 
 };
