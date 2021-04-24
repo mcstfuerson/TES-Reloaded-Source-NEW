@@ -276,19 +276,6 @@ void RenderHook::TrackHDRRender(NiScreenElements* ScreenElements, BSRenderedText
 
 }
 
-void (__thiscall RenderHook::* CullingBSFadeNode)(NiCullingProcess*);
-void (__thiscall RenderHook::* TrackCullingBSFadeNode)(NiCullingProcess*);
-void RenderHook::TrackCullingBSFadeNode(NiCullingProcess* Process) {
-	
-	BSFadeNode* Object = (BSFadeNode*)this;
-
-	if (TheSettingManager->SettingsMain.FrameRate.Enabled && Player->GetWorldSpace()) {
-		if (Object->MultType == 6 && !strstr(Object->m_pcName, "ImperialCity") && TheFrameRateManager->IsOutGrid(Object)) return;
-	}
-	(this->*CullingBSFadeNode)(Process);
-
-}
-
 float (__thiscall RenderHook::* FarPlane)();
 float (__thiscall RenderHook::* TrackFarPlane)();
 float RenderHook::TrackFarPlane() {
@@ -687,8 +674,6 @@ void CreateRenderHook() {
 	TrackEndTargetGroup						= &RenderHook::TrackEndTargetGroup;
 	*((int*)&HDRRender)						= 0x007BDFC0;
 	TrackHDRRender							= &RenderHook::TrackHDRRender;
-	*((int*)&CullingBSFadeNode)				= 0x004A0920;
-	TrackCullingBSFadeNode					= &RenderHook::TrackCullingBSFadeNode;
 	*((int*)&FarPlane)						= 0x00410EE0;
 	TrackFarPlane							= &RenderHook::TrackFarPlane;
 	*((int*)&SetSamplerState)				= 0x0077B610;
@@ -717,7 +702,6 @@ void CreateRenderHook() {
 	//DetourAttach(&(PVOID&)SetDirectionalLight,			*((PVOID*)&TrackSetDirectionalLight));
 	DetourAttach(&(PVOID&)EndTargetGroup,				*((PVOID*)&TrackEndTargetGroup));
 	DetourAttach(&(PVOID&)HDRRender,					*((PVOID*)&TrackHDRRender));
-	DetourAttach(&(PVOID&)CullingBSFadeNode,			*((PVOID*)&TrackCullingBSFadeNode));
 	DetourAttach(&(PVOID&)FarPlane,						*((PVOID*)&TrackFarPlane));
 	DetourAttach(&(PVOID&)SetSamplerState,				*((PVOID*)&TrackSetSamplerState));
 	DetourAttach(&(PVOID&)SaveGameScreenshot,					  &TrackSaveGameScreenshot);

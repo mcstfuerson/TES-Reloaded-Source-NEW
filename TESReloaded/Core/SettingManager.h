@@ -131,20 +131,6 @@ struct SettingsMainStruct {
 		NiPoint3	TorchOnBeltRot;
 	};
 	
-	struct FrameRateStruct {
-		bool	Enabled;
-		int		Average;
-		int		Min;
-		int		Critical;
-		int		Gap;
-		int		Delay;
-		int		GridStep;
-		int		FadeMinObjects;
-		int		FadeMinActors;
-		int		GridMin;
-		float	FadeStep;
-	};
-
 	struct GrassModeStruct {
 		bool	Enabled;
 	};
@@ -293,7 +279,6 @@ struct SettingsMainStruct {
 	MainStruct					Main;
 	CameraModeStruct			CameraMode;
 	EquipmentModeStruct			EquipmentMode;
-	FrameRateStruct				FrameRate;
 	GrassModeStruct				GrassMode;
 	MountedCombatStruct			MountedCombat;
 	SleepingModeStruct			SleepingMode;

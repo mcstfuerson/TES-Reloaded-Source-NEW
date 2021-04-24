@@ -608,7 +608,6 @@ ShaderManager::ShaderManager() {
 	Logger::Log("Starting the shaders manager...");
 	TheShaderManager = this;
 
-	LARGE_INTEGER Frequency;
 	float UAdj, VAdj;
 	void* VertexPointer;
 
@@ -649,8 +648,6 @@ ShaderManager::ShaderManager() {
 	memset(WaterVertexShaders, NULL, sizeof(WaterVertexShaders));
 	memset(WaterPixelShaders, NULL, sizeof(WaterPixelShaders));
 	InitializeConstants();
-	QueryPerformanceFrequency(&Frequency);
-	PerformanceFrequency = Frequency.QuadPart;
 	ShaderConst.ReciprocalResolution.x = 1.0f / TheRenderManager->width;
 	ShaderConst.ReciprocalResolution.y = 1.0f / TheRenderManager->height;
 	ShaderConst.ReciprocalResolution.z = TheRenderManager->width / TheRenderManager->height;
@@ -721,8 +718,6 @@ void ShaderManager::InitializeConstants() {
 
 void ShaderManager::UpdateConstants() {
 
-	LARGE_INTEGER PerformanceCount;
-	double Tick;
 	bool IsThirdPersonView;
 	Sky* WorldSky = Tes->sky;
 	NiNode* SunRoot = WorldSky->sun->RootNode;
@@ -735,28 +730,23 @@ void ShaderManager::UpdateConstants() {
 	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
 	TESRegion* currentRegion = Player->GetRegion();
 	float weatherPercent = WorldSky->weatherPercent;
+	float lastGameTime = ShaderConst.GameTime.y;
 
-	QueryPerformanceCounter(&PerformanceCount);
-	Tick = (double)PerformanceCount.QuadPart / (double)PerformanceFrequency;
-	ShaderConst.Tick.x = Tick;
-	ShaderConst.Tick.y = (double)PerformanceCount.QuadPart * 1000.0 / (double)PerformanceFrequency;
-	TheFrameRateManager->SetFrameTime(Tick);
 	IsThirdPersonView = Player->IsThirdPersonView(TheSettingManager->SettingsMain.CameraMode.Enabled, TheRenderManager->FirstPersonView);
 	TheRenderManager->GetSceneCameraData();
+
+	ShaderConst.GameTime.x = TimeGlobals::GetGameTime();
+	ShaderConst.GameTime.y = ShaderConst.GameTime.x / 3600.0f;
+	ShaderConst.GameTime.z = ShaderConst.Tick.x = TheFrameRateManager->Time;
+	ShaderConst.Tick.y = TheFrameRateManager->GetPerformance();
 	
 	if (currentCell) {
 		ShaderConst.SunTiming.x = currentClimate->sunriseBegin / 6.0f - 1.0f;
 		ShaderConst.SunTiming.y = currentClimate->sunriseEnd / 6.0f;
 		ShaderConst.SunTiming.z = currentClimate->sunsetBegin / 6.0f;
 		ShaderConst.SunTiming.w = currentClimate->sunsetEnd / 6.0f + 1.0f;
-		
-		float deltay = ShaderConst.GameTime.y;
-		ShaderConst.GameTime.x = TimeGlobals::GetGameTime();
-		ShaderConst.GameTime.y = ShaderConst.GameTime.x / 3600.0f;
-		ShaderConst.GameTime.z = ((int)ShaderConst.GameTime.x / 60) % 60;
-		ShaderConst.GameTime.w = ((int)ShaderConst.GameTime.x) % 60;
 
-		if (deltay != ShaderConst.GameTime.y) {
+		if (lastGameTime != ShaderConst.GameTime.y) {
 			float deltaz = ShaderConst.SunDir.z;
 			ShaderConst.SunDir.x = SunRoot->m_localTransform.pos.x;
 			ShaderConst.SunDir.y = SunRoot->m_localTransform.pos.y;
@@ -1598,8 +1588,6 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.VolumetricFog.Data.w = 1.0f;
 			if (weatherPercent == 1.0f && ShaderConst.fogData.y > TheSettingManager->SettingsVolumetricFog.MaxDistance) ShaderConst.VolumetricFog.Data.w = 0.0f;
 		}
-
-		if (TheSettingManager->SettingsMain.FrameRate.Enabled) TheFrameRateManager->Set();
 	}
 }
 

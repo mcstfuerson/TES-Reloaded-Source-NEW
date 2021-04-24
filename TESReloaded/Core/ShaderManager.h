@@ -306,7 +306,6 @@ public:
 
 	int						GameDay;
 	struct					EffectQuad { float x, y, z; float u, v; };
-	LONGLONG				PerformanceFrequency;
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
 	IDirect3DTexture9*		SourceTexture;

@@ -1,27 +1,16 @@
 #pragma once
 
-enum FrameRateRequestType {
-
-	FrameRateRequestType_None,
-	FrameRateRequestType_TurnUp,
-	FrameRateRequestType_TurnDown,
-};
-
 class FrameRateManager { // Never disposed
 public:
 	FrameRateManager();
 
-	void						Set();
-	void						SetFrameTime(double CurrentFrameTime);
-	bool						IsOutGrid(NiAVObject* Object);
-	
-	int							FrameRate;
-	double						ElapsedTime;
+	double			GetPerformance();
 
-private:
-	double						LastFrameTime;
-	int							FrameCounter;
-	UInt32						GridDistant;
-	FrameRateRequestType		RequestType;
-
+	LONGLONG		PerformanceFrequency;
+	LONGLONG		PerformanceCounterStart;
+	double			Time;
+	double			LastTime;
+	double			ElapsedTime;
+	double			SmartControlMPF;
+	double			LastPerformance;
 };

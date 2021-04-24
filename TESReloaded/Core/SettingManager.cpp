@@ -111,19 +111,6 @@ SettingManager::SettingManager() {
 	SettingsMain.Main.SaveSettings = GetPrivateProfileIntA("Main", "SaveSettings", 1, Filename);
 	SettingsMain.Main.ReplaceIntro = GetPrivateProfileIntA("Main", "ReplaceIntro", 0, Filename);	
 
-	SettingsMain.FrameRate.Enabled = GetPrivateProfileIntA("FrameRate", "Enabled", 0, Filename);
-	SettingsMain.FrameRate.Average = GetPrivateProfileIntA("FrameRate", "Average", 33, Filename);
-	SettingsMain.FrameRate.Min = GetPrivateProfileIntA("FrameRate", "Min", 20, Filename);
-	SettingsMain.FrameRate.Critical = GetPrivateProfileIntA("FrameRate", "Critical", 10, Filename);
-	SettingsMain.FrameRate.Gap = GetPrivateProfileIntA("FrameRate", "Gap", 3, Filename);
-	SettingsMain.FrameRate.Delay = GetPrivateProfileIntA("FrameRate", "Delay", 10, Filename);
-	GetPrivateProfileStringA("FrameRate", "FadeStep", "0.5", value, SettingStringBuffer, Filename);
-	SettingsMain.FrameRate.FadeStep = atof(value);
-	SettingsMain.FrameRate.FadeMinObjects = GetPrivateProfileIntA("FrameRate", "FadeMinObjects", 10, Filename);
-	SettingsMain.FrameRate.FadeMinActors = GetPrivateProfileIntA("FrameRate", "FadeMinActors", 15, Filename);
-	SettingsMain.FrameRate.GridStep = GetPrivateProfileIntA("FrameRate", "GridStep", 2, Filename);
-	SettingsMain.FrameRate.GridMin = GetPrivateProfileIntA("FrameRate", "GridMin", 5, Filename);
-
 	SettingsMain.EquipmentMode.Enabled = GetPrivateProfileIntA("EquipmentMode", "Enabled", 0, Filename);
 	GetPrivateProfileStringA("EquipmentMode", "ShieldOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
 	SettingsMain.EquipmentMode.ShieldOnBackPos.x = atof(value);
@@ -1837,19 +1824,6 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["CoeffSunG"] = SettingsMain.WeatherMode.CoeffSun.y;
 				Settings["CoeffSunB"] = SettingsMain.WeatherMode.CoeffSun.z;
 			}
-			else if (!strcmp(Section, "FrameRate")) {
-				Settings["Enabled"] = SettingsMain.FrameRate.Enabled;
-				Settings["Average"] = SettingsMain.FrameRate.Average;
-				Settings["Critical"] = SettingsMain.FrameRate.Critical;
-				Settings["Delay"] = SettingsMain.FrameRate.Delay;
-				Settings["FadeMinActors"] = SettingsMain.FrameRate.FadeMinActors;
-				Settings["FadeMinObjects"] = SettingsMain.FrameRate.FadeMinObjects;
-				Settings["FadeStep"] = SettingsMain.FrameRate.FadeStep;
-				Settings["Gap"] = SettingsMain.FrameRate.Gap;
-				Settings["GridMin"] = SettingsMain.FrameRate.GridMin;
-				Settings["GridStep"] = SettingsMain.FrameRate.GridStep;
-				Settings["Min"] = SettingsMain.FrameRate.Min;
-			}
 			else if (!strcmp(Section, "Gravity")) {
 				Settings["Enabled"] = SettingsMain.Gravity.Enabled;
 				Settings["Value"] = SettingsMain.Gravity.Value;
@@ -2382,30 +2356,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				#endif
 					SetSettingsWeather(Weather);
 				}
-			}
-			else if (!strcmp(Section, "FrameRate")) {
-				if (!strcmp(Setting, "Enabled"))
-					SettingsMain.FrameRate.Enabled = Value;
-				else if (!strcmp(Setting, "Average"))
-					SettingsMain.FrameRate.Average = Value;
-				else if (!strcmp(Setting, "Critical"))
-					SettingsMain.FrameRate.Critical = Value;
-				else if (!strcmp(Setting, "Delay"))
-					SettingsMain.FrameRate.Delay = Value;
-				else if (!strcmp(Setting, "FadeMinActors"))
-					SettingsMain.FrameRate.FadeMinActors = Value;
-				else if (!strcmp(Setting, "FadeMinObjects"))
-					SettingsMain.FrameRate.FadeMinObjects = Value;
-				else if (!strcmp(Setting, "FadeStep"))
-					SettingsMain.FrameRate.FadeStep = Value;
-				else if (!strcmp(Setting, "Gap"))
-					SettingsMain.FrameRate.Gap = Value;
-				else if (!strcmp(Setting, "GridMin"))
-					SettingsMain.FrameRate.GridMin = Value;
-				else if (!strcmp(Setting, "GridStep"))
-					SettingsMain.FrameRate.GridStep = Value;
-				else if (!strcmp(Setting, "Min"))
-					SettingsMain.FrameRate.Min = Value;
 			}
 			else if (!strcmp(Section, "Gravity")) {
 				if (!strcmp(Setting, "Enabled"))
