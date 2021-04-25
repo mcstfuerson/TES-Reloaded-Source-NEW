@@ -425,8 +425,6 @@ struct SettingsGodRaysStruct {
 };
 
 struct SettingsKhajiitRaysStruct {
-	bool mTimeEnabled;
-	bool mSunGlareEnabled;
 	int mLightShaftPasses;
 	float mRayIntensity;
 	float mRayLength;
@@ -439,8 +437,6 @@ struct SettingsKhajiitRaysStruct {
 	float mRayB;
 	float mSaturate;
 
-	bool sTimeEnabled;
-	bool sSunGlareEnabled;
 	int sLightShaftPasses;
 	float sRayIntensity;
 	float sRayLength;

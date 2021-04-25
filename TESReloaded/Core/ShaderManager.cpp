@@ -1350,7 +1350,6 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.KhajiitRaysMasser.Data.x = TheSettingManager->SettingsKhajiitRays.mLightShaftPasses;
 			ShaderConst.KhajiitRaysMasser.Data.y = TheSettingManager->SettingsKhajiitRays.mLuminance;
 			ShaderConst.KhajiitRaysMasser.Data.z = TheSettingManager->SettingsKhajiitRays.mGlobalMultiplier;
-			ShaderConst.KhajiitRaysMasser.Data.w = TheSettingManager->SettingsKhajiitRays.mTimeEnabled;
 
 			ShaderConst.KhajiitRaysSecunda.Ray.x = TheSettingManager->SettingsKhajiitRays.sRayIntensity;
 			ShaderConst.KhajiitRaysSecunda.Ray.y = TheSettingManager->SettingsKhajiitRays.sRayLength;
@@ -1363,7 +1362,6 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.KhajiitRaysSecunda.Data.x = TheSettingManager->SettingsKhajiitRays.sLightShaftPasses;
 			ShaderConst.KhajiitRaysSecunda.Data.y = TheSettingManager->SettingsKhajiitRays.sLuminance;
 			ShaderConst.KhajiitRaysSecunda.Data.z = TheSettingManager->SettingsKhajiitRays.sGlobalMultiplier;
-			ShaderConst.KhajiitRaysSecunda.Data.w = TheSettingManager->SettingsKhajiitRays.sTimeEnabled;
 		}
 
 		if (TheSettingManager->SettingsMain.Effects.AmbientOcclusion) {

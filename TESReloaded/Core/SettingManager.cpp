@@ -648,8 +648,6 @@ void SettingManager::LoadSettings() {
 	strcat(Filename, SettingsPath);
 	strcat(Filename, "KhajiitRays\\KhajiitRays.ini");
 	//Masser
-	SettingsKhajiitRays.mTimeEnabled = GetPrivateProfileIntA("Default", "MasserTimeEnabled", 1, Filename);
-	SettingsKhajiitRays.mSunGlareEnabled = GetPrivateProfileIntA("Default", "MasserSunGlareEnabled", 1, Filename);
 	SettingsKhajiitRays.mLightShaftPasses = GetPrivateProfileIntA("Default", "MasserLightShaftPasses", 30, Filename);
 	GetPrivateProfileStringA("Default", "MasserRayIntensity", "3.2", value, SettingStringBuffer, Filename);
 	SettingsKhajiitRays.mRayIntensity = atof(value);
@@ -672,8 +670,6 @@ void SettingManager::LoadSettings() {
 	GetPrivateProfileStringA("Default", "MasserSaturate", "0.55", value, SettingStringBuffer, Filename);
 	SettingsKhajiitRays.mSaturate = atof(value);
 	//Secunda
-	SettingsKhajiitRays.sTimeEnabled = GetPrivateProfileIntA("Default", "SecundaTimeEnabled", 1, Filename);
-	SettingsKhajiitRays.sSunGlareEnabled = GetPrivateProfileIntA("Default", "SecundaSunGlareEnabled", 1, Filename);
 	SettingsKhajiitRays.sLightShaftPasses = GetPrivateProfileIntA("Default", "SecundaLightShaftPasses", 30, Filename);
 	GetPrivateProfileStringA("Default", "SecundaRayIntensity", "3.2", value, SettingStringBuffer, Filename);
 	SettingsKhajiitRays.sRayIntensity = atof(value);
@@ -1367,8 +1363,6 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("Default", "MasserRayR", ToString(SettingsKhajiitRays.mRayR).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "MasserRayG", ToString(SettingsKhajiitRays.mRayG).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "MasserRayB", ToString(SettingsKhajiitRays.mRayB).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "MasserSunGlareEnabled", ToString(SettingsKhajiitRays.mSunGlareEnabled).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "MasserTimeEnabled", ToString(SettingsKhajiitRays.mTimeEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "MasserRayVisibility", ToString(SettingsKhajiitRays.mRayVisibility).c_str(), Filename);
 			//Secunda
 			WritePrivateProfileStringA("Default", "SecundaRayDensity", ToString(SettingsKhajiitRays.sRayDensity).c_str(), Filename);
@@ -1381,8 +1375,6 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("Default", "SecundaRayR", ToString(SettingsKhajiitRays.sRayR).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "SecundaRayG", ToString(SettingsKhajiitRays.sRayG).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "SecundaRayB", ToString(SettingsKhajiitRays.sRayB).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "SecundaSunGlareEnabled", ToString(SettingsKhajiitRays.sSunGlareEnabled).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "SecundaTimeEnabled", ToString(SettingsKhajiitRays.sTimeEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "SecundaRayVisibility", ToString(SettingsKhajiitRays.sRayVisibility).c_str(), Filename);
 			//Other
 			WritePrivateProfileStringA("Default", "PhaseLumQtr", ToString(SettingsKhajiitRays.phaseLumQtr).c_str(), Filename);
@@ -1968,8 +1960,6 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["MasserRayG"] = SettingsKhajiitRays.mRayG;
 			Settings["MasserRayB"] = SettingsKhajiitRays.mRayB;
 			Settings["MasserSaturate"] = SettingsKhajiitRays.mSaturate;
-			Settings["MasserSunGlareEnabled"] = SettingsKhajiitRays.mSunGlareEnabled;
-			Settings["MasserTimeEnabled"] = SettingsKhajiitRays.mTimeEnabled;
 			//Secunda
 			Settings["SecundaGlobalMultiplier"] = SettingsKhajiitRays.sGlobalMultiplier;
 			Settings["SecundaLightShaftPasses"] = SettingsKhajiitRays.sLightShaftPasses;
@@ -1982,8 +1972,6 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["SecundaRayG"] = SettingsKhajiitRays.sRayG;
 			Settings["SecundaRayB"] = SettingsKhajiitRays.sRayB;
 			Settings["SecundaSaturate"] = SettingsKhajiitRays.sSaturate;
-			Settings["SecundaSunGlareEnabled"] = SettingsKhajiitRays.sSunGlareEnabled;
-			Settings["SecundaTimeEnabled"] = SettingsKhajiitRays.sTimeEnabled;
 			//Other
 			Settings["PhaseLumQtr"] = SettingsKhajiitRays.phaseLumQtr;
 			Settings["PhaseLumHalf"] = SettingsKhajiitRays.phaseLumHalf;
@@ -2593,10 +2581,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				SettingsKhajiitRays.mRayG = Value;
 			else if (!strcmp(Setting, "MasserRayB"))
 				SettingsKhajiitRays.mRayB = Value;
-			else if (!strcmp(Setting, "MasserTimeEnabled"))
-				SettingsKhajiitRays.mTimeEnabled = Value;
-			else if (!strcmp(Setting, "MasserSunGlareEnabled"))
-				SettingsKhajiitRays.mSunGlareEnabled = Value;
 			else if (!strcmp(Setting, "MasserRayVisibility"))
 				SettingsKhajiitRays.mRayVisibility = Value;
 			else if (!strcmp(Setting, "SecundaRayDensity"))
@@ -2619,10 +2603,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				SettingsKhajiitRays.sRayG = Value;
 			else if (!strcmp(Setting, "SecundaRayB"))
 				SettingsKhajiitRays.sRayB = Value;
-			else if (!strcmp(Setting, "SecundaTimeEnabled"))
-				SettingsKhajiitRays.sTimeEnabled = Value;
-			else if (!strcmp(Setting, "SecundaSunGlareEnabled"))
-				SettingsKhajiitRays.sSunGlareEnabled = Value;
 			else if (!strcmp(Setting, "SecundaRayVisibility"))
 				SettingsKhajiitRays.sRayVisibility = Value;
 			else if (!strcmp(Setting, "PhaseLumQtr"))
