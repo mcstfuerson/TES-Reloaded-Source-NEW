@@ -226,10 +226,10 @@ bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiAVObject* Objec
 }
 void ShadowManager::RenderObject(NiAVObject* Object, D3DXVECTOR4* ShadowData, bool HasWater) {
 
-	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled) && Object->GetWorldBoundRadius() >= ShadowMapObjectMinBound) {
+	if (Object){// && !(Object->m_flags & NiAVObject::kFlag_AppCulled) && Object->GetWorldBoundRadius() >= ShadowMapObjectMinBound) {
 		void* VFT = *(void**)Object;
 		if (VFT == VFTNiNode || VFT == VFTBSFadeNode || VFT == VFTBSFaceGenNiNode || VFT == VFTBSTreeNode) {
-			if (VFT == VFTBSFadeNode && ((BSFadeNode*)Object)->FadeAlpha <= 0.2f) return;
+			//if (VFT == VFTBSFadeNode && ((BSFadeNode*)Object)->FadeAlpha <= 0.2f) return;
 			NiNode* Node = (NiNode*)Object;
 			for (int i = 0; i < Node->m_children.end; i++) {
 				RenderObject(Node->m_children.data[i], ShadowData, HasWater);
@@ -315,7 +315,7 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 		}
 		else {
 			BSShaderProperty* LProp = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Lighting);
-			if (LProp->IsLightingProperty()) {
+			//if (LProp->IsLightingProperty()) {
 				if (AlphaEnabled) {
 					NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
 					if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) {
@@ -330,10 +330,11 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 						}
 					}
 				}
-			}
-			else {
+			//}
+			/*else {
+				Logger::Log("%s just returned", Geo->m_pcName);
 				return;
-			}
+			}*/
 		}
 		TheRenderManager->PackGeometryBuffer(GeoData, ModelData, SkinInstance, ShaderDeclaration);
 		for (UInt32 i = 0; i < GeoData->StreamCount; i++) {
