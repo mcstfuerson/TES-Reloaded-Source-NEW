@@ -734,7 +734,7 @@ void CreateRenderHook() {
 	SafeWrite8(0x00A38280, 0x5A); // Fixes the "purple water bug"
 	SafeWrite8(0x0040CE11, 0); // Stops to clear the depth buffer when rendering the 1st person node
 	WriteRelJump(0x00553EAC, 0x00553EB2); // Patches the use of Lighting30Shader only for the hair
-	WriteRelJump(0x007D1BC4, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
+	//WriteRelJump(0x007D1BC4, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
 	WriteRelJump(0x007D1BCD, 0x007D1BFD); // Patches the use of Lighting30Shader only for the hair
 	if (TheSettingManager->SettingsMain.Main.AnisotropicFilter >= 2) {
 		SafeWrite8(0x007BE1D3, TheSettingManager->SettingsMain.Main.AnisotropicFilter);
