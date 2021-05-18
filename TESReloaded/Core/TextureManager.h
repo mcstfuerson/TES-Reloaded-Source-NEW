@@ -10,6 +10,14 @@
 #define WordShadowCubeMapBuffer1 "TESR_ShadowCubeMapBuffer1"
 #define WordShadowCubeMapBuffer2 "TESR_ShadowCubeMapBuffer2"
 #define WordShadowCubeMapBuffer3 "TESR_ShadowCubeMapBuffer3"
+#define WordShadowCubeMapBuffer4 "TESR_ShadowCubeMapBuffer4"
+#define WordShadowCubeMapBuffer5 "TESR_ShadowCubeMapBuffer5"
+#define WordShadowCubeMapBuffer6 "TESR_ShadowCubeMapBuffer6"
+#define WordShadowCubeMapBuffer7 "TESR_ShadowCubeMapBuffer7"
+#define WordShadowCubeMapBuffer8 "TESR_ShadowCubeMapBuffer8"
+#define WordShadowCubeMapBuffer9 "TESR_ShadowCubeMapBuffer9"
+#define WordShadowCubeMapBuffer10 "TESR_ShadowCubeMapBuffer10"
+#define WordShadowCubeMapBuffer11 "TESR_ShadowCubeMapBuffer11"
 
 enum TextureRecordType {
 	TextureRecordType_None,
@@ -26,6 +34,14 @@ enum TextureRecordType {
 	TextureRecordType_ShadowCubeMapBuffer1,
 	TextureRecordType_ShadowCubeMapBuffer2,
 	TextureRecordType_ShadowCubeMapBuffer3,
+	TextureRecordType_ShadowCubeMapBuffer4,
+	TextureRecordType_ShadowCubeMapBuffer5,
+	TextureRecordType_ShadowCubeMapBuffer6,
+	TextureRecordType_ShadowCubeMapBuffer7,
+	TextureRecordType_ShadowCubeMapBuffer8,
+	TextureRecordType_ShadowCubeMapBuffer9,
+	TextureRecordType_ShadowCubeMapBuffer10,
+	TextureRecordType_ShadowCubeMapBuffer11,
 	TextureRecordType_Max,
 };
 

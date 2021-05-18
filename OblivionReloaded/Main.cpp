@@ -48,6 +48,7 @@ extern "C" {
 			CreateScriptHook();
 			CreateAnimationHook();
 			CreateShadowsHook();
+			CreateWeatherModeHook();
 			if (TheSettingManager->SettingsMain.Main.MemoryManagement) CreateMemoryManagementHook();
 			if (TheSettingManager->SettingsMain.GrassMode.Enabled) CreateGrassHook();
 			if (TheSettingManager->SettingsMain.CameraMode.Enabled) CreateCameraModeHook();
@@ -58,7 +59,8 @@ extern "C" {
 			if (TheSettingManager->SettingsMain.SleepingMode.Enabled) CreateSleepingModeHook();
 			if (TheSettingManager->SettingsMain.Dodge.Enabled) CreateDodgeHook();
 			if (TheSettingManager->SettingsMain.FlyCam.Enabled) CreateFlyCamHook();
-			if (TheSettingManager->SettingsMain.WeatherMode.Enabled) CreateWeatherModeHook();
+			//TODO: Add additonal setting for Moon phase luminance to toggle this
+			//if (TheSettingManager->SettingsMain.WeatherMode.Enabled) CreateWeatherModeHook();
 			if (TheSettingManager->SettingsMain.Develop.LogShaders) CreateD3D9Hook();
 
 			WriteRelJump(0x0049849A, 0x004984A0); // Skips antialiasing deactivation if HDR is enabled on the D3DDevice

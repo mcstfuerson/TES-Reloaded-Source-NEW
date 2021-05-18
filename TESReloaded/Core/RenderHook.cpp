@@ -76,6 +76,7 @@ public:
 	void	TrackCullingBSFadeNode(NiCullingProcess*);
 	float	TrackFarPlane();
 	HRESULT TrackSetSamplerState(UInt32, D3DSAMPLERSTATETYPE, UInt32, UInt8);
+	void	TrackSetDirectionalLight(NiTransform* WorldTransform);
 #elif defined(SKYRIM)
 	void	TrackRender(BSRenderedTexture* RenderedTexture, int Arg2, int Arg3);
 	bool	TrackSetupRenderingPass(UInt32 Arg1, UInt32 Arg2);
@@ -275,19 +276,6 @@ void RenderHook::TrackHDRRender(NiScreenElements* ScreenElements, BSRenderedText
 
 }
 
-void (__thiscall RenderHook::* CullingBSFadeNode)(NiCullingProcess*);
-void (__thiscall RenderHook::* TrackCullingBSFadeNode)(NiCullingProcess*);
-void RenderHook::TrackCullingBSFadeNode(NiCullingProcess* Process) {
-	
-	BSFadeNode* Object = (BSFadeNode*)this;
-
-	if (TheSettingManager->SettingsMain.FrameRate.Enabled && Player->GetWorldSpace()) {
-		if (Object->MultType == 6 && !strstr(Object->m_pcName, "ImperialCity") && TheFrameRateManager->IsOutGrid(Object)) return;
-	}
-	(this->*CullingBSFadeNode)(Process);
-
-}
-
 float (__thiscall RenderHook::* FarPlane)();
 float (__thiscall RenderHook::* TrackFarPlane)();
 float RenderHook::TrackFarPlane() {
@@ -297,6 +285,12 @@ float RenderHook::TrackFarPlane() {
 	if (TheSettingManager->SettingsMain.Main.FarPlaneDistance && r == 283840.0f) r = TheSettingManager->SettingsMain.Main.FarPlaneDistance;
 	return r;
 
+}
+
+void(__thiscall RenderHook::* SetDirectionalLight)(NiTransform* WorldTransform);
+void(__thiscall RenderHook::* TrackSetDirectionalLight)(NiTransform* WorldTransform);
+void RenderHook::TrackSetDirectionalLight(NiTransform* WorldTransform) {
+	return (this->*SetDirectionalLight)(WorldTransform);
 }
 
 UInt32 (__thiscall RenderHook::* SetupShaderPrograms)(NiGeometry*, NiSkinInstance*, NiSkinPartition::Partition*, NiGeometryBufferData*, NiPropertyState*, NiDynamicEffectState*, NiTransform*, UInt32);
@@ -313,6 +307,7 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 			TheShaderManager->ShaderConst.TextureData.x = Pass->Stages.data[0]->Texture->GetWidth();
 			TheShaderManager->ShaderConst.TextureData.y = Pass->Stages.data[0]->Texture->GetHeight();
 		}
+
 		if (VertexShader->ShaderProg && TheRenderManager->renderState->GetVertexShader() != VertexShader->ShaderHandle) VertexShader->ShaderProg->SetCT();
 		if (PixelShader->ShaderProg && TheRenderManager->renderState->GetPixelShader() != PixelShader->ShaderHandle) PixelShader->ShaderProg->SetCT();
 		if (RenderWindowRootNode) {
@@ -326,8 +321,11 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 			Node->m_children.Add((NiAVObject**)&Geometry); // Same as above
 			RenderWindowRootNode->AddObject(Node, 1);
 		}
-		if (TheSettingManager->SettingsMain.Develop.LogShaders && TheKeyboardManager->OnKeyPressed(TheSettingManager->SettingsMain.Develop.LogShaders)) Logger::Log("Pass %s (%s %s)", Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
+		if (TheSettingManager->SettingsMain.Develop.LogShaders && TheKeyboardManager->OnKeyPressed(TheSettingManager->SettingsMain.Develop.LogShaders)) {
+			Logger::Log("Pass %s (%s %s)", Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
+		}
 	}
+
 	return (this->*SetupShaderPrograms)(Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
 	
 }
@@ -670,12 +668,12 @@ void CreateRenderHook() {
 #elif defined(OBLIVION)
 	*((int*)&SetupShaderPrograms)			= 0x0077A1F0;
 	TrackSetupShaderPrograms				= &RenderHook::TrackSetupShaderPrograms;
+	*((int*)&SetDirectionalLight)			= 0x007c8520;
+	TrackSetDirectionalLight				= &RenderHook::TrackSetDirectionalLight;
 	*((int*)&EndTargetGroup)				= 0x007AAA30;
 	TrackEndTargetGroup						= &RenderHook::TrackEndTargetGroup;
 	*((int*)&HDRRender)						= 0x007BDFC0;
 	TrackHDRRender							= &RenderHook::TrackHDRRender;
-	*((int*)&CullingBSFadeNode)				= 0x004A0920;
-	TrackCullingBSFadeNode					= &RenderHook::TrackCullingBSFadeNode;
 	*((int*)&FarPlane)						= 0x00410EE0;
 	TrackFarPlane							= &RenderHook::TrackFarPlane;
 	*((int*)&SetSamplerState)				= 0x0077B610;
@@ -701,9 +699,9 @@ void CreateRenderHook() {
 	//DetourAttach(&(PVOID&)SetShaderPackage,						  &TrackSetShaderPackage);
 #elif defined(OBLIVION)
 	DetourAttach(&(PVOID&)SetupShaderPrograms,			*((PVOID*)&TrackSetupShaderPrograms));
+	//DetourAttach(&(PVOID&)SetDirectionalLight,			*((PVOID*)&TrackSetDirectionalLight));
 	DetourAttach(&(PVOID&)EndTargetGroup,				*((PVOID*)&TrackEndTargetGroup));
 	DetourAttach(&(PVOID&)HDRRender,					*((PVOID*)&TrackHDRRender));
-	DetourAttach(&(PVOID&)CullingBSFadeNode,			*((PVOID*)&TrackCullingBSFadeNode));
 	DetourAttach(&(PVOID&)FarPlane,						*((PVOID*)&TrackFarPlane));
 	DetourAttach(&(PVOID&)SetSamplerState,				*((PVOID*)&TrackSetSamplerState));
 	DetourAttach(&(PVOID&)SaveGameScreenshot,					  &TrackSaveGameScreenshot);

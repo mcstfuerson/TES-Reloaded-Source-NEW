@@ -97,21 +97,19 @@ SettingManager::SettingManager() {
 	SettingsMain.Main.ScreenshotType = GetPrivateProfileIntA("Main", "ScreenshotType", 1, Filename);
 	SettingsMain.Main.ScreenshotKey = GetPrivateProfileIntA("Main", "ScreenshotKey", 87, Filename);
 	SettingsMain.Main.FPSOverlay = GetPrivateProfileIntA("Main", "FPSOverlay", 0, Filename);
+	SettingsMain.Main.DirectionalLightOverride = GetPrivateProfileIntA("Main", "DirectionalLightOverride", 0, Filename);
+	GetPrivateProfileStringA("Main", "MoonPhaseLumNew", "0.0", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.MoonPhaseLumNew = atof(value);
+	GetPrivateProfileStringA("Main", "MoonPhaseLumQtr", "0.25", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.MoonPhaseLumQtr = atof(value);
+	GetPrivateProfileStringA("Main", "MoonPhaseLumHalf", "0.50", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.MoonPhaseLumHalf = atof(value);
+	GetPrivateProfileStringA("Main", "MoonPhaseLumTQtr", "0.75", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.MoonPhaseLumTQtr = atof(value);
+	GetPrivateProfileStringA("Main", "MoonPhaseLumFull", "1.00", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.MoonPhaseLumFull = atof(value);
 	SettingsMain.Main.SaveSettings = GetPrivateProfileIntA("Main", "SaveSettings", 1, Filename);
-	SettingsMain.Main.ReplaceIntro = GetPrivateProfileIntA("Main", "ReplaceIntro", 0, Filename);
-
-	SettingsMain.FrameRate.Enabled = GetPrivateProfileIntA("FrameRate", "Enabled", 0, Filename);
-	SettingsMain.FrameRate.Average = GetPrivateProfileIntA("FrameRate", "Average", 33, Filename);
-	SettingsMain.FrameRate.Min = GetPrivateProfileIntA("FrameRate", "Min", 20, Filename);
-	SettingsMain.FrameRate.Critical = GetPrivateProfileIntA("FrameRate", "Critical", 10, Filename);
-	SettingsMain.FrameRate.Gap = GetPrivateProfileIntA("FrameRate", "Gap", 3, Filename);
-	SettingsMain.FrameRate.Delay = GetPrivateProfileIntA("FrameRate", "Delay", 10, Filename);
-	GetPrivateProfileStringA("FrameRate", "FadeStep", "0.5", value, SettingStringBuffer, Filename);
-	SettingsMain.FrameRate.FadeStep = atof(value);
-	SettingsMain.FrameRate.FadeMinObjects = GetPrivateProfileIntA("FrameRate", "FadeMinObjects", 10, Filename);
-	SettingsMain.FrameRate.FadeMinActors = GetPrivateProfileIntA("FrameRate", "FadeMinActors", 15, Filename);
-	SettingsMain.FrameRate.GridStep = GetPrivateProfileIntA("FrameRate", "GridStep", 2, Filename);
-	SettingsMain.FrameRate.GridMin = GetPrivateProfileIntA("FrameRate", "GridMin", 5, Filename);
+	SettingsMain.Main.ReplaceIntro = GetPrivateProfileIntA("Main", "ReplaceIntro", 0, Filename);	
 
 	SettingsMain.EquipmentMode.Enabled = GetPrivateProfileIntA("EquipmentMode", "Enabled", 0, Filename);
 	GetPrivateProfileStringA("EquipmentMode", "ShieldOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
@@ -305,6 +303,7 @@ SettingManager::SettingManager() {
 	SettingsMain.Effects.Underwater = GetPrivateProfileIntA("Effects", "Underwater", 0, Filename);
 	SettingsMain.Effects.WaterLens = GetPrivateProfileIntA("Effects", "WaterLens", 0, Filename);
 	SettingsMain.Effects.GodRays = GetPrivateProfileIntA("Effects", "GodRays", 0, Filename);
+	SettingsMain.Effects.KhajiitRays = GetPrivateProfileIntA("Effects", "KhajiitRays", 0, Filename);
 	SettingsMain.Effects.DepthOfField = GetPrivateProfileIntA("Effects", "DepthOfField", 0, Filename);
 	SettingsMain.Effects.AmbientOcclusion = GetPrivateProfileIntA("Effects", "AmbientOcclusion", 0, Filename);
 	SettingsMain.Effects.Coloring = GetPrivateProfileIntA("Effects", "Coloring", 0, Filename);
@@ -644,6 +643,63 @@ void SettingManager::LoadSettings() {
 	SettingsGodRays.RayB = atof(value);
 	GetPrivateProfileStringA("Default", "Saturate", "0.55", value, SettingStringBuffer, Filename);
 	SettingsGodRays.Saturate = atof(value);
+
+	strcpy(Filename, CurrentPath);
+	strcat(Filename, SettingsPath);
+	strcat(Filename, "KhajiitRays\\KhajiitRays.ini");
+	//Masser
+	SettingsKhajiitRays.mLightShaftPasses = GetPrivateProfileIntA("Default", "MasserLightShaftPasses", 30, Filename);
+	GetPrivateProfileStringA("Default", "MasserRayIntensity", "3.2", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayIntensity = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayLength", "1.0", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayLength = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayDensity", "0.8", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayDensity = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayVisibility", "0.4", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayVisibility = atof(value);
+	GetPrivateProfileStringA("Default", "MasserLuminance", "0.4", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mLuminance = atof(value);
+	GetPrivateProfileStringA("Default", "MasserGlobalMultiplier", "1.5", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mGlobalMultiplier = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayR", "0.5", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayR = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayG", "0.9", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayG = atof(value);
+	GetPrivateProfileStringA("Default", "MasserRayB", "0.8", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mRayB = atof(value);
+	GetPrivateProfileStringA("Default", "MasserSaturate", "0.55", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.mSaturate = atof(value);
+	//Secunda
+	SettingsKhajiitRays.sLightShaftPasses = GetPrivateProfileIntA("Default", "SecundaLightShaftPasses", 30, Filename);
+	GetPrivateProfileStringA("Default", "SecundaRayIntensity", "3.2", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayIntensity = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayLength", "1.0", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayLength = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayDensity", "0.8", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayDensity = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayVisibility", "0.4", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayVisibility = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaLuminance", "0.4", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sLuminance = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaGlobalMultiplier", "1.5", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sGlobalMultiplier = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayR", "0.5", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayR = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayG", "0.9", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayG = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaRayB", "0.8", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sRayB = atof(value);
+	GetPrivateProfileStringA("Default", "SecundaSaturate", "0.55", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.sSaturate = atof(value);
+	//Other
+	GetPrivateProfileStringA("Default", "PhaseLumQtr", "0.25", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.phaseLumQtr = atof(value);
+	GetPrivateProfileStringA("Default", "PhaseLumHalf", "0.50", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.phaseLumHalf = atof(value);
+	GetPrivateProfileStringA("Default", "PhaseLumTQtr", "0.75", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.phaseLumTQtr = atof(value);
+	GetPrivateProfileStringA("Default", "PhaseLumFull", "1,0", value, SettingStringBuffer, Filename);
+	SettingsKhajiitRays.phaseLumFull = atof(value);
 
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
@@ -1081,6 +1137,24 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Interiors.ShadowCubeMapSize = GetPrivateProfileIntA("Interiors", "ShadowCubeMapSize", 512, Filename);
 	GetPrivateProfileStringA("Interiors", "Darkness", "1.0", value, SettingStringBuffer, Filename);
 	SettingsShadows.Interiors.Darkness = atof(value);
+
+	SettingsShadows.ExteriorsPoint.Enabled = GetPrivateProfileIntA("ExteriorsPoint", "Enabled", 1, Filename);
+	SettingsShadows.ExteriorsPoint.AlphaEnabled = GetPrivateProfileIntA("ExteriorsPoint", "AlphaEnabled", 1, Filename);
+	SettingsShadows.ExteriorsPoint.Forms.Activators = GetPrivateProfileIntA("ExteriorsPoint", "Activators", 1, Filename);
+	SettingsShadows.ExteriorsPoint.Forms.Actors = GetPrivateProfileIntA("ExteriorsPoint", "Actors", 1, Filename);
+	SettingsShadows.ExteriorsPoint.Forms.Apparatus = GetPrivateProfileIntA("ExteriorsPoint", "Apparatus", 1, Filename);
+	SettingsShadows.ExteriorsPoint.Forms.Books = GetPrivateProfileIntA("ExteriorsPoint", "Books", 0, Filename);
+	SettingsShadows.ExteriorsPoint.Forms.Containers = GetPrivateProfileIntA("ExteriorsPoint", "Containers", 1, Filename);
+	SettingsShadows.ExteriorsPoint.Forms.Doors = GetPrivateProfileIntA("ExteriorsPoint", "Doors", 0, Filename);
+	SettingsShadows.ExteriorsPoint.Forms.Furniture = GetPrivateProfileIntA("ExteriorsPoint", "Furniture", 1, Filename);
+	SettingsShadows.ExteriorsPoint.Forms.Misc = GetPrivateProfileIntA("ExteriorsPoint", "Misc", 0, Filename);
+	SettingsShadows.ExteriorsPoint.Forms.Statics = GetPrivateProfileIntA("ExteriorsPoint", "Statics", 1, Filename);
+	SettingsShadows.ExteriorsPoint.Quality = GetPrivateProfileIntA("ExteriorsPoint", "Quality", 0, Filename);
+	SettingsShadows.ExteriorsPoint.LightPoints = GetPrivateProfileIntA("ExteriorsPoint", "LightPoints", 2, Filename);
+	SettingsShadows.ExteriorsPoint.TorchesCastShadows = GetPrivateProfileIntA("ExteriorsPoint", "TorchesCastShadows", 0, Filename);
+	SettingsShadows.ExteriorsPoint.ShadowCubeMapSize = GetPrivateProfileIntA("ExteriorsPoint", "ShadowCubeMapSize", 512, Filename);
+	GetPrivateProfileStringA("ExteriorsPoint", "Darkness", "1.0", value, SettingStringBuffer, Filename);
+	SettingsShadows.ExteriorsPoint.Darkness = atof(value);
 	
 	ValueList FormValue;
 	char Form[12] = { NULL };
@@ -1088,11 +1162,13 @@ void SettingManager::LoadSettings() {
 	char FormID[12] = { NULL };
 	bool FormStatus = false;
 	size_t EC = 0;
+	size_t NC = 0;
 	size_t IC = 0;
 	GetPrivateProfileSectionA("FormIDs", Sections, 32767, Filename);
 	for (int i = 0; i < 2; i++) {
 		if (i == 1) {
 			SettingsShadows.Exteriors.ExcludedForms.reserve(EC);
+			SettingsShadows.ExteriorsPoint.ExcludedForms.reserve(NC);
 			SettingsShadows.Interiors.ExcludedForms.reserve(IC);
 		}
 		pNextSection = Sections;
@@ -1117,11 +1193,18 @@ void SettingManager::LoadSettings() {
 					else
 						SettingsShadows.Interiors.ExcludedForms.push_back(atoi(FormID));
 				}
+				if (FormType[0] == 'X' || FormType[0] == 'N') {
+					if (i == 0)
+						NC += 1;
+					else
+						SettingsShadows.ExteriorsPoint.ExcludedForms.push_back(atoi(FormID));
+				}
 			}
 			pNextSection = pNextSection + strlen(pNextSection) + 1;
 		}
 	}
 	if (EC) std::sort(SettingsShadows.Exteriors.ExcludedForms.begin(), SettingsShadows.Exteriors.ExcludedForms.end());
+	if (IC) std::sort(SettingsShadows.ExteriorsPoint.ExcludedForms.begin(), SettingsShadows.ExteriorsPoint.ExcludedForms.end());
 	if (IC) std::sort(SettingsShadows.Interiors.ExcludedForms.begin(), SettingsShadows.Interiors.ExcludedForms.end());
 
 }
@@ -1136,8 +1219,14 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 	if (!strcmp(Item, "Main")) {
 		if (!strcmp(Definition, "Main")) {
 			WritePrivateProfileStringA("Main", "FoV", ToString(SettingsMain.Main.FoV).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "MoonPhaseLumNew", ToString(SettingsMain.Main.MoonPhaseLumNew).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "MoonPhaseLumQtr", ToString(SettingsMain.Main.MoonPhaseLumQtr).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "MoonPhaseLumHalf", ToString(SettingsMain.Main.MoonPhaseLumHalf).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "MoonPhaseLumTQtr", ToString(SettingsMain.Main.MoonPhaseLumTQtr).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "MoonPhaseLumFull", ToString(SettingsMain.Main.MoonPhaseLumFull).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "ScreenshotKey", ToString(SettingsMain.Main.ScreenshotKey).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "FPSOverlay", ToString(SettingsMain.Main.FPSOverlay).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "DirectionalLightOverride", ToString(SettingsMain.Main.DirectionalLightOverride).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("CameraMode", "NearDistanceFirst", ToString(SettingsMain.CameraMode.NearDistanceFirst).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("CameraMode", "NearDistanceThird", ToString(SettingsMain.CameraMode.NearDistanceThird).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("CameraMode", "OffsetX", ToString(SettingsMain.CameraMode.Offset.x).c_str(), SettingsMain.Main.MainFile);
@@ -1260,6 +1349,39 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("Default", "TimeEnabled", ToString(SettingsGodRays.TimeEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "RayVisibility", ToString(SettingsGodRays.RayVisibility).c_str(), Filename);
 		}
+		else if (!strcmp(Definition, "KhajiitRays")) {
+			WritePrivateProfileStringA("Effects", "KhajiitRays", ToString(SettingsMain.Effects.KhajiitRays).c_str(), SettingsMain.Main.MainFile);
+			strcat(Filename, "KhajiitRays\\KhajiitRays.ini");
+			//Masser
+			WritePrivateProfileStringA("Default", "MasserRayDensity", ToString(SettingsKhajiitRays.mRayDensity).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayIntensity", ToString(SettingsKhajiitRays.mRayIntensity).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayLength", ToString(SettingsKhajiitRays.mRayLength).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserGlobalMultiplier", ToString(SettingsKhajiitRays.mGlobalMultiplier).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserSaturate", ToString(SettingsKhajiitRays.mSaturate).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserLightShaftPasses", ToString(SettingsKhajiitRays.mLightShaftPasses).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserLuminance", ToString(SettingsKhajiitRays.mLuminance).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayR", ToString(SettingsKhajiitRays.mRayR).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayG", ToString(SettingsKhajiitRays.mRayG).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayB", ToString(SettingsKhajiitRays.mRayB).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "MasserRayVisibility", ToString(SettingsKhajiitRays.mRayVisibility).c_str(), Filename);
+			//Secunda
+			WritePrivateProfileStringA("Default", "SecundaRayDensity", ToString(SettingsKhajiitRays.sRayDensity).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayIntensity", ToString(SettingsKhajiitRays.sRayIntensity).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayLength", ToString(SettingsKhajiitRays.sRayLength).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaGlobalMultiplier", ToString(SettingsKhajiitRays.sGlobalMultiplier).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaSaturate", ToString(SettingsKhajiitRays.sSaturate).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaLightShaftPasses", ToString(SettingsKhajiitRays.sLightShaftPasses).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaLuminance", ToString(SettingsKhajiitRays.sLuminance).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayR", ToString(SettingsKhajiitRays.sRayR).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayG", ToString(SettingsKhajiitRays.sRayG).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayB", ToString(SettingsKhajiitRays.sRayB).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SecundaRayVisibility", ToString(SettingsKhajiitRays.sRayVisibility).c_str(), Filename);
+			//Other
+			WritePrivateProfileStringA("Default", "PhaseLumQtr", ToString(SettingsKhajiitRays.phaseLumQtr).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "PhaseLumHalf", ToString(SettingsKhajiitRays.phaseLumHalf).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "PhaseLumTQtr", ToString(SettingsKhajiitRays.phaseLumTQtr).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "PhaseLumFull", ToString(SettingsKhajiitRays.phaseLumFull).c_str(), Filename);
+		}
 		else if (!strcmp(Definition, "Grass")) {
 			strcat(Filename, "Grass\\Grass.ini");
 			WritePrivateProfileStringA("Default", "GrassDensity", ToString(SettingsGrass.GrassDensity).c_str(), Filename);
@@ -1327,10 +1449,16 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("ExteriorsNear", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsFar", "Enabled", ToString(SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsFar", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsPoint", "Enabled", ToString(SettingsShadows.ExteriorsPoint.Enabled).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsPoint", "AlphaEnabled", ToString(SettingsShadows.ExteriorsPoint.AlphaEnabled).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsPoint", "Darkness", ToString(SettingsShadows.ExteriorsPoint.Darkness).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsPoint", "Quality", ToString(SettingsShadows.ExteriorsPoint.Quality).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsPoint", "LightPoints", ToString(SettingsShadows.ExteriorsPoint.LightPoints).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Enabled", ToString(SettingsShadows.Interiors.Enabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "AlphaEnabled", ToString(SettingsShadows.Interiors.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Darkness", ToString(SettingsShadows.Interiors.Darkness).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Quality", ToString(SettingsShadows.Interiors.Quality).c_str(), Filename);
+			WritePrivateProfileStringA("Interiors", "LightPoints", ToString(SettingsShadows.Interiors.LightPoints).c_str(), Filename);
 		}
 		else if (!strcmp(Definition, "Sharpening")) {
 			WritePrivateProfileStringA("Effects", "Sharpening", ToString(SettingsMain.Effects.Sharpening).c_str(), SettingsMain.Main.MainFile);
@@ -1490,6 +1618,7 @@ DefinitionsList SettingManager::GetMenuDefinitions(const char* Item) {
 		Definitions["Coloring"] = "Coloring";
 		Definitions["DepthOfField"] = "Depth Of Field";
 		Definitions["GodRays"] = "God Rays";
+		Definitions["KhajiitRays"] = "Khajiit Rays";
 #if defined(OBLIVION)
 		Definitions["Grass"] = "Grass";
 		Definitions["HDR"] = "High Dynamic Range";
@@ -1593,7 +1722,8 @@ SectionsList SettingManager::GetMenuSections(const char* Item, const char* Defin
 			Sections[0] = "Exteriors";
 			Sections[1] = "ExteriorsNear";
 			Sections[2] = "ExteriorsFar";
-			Sections[3] = "Interiors";
+			Sections[3] = "ExteriorsPoint";
+			Sections[4] = "Interiors";
 		}
 		else if (!strcmp(Definition, "Water")) {
 			SettingsWaterList::iterator v = SettingsWater.begin();
@@ -1636,6 +1766,12 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				if (SettingsMain.Main.FoV) Settings["FoV"] = SettingsMain.Main.FoV;
 				Settings["ScreenshotKey"] = SettingsMain.Main.ScreenshotKey;
 				Settings["FPSOverlay"] = SettingsMain.Main.FPSOverlay;
+				Settings["DirectionalLightOverride"] = SettingsMain.Main.DirectionalLightOverride;
+				Settings["MoonPhaseLumNew"] = SettingsMain.Main.MoonPhaseLumNew;
+				Settings["MoonPhaseLumQtr"] = SettingsMain.Main.MoonPhaseLumQtr;
+				Settings["MoonPhaseLumHalf"] = SettingsMain.Main.MoonPhaseLumHalf;
+				Settings["MoonPhaseLumTQtr"] = SettingsMain.Main.MoonPhaseLumTQtr;
+				Settings["MoonPhaseLumFull"] = SettingsMain.Main.MoonPhaseLumFull;
 			}
 			else if (!strcmp(Section, "CameraMode")) {
 				Settings["NearDistanceFirst"] = SettingsMain.CameraMode.NearDistanceFirst;
@@ -1679,19 +1815,6 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["CoeffSunR"] = SettingsMain.WeatherMode.CoeffSun.x;
 				Settings["CoeffSunG"] = SettingsMain.WeatherMode.CoeffSun.y;
 				Settings["CoeffSunB"] = SettingsMain.WeatherMode.CoeffSun.z;
-			}
-			else if (!strcmp(Section, "FrameRate")) {
-				Settings["Enabled"] = SettingsMain.FrameRate.Enabled;
-				Settings["Average"] = SettingsMain.FrameRate.Average;
-				Settings["Critical"] = SettingsMain.FrameRate.Critical;
-				Settings["Delay"] = SettingsMain.FrameRate.Delay;
-				Settings["FadeMinActors"] = SettingsMain.FrameRate.FadeMinActors;
-				Settings["FadeMinObjects"] = SettingsMain.FrameRate.FadeMinObjects;
-				Settings["FadeStep"] = SettingsMain.FrameRate.FadeStep;
-				Settings["Gap"] = SettingsMain.FrameRate.Gap;
-				Settings["GridMin"] = SettingsMain.FrameRate.GridMin;
-				Settings["GridStep"] = SettingsMain.FrameRate.GridStep;
-				Settings["Min"] = SettingsMain.FrameRate.Min;
 			}
 			else if (!strcmp(Section, "Gravity")) {
 				Settings["Enabled"] = SettingsMain.Gravity.Enabled;
@@ -1824,6 +1947,38 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["SunGlareEnabled"] = SettingsGodRays.SunGlareEnabled;
 			Settings["TimeEnabled"] = SettingsGodRays.TimeEnabled;
 		}
+		else if (!strcmp(Definition, "KhajiitRays")) {
+			//Masser
+			Settings["MasserGlobalMultiplier"] = SettingsKhajiitRays.mGlobalMultiplier;
+			Settings["MasserLightShaftPasses"] = SettingsKhajiitRays.mLightShaftPasses;
+			Settings["MasserLuminance"] = SettingsKhajiitRays.mLuminance;
+			Settings["MasserRayDensity"] = SettingsKhajiitRays.mRayDensity;
+			Settings["MasserRayIntensity"] = SettingsKhajiitRays.mRayIntensity;
+			Settings["MasserRayLength"] = SettingsKhajiitRays.mRayLength;
+			Settings["MasserRayVisibility"] = SettingsKhajiitRays.mRayVisibility;
+			Settings["MasserRayR"] = SettingsKhajiitRays.mRayR;
+			Settings["MasserRayG"] = SettingsKhajiitRays.mRayG;
+			Settings["MasserRayB"] = SettingsKhajiitRays.mRayB;
+			Settings["MasserSaturate"] = SettingsKhajiitRays.mSaturate;
+			//Secunda
+			Settings["SecundaGlobalMultiplier"] = SettingsKhajiitRays.sGlobalMultiplier;
+			Settings["SecundaLightShaftPasses"] = SettingsKhajiitRays.sLightShaftPasses;
+			Settings["SecundaLuminance"] = SettingsKhajiitRays.sLuminance;
+			Settings["SecundaRayDensity"] = SettingsKhajiitRays.sRayDensity;
+			Settings["SecundaRayIntensity"] = SettingsKhajiitRays.sRayIntensity;
+			Settings["SecundaRayLength"] = SettingsKhajiitRays.sRayLength;
+			Settings["SecundaRayVisibility"] = SettingsKhajiitRays.sRayVisibility;
+			Settings["SecundaRayR"] = SettingsKhajiitRays.sRayR;
+			Settings["SecundaRayG"] = SettingsKhajiitRays.sRayG;
+			Settings["SecundaRayB"] = SettingsKhajiitRays.sRayB;
+			Settings["SecundaSaturate"] = SettingsKhajiitRays.sSaturate;
+			//Other
+			Settings["PhaseLumQtr"] = SettingsKhajiitRays.phaseLumQtr;
+			Settings["PhaseLumHalf"] = SettingsKhajiitRays.phaseLumHalf;
+			Settings["PhaseLumTQtr"] = SettingsKhajiitRays.phaseLumTQtr;
+			Settings["PhaseLumFull"] = SettingsKhajiitRays.phaseLumFull;
+
+		}
 		else if (!strcmp(Definition, "Grass")) {
 			Settings["GrassDensity"] = SettingsGrass.GrassDensity;
 			Settings["MaxDistance"] = SettingsGrass.MaxDistance;
@@ -1881,6 +2036,14 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["AlphaEnabled"] = SettingsShadows.Interiors.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.Interiors.Darkness;
 				Settings["Quality"] = SettingsShadows.Interiors.Quality;
+				Settings["LightPoints"] = SettingsShadows.Interiors.LightPoints;
+			}
+			else if (!strcmp(Section, "ExteriorsPoint")) {
+				Settings["Enabled"] = SettingsShadows.ExteriorsPoint.Enabled;
+				Settings["AlphaEnabled"] = SettingsShadows.ExteriorsPoint.AlphaEnabled;
+				Settings["Darkness"] = SettingsShadows.ExteriorsPoint.Darkness;
+				Settings["Quality"] = SettingsShadows.ExteriorsPoint.Quality;
+				Settings["LightPoints"] = SettingsShadows.ExteriorsPoint.LightPoints;
 			}
 		}
 		else if (!strcmp(Definition, "Sharpening")) {
@@ -2079,6 +2242,18 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsMain.Main.ScreenshotKey = Value;
 				else if (!strcmp(Setting, "FPSOverlay"))
 					SettingsMain.Main.FPSOverlay = Value;
+				else if (!strcmp(Setting, "DirectionalLightOverride"))
+					SettingsMain.Main.DirectionalLightOverride = Value;
+				else if (!strcmp(Setting, "MoonPhaseLumNew"))
+					SettingsMain.Main.MoonPhaseLumNew = Value;
+				else if (!strcmp(Setting, "MoonPhaseLumQtr"))
+					SettingsMain.Main.MoonPhaseLumQtr = Value;
+				else if (!strcmp(Setting, "MoonPhaseLumHalf"))
+					SettingsMain.Main.MoonPhaseLumHalf = Value;
+				else if (!strcmp(Setting, "MoonPhaseLumTQtr"))
+					SettingsMain.Main.MoonPhaseLumTQtr = Value;
+				else if (!strcmp(Setting, "MoonPhaseLumFull"))
+					SettingsMain.Main.MoonPhaseLumFull = Value;
 			}
 			else if (!strcmp(Section, "CameraMode")) {
 				if (!strcmp(Setting, "NearDistanceFirst"))
@@ -2169,30 +2344,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				#endif
 					SetSettingsWeather(Weather);
 				}
-			}
-			else if (!strcmp(Section, "FrameRate")) {
-				if (!strcmp(Setting, "Enabled"))
-					SettingsMain.FrameRate.Enabled = Value;
-				else if (!strcmp(Setting, "Average"))
-					SettingsMain.FrameRate.Average = Value;
-				else if (!strcmp(Setting, "Critical"))
-					SettingsMain.FrameRate.Critical = Value;
-				else if (!strcmp(Setting, "Delay"))
-					SettingsMain.FrameRate.Delay = Value;
-				else if (!strcmp(Setting, "FadeMinActors"))
-					SettingsMain.FrameRate.FadeMinActors = Value;
-				else if (!strcmp(Setting, "FadeMinObjects"))
-					SettingsMain.FrameRate.FadeMinObjects = Value;
-				else if (!strcmp(Setting, "FadeStep"))
-					SettingsMain.FrameRate.FadeStep = Value;
-				else if (!strcmp(Setting, "Gap"))
-					SettingsMain.FrameRate.Gap = Value;
-				else if (!strcmp(Setting, "GridMin"))
-					SettingsMain.FrameRate.GridMin = Value;
-				else if (!strcmp(Setting, "GridStep"))
-					SettingsMain.FrameRate.GridStep = Value;
-				else if (!strcmp(Setting, "Min"))
-					SettingsMain.FrameRate.Min = Value;
 			}
 			else if (!strcmp(Section, "Gravity")) {
 				if (!strcmp(Setting, "Enabled"))
@@ -2409,6 +2560,60 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 			else if (!strcmp(Setting, "RayVisibility"))
 				SettingsGodRays.RayVisibility = Value;
 		}
+		else if (!strcmp(Definition, "KhajiitRays")) {
+			if (!strcmp(Setting, "MasserRayDensity"))
+				SettingsKhajiitRays.mRayDensity = Value;
+			else if (!strcmp(Setting, "MasserRayIntensity"))
+				SettingsKhajiitRays.mRayIntensity = Value;
+			else if (!strcmp(Setting, "MasserRayLength"))
+				SettingsKhajiitRays.mRayLength = Value;
+			else if (!strcmp(Setting, "MasserGlobalMultiplier"))
+				SettingsKhajiitRays.mGlobalMultiplier = Value;
+			else if (!strcmp(Setting, "MasserSaturate"))
+				SettingsKhajiitRays.mSaturate = Value;
+			else if (!strcmp(Setting, "MasserLightShaftPasses"))
+				SettingsKhajiitRays.mLightShaftPasses = Value;
+			else if (!strcmp(Setting, "MasserLuminance"))
+				SettingsKhajiitRays.mLuminance = Value;
+			else if (!strcmp(Setting, "MasserRayR"))
+				SettingsKhajiitRays.mRayR = Value;
+			else if (!strcmp(Setting, "MasserRayG"))
+				SettingsKhajiitRays.mRayG = Value;
+			else if (!strcmp(Setting, "MasserRayB"))
+				SettingsKhajiitRays.mRayB = Value;
+			else if (!strcmp(Setting, "MasserRayVisibility"))
+				SettingsKhajiitRays.mRayVisibility = Value;
+			else if (!strcmp(Setting, "SecundaRayDensity"))
+				SettingsKhajiitRays.sRayDensity = Value;
+			else if (!strcmp(Setting, "SecundaRayIntensity"))
+				SettingsKhajiitRays.sRayIntensity = Value;
+			else if (!strcmp(Setting, "SecundaRayLength"))
+				SettingsKhajiitRays.sRayLength = Value;
+			else if (!strcmp(Setting, "SecundaGlobalMultiplier"))
+				SettingsKhajiitRays.sGlobalMultiplier = Value;
+			else if (!strcmp(Setting, "SecundaSaturate"))
+				SettingsKhajiitRays.sSaturate = Value;
+			else if (!strcmp(Setting, "SecundaLightShaftPasses"))
+				SettingsKhajiitRays.sLightShaftPasses = Value;
+			else if (!strcmp(Setting, "SecundaLuminance"))
+				SettingsKhajiitRays.sLuminance = Value;
+			else if (!strcmp(Setting, "SecundaRayR"))
+				SettingsKhajiitRays.sRayR = Value;
+			else if (!strcmp(Setting, "SecundaRayG"))
+				SettingsKhajiitRays.sRayG = Value;
+			else if (!strcmp(Setting, "SecundaRayB"))
+				SettingsKhajiitRays.sRayB = Value;
+			else if (!strcmp(Setting, "SecundaRayVisibility"))
+				SettingsKhajiitRays.sRayVisibility = Value;
+			else if (!strcmp(Setting, "PhaseLumQtr"))
+				SettingsKhajiitRays.phaseLumQtr = Value;
+			else if (!strcmp(Setting, "PhaseLumHalf"))
+				SettingsKhajiitRays.phaseLumHalf = Value;
+			else if (!strcmp(Setting, "PhaseLumTQtr"))
+				SettingsKhajiitRays.phaseLumTQtr = Value;
+			else if (!strcmp(Setting, "PhaseLumFull"))
+				SettingsKhajiitRays.phaseLumFull = Value;
+		}
 		else if (!strcmp(Definition, "Grass")) {
 			if (!strcmp(Setting, "GrassDensity"))
 				SettingsGrass.GrassDensity = Value;
@@ -2509,10 +2714,32 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				else if (!strcmp(Setting, "Darkness")) {
 					SettingsShadows.Interiors.Darkness = Value;
 				}
+				else if (!strcmp(Setting, "LightPoints")) {
+					SettingsShadows.Interiors.LightPoints = Value;
+				}
 				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.Interiors.Quality = Value;
 					// Special case for forward or post-process shadowing
 					TheShaderManager->SwitchShaderStatus("ShadowsInteriors");
+				}
+			}
+			else if (!strcmp(Section, "ExteriorsPoint")) {
+				if (!strcmp(Setting, "Enabled")) {
+					SettingsShadows.ExteriorsPoint.Enabled = Value;
+				}
+				else if (!strcmp(Setting, "AlphaEnabled")) {
+					SettingsShadows.ExteriorsPoint.AlphaEnabled = Value;
+				}
+				else if (!strcmp(Setting, "Darkness")) {
+					SettingsShadows.ExteriorsPoint.Darkness = Value;
+				}
+				else if (!strcmp(Setting, "LightPoints")) {
+					SettingsShadows.ExteriorsPoint.LightPoints = Value;
+				}
+				else if (!strcmp(Setting, "Quality")) {
+					SettingsShadows.ExteriorsPoint.Quality = Value;
+					// Special case for forward or post-process shadowing
+					TheShaderManager->SwitchShaderStatus("ExteriorsPoint");
 				}
 			}
 		}
@@ -2837,6 +3064,8 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name)
 		Value = SettingsMain.Effects.DepthOfField;
 	else if (!strcmp(Name, "GodRays"))
 		Value = SettingsMain.Effects.GodRays;
+	else if (!strcmp(Name, "KhajiitRays"))
+		Value = SettingsMain.Effects.KhajiitRays;
 	else if (!strcmp(Name, "Grass"))
 		Value = SettingsMain.Shaders.Grass;
 	else if (!strcmp(Name, "HDR"))

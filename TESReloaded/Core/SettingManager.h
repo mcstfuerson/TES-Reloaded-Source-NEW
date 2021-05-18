@@ -85,6 +85,12 @@ struct SettingsMainStruct {
 		bool	FPSOverlay;
 		bool	SaveSettings;
 		bool	ReplaceIntro;
+		bool	DirectionalLightOverride;
+		float	MoonPhaseLumNew;
+		float	MoonPhaseLumQtr;
+		float	MoonPhaseLumHalf;
+		float	MoonPhaseLumTQtr;
+		float	MoonPhaseLumFull;
 		UInt8	ScreenshotType;
 		UInt8	AnisotropicFilter;
 		UInt16	ScreenshotKey;
@@ -125,20 +131,6 @@ struct SettingsMainStruct {
 		NiPoint3	TorchOnBeltRot;
 	};
 	
-	struct FrameRateStruct {
-		bool	Enabled;
-		int		Average;
-		int		Min;
-		int		Critical;
-		int		Gap;
-		int		Delay;
-		int		GridStep;
-		int		FadeMinObjects;
-		int		FadeMinActors;
-		int		GridMin;
-		float	FadeStep;
-	};
-
 	struct GrassModeStruct {
 		bool	Enabled;
 	};
@@ -191,6 +183,7 @@ struct SettingsMainStruct {
 		bool Coloring;
 		bool DepthOfField;
 		bool GodRays;
+		bool KhajiitRays;
 		bool LowHF;
 		bool MotionBlur;
 		bool Precipitations;
@@ -286,7 +279,6 @@ struct SettingsMainStruct {
 	MainStruct					Main;
 	CameraModeStruct			CameraMode;
 	EquipmentModeStruct			EquipmentMode;
-	FrameRateStruct				FrameRate;
 	GrassModeStruct				GrassMode;
 	MountedCombatStruct			MountedCombat;
 	SleepingModeStruct			SleepingMode;
@@ -331,6 +323,7 @@ struct SettingsShadowStruct {
 		ExcludedFormsList	ExcludedForms;
 	};
 	
+	//TODO: rename to something more appropriate
 	struct InteriorsStruct {
 		FormsStruct			Forms;
 		bool				Enabled;
@@ -345,6 +338,7 @@ struct SettingsShadowStruct {
 
 	ExteriorsStruct		Exteriors;
 	InteriorsStruct		Interiors;
+	InteriorsStruct		ExteriorsPoint;
 };
 
 struct SettingsWaterStruct {
@@ -428,6 +422,37 @@ struct SettingsGodRaysStruct {
 	float RayG;
 	float RayB;
 	float Saturate;
+};
+
+struct SettingsKhajiitRaysStruct {
+	int mLightShaftPasses;
+	float mRayIntensity;
+	float mRayLength;
+	float mRayDensity;
+	float mRayVisibility;
+	float mLuminance;
+	float mGlobalMultiplier;
+	float mRayR;
+	float mRayG;
+	float mRayB;
+	float mSaturate;
+
+	int sLightShaftPasses;
+	float sRayIntensity;
+	float sRayLength;
+	float sRayDensity;
+	float sRayVisibility;
+	float sLuminance;
+	float sGlobalMultiplier;
+	float sRayR;
+	float sRayG;
+	float sRayB;
+	float sSaturate;
+
+	float phaseLumQtr;
+	float phaseLumHalf;
+	float phaseLumTQtr;
+	float phaseLumFull;
 };
 
 struct SettingsDepthOfFieldStruct {
@@ -625,6 +650,7 @@ public:
 	SettingsTerrainStruct			SettingsTerrain;
 	SettingsSkinStruct				SettingsSkin;
 	SettingsGodRaysStruct			SettingsGodRays;
+	SettingsKhajiitRaysStruct		SettingsKhajiitRays;
 	SettingsCinemaStruct			SettingsCinema;
 	SettingsPrecipitationsStruct	SettingsPrecipitations;
 	SettingsBloodStruct				SettingsBlood;
