@@ -226,7 +226,7 @@ bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiAVObject* Objec
 }
 void ShadowManager::RenderObject(NiAVObject* Object, D3DXVECTOR4* ShadowData, bool HasWater) {
 
-	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled) && Object->GetWorldBoundRadius() >= ShadowMapObjectMinBound) {
+	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
 		void* VFT = *(void**)Object;
 		if (VFT == VFTNiNode || VFT == VFTBSFadeNode || VFT == VFTBSFaceGenNiNode || VFT == VFTBSTreeNode) {
 			if (VFT == VFTBSFadeNode && ((BSFadeNode*)Object)->FadeAlpha <= 0.2f) return;
@@ -315,24 +315,19 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 		}
 		else {
 			BSShaderProperty* LProp = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Lighting);
-			if (LProp->IsLightingProperty()) {
-				if (AlphaEnabled) {
-					NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
-					if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) {
-						if (NiTexture* Texture = *((BSShaderPPLightingProperty*)LProp)->textures[0]) {
-							ShadowData->y = 1.0f;
-							RenderState->SetTexture(0, Texture->rendererData->dTexture);
-							RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
-							RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
-							RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
-							RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
-							RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
-						}
+			if (AlphaEnabled) {
+				NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
+				if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) {
+					if (NiTexture* Texture = *((BSShaderPPLightingProperty*)LProp)->textures[0]) {
+						ShadowData->y = 1.0f;
+						RenderState->SetTexture(0, Texture->rendererData->dTexture);
+						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
+						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
+						RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
+						RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
+						RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
 					}
 				}
-			}
-			else {
-				return;
 			}
 		}
 		TheRenderManager->PackGeometryBuffer(GeoData, ModelData, SkinInstance, ShaderDeclaration);

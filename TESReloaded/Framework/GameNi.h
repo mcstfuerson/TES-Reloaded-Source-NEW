@@ -3311,10 +3311,11 @@ public:
 							void* VFTBSShaderPPLightingProperty = (void*)0x00A91384;
 							void* VFTHairShaderProperty = (void*)0x00A95ABC;
 							void* VFTSpeedTreeBranchShaderProperty = (void*)0x00A92A94;
+							void* VFTLighting30ShaderProperty = (void*)0x00A9576C;
 							bool r = false;
 							void* VFT = *(void**)this;
 
-							if (VFT == VFTBSShaderPPLightingProperty || VFT == VFTHairShaderProperty || VFT == VFTSpeedTreeBranchShaderProperty) r = true;
+							if (VFT == VFTBSShaderPPLightingProperty || VFT == VFTHairShaderProperty || VFT == VFTSpeedTreeBranchShaderProperty || VFT == VFTLighting30ShaderProperty) r = true;
 							return r;
 						}
 
