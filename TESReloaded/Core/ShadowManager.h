@@ -79,6 +79,8 @@ public:
 	TESObjectCELL*			CurrentCell;
 	ShadowCubeMapStateEnum	ShadowCubeMapState;
 	bool					AlphaEnabled;
+	bool					FakeExtShadowLightDirSet;
+	D3DXVECTOR4				fakeExtShadowLightDir;
 	int                     ShadowCubeLightCount;
 };
 

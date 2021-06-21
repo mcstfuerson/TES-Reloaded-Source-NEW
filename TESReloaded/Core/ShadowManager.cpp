@@ -500,14 +500,21 @@ void ShadowManager::RenderShadowCubeMapFakeInt(int LightIndex, SettingsShadowStr
 	D3DXVECTOR3 At, Eye;
 	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
 	D3DXVECTOR4* ShadowLightDir = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
-	Eye.x = (ShadowLightDir->x * 6000) - TheRenderManager->CameraPosition.x;
-	Eye.y = (ShadowLightDir->y * 6000) - TheRenderManager->CameraPosition.y;
-	Eye.z = (ShadowLightDir->z * 6000) - TheRenderManager->CameraPosition.z;
+
+	if (!FakeExtShadowLightDirSet || TheKeyboardManager->OnKeyPressed(57)) {
+		FakeExtShadowLightDirSet = true;
+		fakeExtShadowLightDir = TheRenderManager->CameraPosition;
+	}
+	Logger::Log("Shadow light dir - x: %f, y: %f, z: %f", ShadowLightDir->x, ShadowLightDir->y, ShadowLightDir->z);
+	Logger::Log("cAM POS - x: %f, y: %f, z: %f", TheRenderManager->CameraPosition.x, TheRenderManager->CameraPosition.y, TheRenderManager->CameraPosition.z);
+	Eye.x = ((ShadowLightDir->x * 4000) + fakeExtShadowLightDir.x) - TheRenderManager->CameraPosition.x;
+	Eye.y = ((ShadowLightDir->y * 4000) + fakeExtShadowLightDir.y) - TheRenderManager->CameraPosition.y;
+	Eye.z = ((ShadowLightDir->z * 4000) + fakeExtShadowLightDir.z) - TheRenderManager->CameraPosition.z;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].x = Eye.x;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].y = Eye.y;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].z = Eye.z;
-	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].w = 7000;
-	ShadowCubeMapBlend->x = 0.4f;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].w = 15000;
+	ShadowCubeMapBlend->x = 0.6f;
 
 	std::map<int, std::vector<NiNode*>> refMap;
 	TList<TESObjectREFR>::Entry* Entry = &Player->parentCell->objectList.First;
@@ -655,7 +662,7 @@ void ShadowManager::RenderInteriorShadows() {
 	int LightIndex = -1;
 
 	if (!(Player->parentCell->flags0 & Player->parentCell->kFlags0_BehaveLikeExterior && ShadowLightDir->z > 0.01f)) {
-
+		FakeExtShadowLightDirSet = false;
 		if (ShadowSettings->Enabled) {
 			LightIndex = GetShadowSceneLights(SceneLights, Lights, LightIndex, ShadowSettings);
 			SetAllShadowMapLightPos(Lights, LightIndex);
@@ -690,6 +697,9 @@ void ShadowManager::RenderInteriorShadows() {
 }
 
 void ShadowManager::RenderShadowMaps() {
+	Global->RenderShadowMaps();
+	//return;
+
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	IDirect3DSurface9* DepthSurface = NULL;
 
