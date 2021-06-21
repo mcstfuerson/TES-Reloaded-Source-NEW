@@ -2,6 +2,8 @@
 #include <ctime>
 #include <math.h>
 #include <WeatherMode.h>
+#include <algorithm>
+#include <iostream>
 #define EFFECTQUADFORMAT D3DFVF_XYZ | D3DFVF_TEX1
 
 #if defined(NEWVEGAS)
@@ -171,6 +173,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.RaysPhaseCoeff;
 	else if (!strcmp(Name, "TESR_GameTime"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.GameTime;
+	else if (!strcmp(Name, "TESR_InteriorDimmer"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.InteriorDimmer;
 	else if (!strcmp(Name, "TESR_TextureData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.TextureData;
 	else if (!strcmp(Name, "TESR_WaterCoefficients"))
@@ -1055,6 +1059,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 			ShaderConst.OverrideVanillaDirectionalLight = false;
 			TESObjectCELL::LightingData* LightData = currentCell->lighting;
+
 			if (!(currentCell->flags0 & currentCell->kFlags0_BehaveLikeExterior)) {
 				ShaderConst.fogColor.x = LightData->fog.r / 255.0f;
 				ShaderConst.fogColor.y = LightData->fog.g / 255.0f;
@@ -1076,6 +1081,36 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.fogData.x = LightData->fogNear;
 			ShaderConst.fogData.y = LightData->fogFar;
 			ShaderConst.fogData.z = ShaderConst.currentsunGlare;
+
+			//TODO: Dimmer Settings check
+			if (ShaderConst.InteriorLighting.find(currentCell->GetEditorName()) == ShaderConst.InteriorLighting.end()) {
+				ShaderConstants::SimpleLightingStruct sls;
+				sls.r = LightData->ambient.r;
+				sls.g = LightData->ambient.g;
+				sls.b = LightData->ambient.b;
+				sls.a = LightData->ambient.a;
+				ShaderConst.InteriorLighting.emplace(currentCell->GetEditorName(), sls);
+			}
+
+			//TODO do these 
+			ShaderConst.InteriorDimmerStart = 6.0f;
+			ShaderConst.InteriorDimmerEnd = 9.0f;
+			float windowDimmer;
+			if (ShaderConst.GameTime.y > 12) {
+				windowDimmer = ShaderConst.GameTime.y - (12 + ShaderConst.InteriorDimmerStart);
+				windowDimmer = 1 - (windowDimmer / (ShaderConst.InteriorDimmerEnd - ShaderConst.InteriorDimmerStart));
+				windowDimmer = std::clamp(windowDimmer, 0.0f, 1.0f);
+			}
+			else {
+				windowDimmer = ShaderConst.GameTime.y - ShaderConst.InteriorDimmerStart;
+				windowDimmer = (windowDimmer / (ShaderConst.InteriorDimmerEnd - ShaderConst.InteriorDimmerStart));
+				windowDimmer = std::clamp(windowDimmer, 0.0f, 1.0f);
+			}
+
+			ShaderConst.InteriorDimmer.x = windowDimmer;
+			LightData->ambient.r = ShaderConst.InteriorLighting[currentCell->GetEditorName()].r * ShaderConst.InteriorDimmer.x;
+			LightData->ambient.g = ShaderConst.InteriorLighting[currentCell->GetEditorName()].g * ShaderConst.InteriorDimmer.x;
+			LightData->ambient.b = ShaderConst.InteriorLighting[currentCell->GetEditorName()].b * ShaderConst.InteriorDimmer.x;
 		}
 
 		//TODO: shadows draw "over" fog, how to fix shader? for now just disable post processing shadows when foggy.
