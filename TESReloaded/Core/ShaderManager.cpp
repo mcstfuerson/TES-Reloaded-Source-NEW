@@ -1095,22 +1095,23 @@ void ShaderManager::UpdateConstants() {
 			//TODO do these 
 			ShaderConst.InteriorDimmerStart = 6.0f;
 			ShaderConst.InteriorDimmerEnd = 9.0f;
-			float windowDimmer;
+			float dimmer;
 			if (ShaderConst.GameTime.y > 12) {
-				windowDimmer = ShaderConst.GameTime.y - (12 + ShaderConst.InteriorDimmerStart);
-				windowDimmer = 1 - (windowDimmer / (ShaderConst.InteriorDimmerEnd - ShaderConst.InteriorDimmerStart));
-				windowDimmer = std::clamp(windowDimmer, 0.0f, 1.0f);
+				dimmer = ShaderConst.GameTime.y - (12 + ShaderConst.InteriorDimmerStart);
+				dimmer = 1 - (dimmer / (ShaderConst.InteriorDimmerEnd - ShaderConst.InteriorDimmerStart));
+				dimmer = std::clamp(dimmer, 0.0f, 1.0f);
 			}
 			else {
-				windowDimmer = ShaderConst.GameTime.y - ShaderConst.InteriorDimmerStart;
-				windowDimmer = (windowDimmer / (ShaderConst.InteriorDimmerEnd - ShaderConst.InteriorDimmerStart));
-				windowDimmer = std::clamp(windowDimmer, 0.0f, 1.0f);
+				dimmer = ShaderConst.GameTime.y - ShaderConst.InteriorDimmerStart;
+				dimmer = (dimmer / (ShaderConst.InteriorDimmerEnd - ShaderConst.InteriorDimmerStart));
+				dimmer = std::clamp(dimmer, 0.0f, 1.0f);
 			}
 
-			ShaderConst.InteriorDimmer.x = windowDimmer;
-			LightData->ambient.r = ShaderConst.InteriorLighting[currentCell->GetEditorName()].r * ShaderConst.InteriorDimmer.x;
-			LightData->ambient.g = ShaderConst.InteriorLighting[currentCell->GetEditorName()].g * ShaderConst.InteriorDimmer.x;
-			LightData->ambient.b = ShaderConst.InteriorLighting[currentCell->GetEditorName()].b * ShaderConst.InteriorDimmer.x;
+			ShaderConst.InteriorDimmer.x = dimmer;
+			float dimmerAdj = std::clamp(dimmer, TheSettingManager->SettingsMain.Main.InteriorDimmerCoeff, 1.0f);
+			LightData->ambient.r = ShaderConst.InteriorLighting[currentCell->GetEditorName()].r * dimmerAdj;
+			LightData->ambient.g = ShaderConst.InteriorLighting[currentCell->GetEditorName()].g * dimmerAdj;
+			LightData->ambient.b = ShaderConst.InteriorLighting[currentCell->GetEditorName()].b * dimmerAdj;
 		}
 
 		//TODO: shadows draw "over" fog, how to fix shader? for now just disable post processing shadows when foggy.

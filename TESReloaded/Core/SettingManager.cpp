@@ -108,6 +108,8 @@ SettingManager::SettingManager() {
 	SettingsMain.Main.MoonPhaseLumTQtr = atof(value);
 	GetPrivateProfileStringA("Main", "MoonPhaseLumFull", "1.00", value, SettingStringBuffer, Filename);
 	SettingsMain.Main.MoonPhaseLumFull = atof(value);
+	GetPrivateProfileStringA("Main", "InteriorDimmerCoeff", "1.00", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.InteriorDimmerCoeff = atof(value);
 	SettingsMain.Main.SaveSettings = GetPrivateProfileIntA("Main", "SaveSettings", 1, Filename);
 	SettingsMain.Main.ReplaceIntro = GetPrivateProfileIntA("Main", "ReplaceIntro", 0, Filename);	
 
@@ -1224,6 +1226,7 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("Main", "MoonPhaseLumHalf", ToString(SettingsMain.Main.MoonPhaseLumHalf).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "MoonPhaseLumTQtr", ToString(SettingsMain.Main.MoonPhaseLumTQtr).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "MoonPhaseLumFull", ToString(SettingsMain.Main.MoonPhaseLumFull).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "InteriorDimmerCoeff", ToString(SettingsMain.Main.InteriorDimmerCoeff).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "ScreenshotKey", ToString(SettingsMain.Main.ScreenshotKey).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "FPSOverlay", ToString(SettingsMain.Main.FPSOverlay).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "DirectionalLightOverride", ToString(SettingsMain.Main.DirectionalLightOverride).c_str(), SettingsMain.Main.MainFile);
@@ -1772,6 +1775,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["MoonPhaseLumHalf"] = SettingsMain.Main.MoonPhaseLumHalf;
 				Settings["MoonPhaseLumTQtr"] = SettingsMain.Main.MoonPhaseLumTQtr;
 				Settings["MoonPhaseLumFull"] = SettingsMain.Main.MoonPhaseLumFull;
+				Settings["InteriorDimmerCoeff"] = SettingsMain.Main.InteriorDimmerCoeff;				
 			}
 			else if (!strcmp(Section, "CameraMode")) {
 				Settings["NearDistanceFirst"] = SettingsMain.CameraMode.NearDistanceFirst;
@@ -2254,6 +2258,8 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsMain.Main.MoonPhaseLumTQtr = Value;
 				else if (!strcmp(Setting, "MoonPhaseLumFull"))
 					SettingsMain.Main.MoonPhaseLumFull = Value;
+				else if (!strcmp(Setting, "InteriorDimmerCoeff"))
+					SettingsMain.Main.InteriorDimmerCoeff = Value;
 			}
 			else if (!strcmp(Section, "CameraMode")) {
 				if (!strcmp(Setting, "NearDistanceFirst"))

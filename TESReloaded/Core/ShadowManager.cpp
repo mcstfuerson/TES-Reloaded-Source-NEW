@@ -501,12 +501,11 @@ void ShadowManager::RenderShadowCubeMapFakeInt(int LightIndex, SettingsShadowStr
 	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
 	D3DXVECTOR4* ShadowLightDir = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
 
-	if (!FakeExtShadowLightDirSet || TheKeyboardManager->OnKeyPressed(57)) {
+	if (!FakeExtShadowLightDirSet) {
 		FakeExtShadowLightDirSet = true;
 		fakeExtShadowLightDir = TheRenderManager->CameraPosition;
 	}
-	Logger::Log("Shadow light dir - x: %f, y: %f, z: %f", ShadowLightDir->x, ShadowLightDir->y, ShadowLightDir->z);
-	Logger::Log("cAM POS - x: %f, y: %f, z: %f", TheRenderManager->CameraPosition.x, TheRenderManager->CameraPosition.y, TheRenderManager->CameraPosition.z);
+
 	Eye.x = ((ShadowLightDir->x * 4000) + fakeExtShadowLightDir.x) - TheRenderManager->CameraPosition.x;
 	Eye.y = ((ShadowLightDir->y * 4000) + fakeExtShadowLightDir.y) - TheRenderManager->CameraPosition.y;
 	Eye.z = ((ShadowLightDir->z * 4000) + fakeExtShadowLightDir.z) - TheRenderManager->CameraPosition.z;

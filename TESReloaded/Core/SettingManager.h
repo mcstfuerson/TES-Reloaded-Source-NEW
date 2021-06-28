@@ -91,6 +91,7 @@ struct SettingsMainStruct {
 		float	MoonPhaseLumHalf;
 		float	MoonPhaseLumTQtr;
 		float	MoonPhaseLumFull;
+		float	InteriorDimmerCoeff;
 		UInt8	ScreenshotType;
 		UInt8	AnisotropicFilter;
 		UInt16	ScreenshotKey;
