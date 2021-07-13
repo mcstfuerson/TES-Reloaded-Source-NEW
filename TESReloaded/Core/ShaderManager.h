@@ -153,7 +153,16 @@ struct ShaderConstants {
 		TESWeather::ColorData		colors[10];
 		float			hdrInfo[14];
 	};
-	typedef std::map<std::string, SimpleWeatherStruct> WeatherMap;	
+
+	struct SimpleLightingStruct {
+		UInt8	r;
+		UInt8	g;
+		UInt8	b;
+		UInt8	a;
+	};
+
+	typedef std::map<std::string, SimpleWeatherStruct> WeatherMap;
+	typedef std::map<std::string, SimpleLightingStruct> InteriorLightingMap;
 
 	D3DXVECTOR4				ReciprocalResolution;
 	D3DXVECTOR4				ReciprocalResolutionWater;
@@ -171,10 +180,14 @@ struct ShaderConstants {
 	float					SecundaFade;
 	bool					MoonsExist;
 	WeatherMap				OrigWeathers;
+	InteriorLightingMap		InteriorLighting;
 	float					MoonPhaseCoeff;
 	D3DXVECTOR4				RaysPhaseCoeff;
 	D3DXVECTOR4				GameTime;
 	D3DXVECTOR4				Tick;
+	D3DXVECTOR4				InteriorDimmer;
+	float					InteriorDimmerStart;
+	float					InteriorDimmerEnd;
 	D3DXVECTOR4				TextureData;
 	TESWeather*				pWeather;
 	float					currentsunGlare;
@@ -248,6 +261,7 @@ public:
 
 	void					CreateCT();
 	void					SetCT();
+	void					SetCustomCT();
 	bool					LoadShader(const char* Name);
 	
 	ShaderType				Type;
