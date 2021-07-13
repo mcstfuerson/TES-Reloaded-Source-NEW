@@ -69,12 +69,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Alessio Tamburini"
             VALUE "FileDescription", "Oblivion Reloaded"
-            VALUE "FileVersion", "1.1.0mc DEV BUILD"
+            VALUE "FileVersion", "1.1.0mc"
             VALUE "InternalName", "OblivionReloaded.dll"
             VALUE "LegalCopyright", "Copyright (C) 2020"
             VALUE "OriginalFilename", "OblivionReloaded.dll"
-            VALUE "ProductName", "Oblivion Reloaded UNOFFICIAL"
-            VALUE "ProductVersion", "1.1.0mc DEV BUILD"
+            VALUE "ProductName", "Oblivion Reloaded E3"
+            VALUE "ProductVersion", "1.1.0mc (UNOFFICIAL)"
         END
     END
     BLOCK "VarFileInfo"
