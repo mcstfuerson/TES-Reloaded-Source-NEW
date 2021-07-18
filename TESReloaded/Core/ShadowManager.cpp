@@ -229,7 +229,6 @@ void ShadowManager::RenderObject(NiAVObject* Object, D3DXVECTOR4* ShadowData, bo
 	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
 		void* VFT = *(void**)Object;
 		if (VFT == VFTNiNode || VFT == VFTBSFadeNode || VFT == VFTBSFaceGenNiNode || VFT == VFTBSTreeNode) {
-			if (VFT == VFTBSFadeNode && ((BSFadeNode*)Object)->FadeAlpha <= 0.2f) return;
 			NiNode* Node = (NiNode*)Object;
 			for (int i = 0; i < Node->m_children.end; i++) {
 				RenderObject(Node->m_children.data[i], ShadowData, HasWater);
