@@ -417,7 +417,7 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 	Device->SetDepthStencilSurface(ShadowMapDepthSurface[ShadowMapType]);
 	Device->SetViewport(&ShadowMapViewPort[ShadowMapType]);
 	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
-	if (ShadowsExteriors->Enabled[ShadowMapType] && ShadowLightDir->z > 0.0f) {
+	if (ShadowsExteriors->Enabled[ShadowMapType]) {
 		RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
 		RenderState->SetRenderState(D3DRS_ZWRITEENABLE, 1, RenderStateArgs);
 		RenderState->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE, RenderStateArgs);
@@ -625,11 +625,7 @@ void ShadowManager::RenderExteriorShadows() {
 
 	ShadowData->x = ShadowsExteriors->Quality;
 	ShadowData->y = ShadowsExteriors->Darkness;
-	if (ShadowLightDir->z < 0.1f) {
-		if (ShadowData->y == 0.0f) ShadowData->y = 0.1f;
-		ShadowData->y += log(ShadowLightDir->z) / -10.0f;
-		if (ShadowData->y > 1.0f) ShadowData->y = 1.0f;
-	}
+
 	ShadowData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapNear];
 	ShadowData->w = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapFar];
 	OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
