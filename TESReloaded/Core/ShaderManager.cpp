@@ -157,6 +157,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheRenderManager->CameraPosition;
 	else if (!strcmp(Name, "TESR_SunDirection"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SunDir;
+	else if (!strcmp(Name, "TESR_ShadowLightDir"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
 	else if (!strcmp(Name, "TESR_SunTiming"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SunTiming;
 	else if (!strcmp(Name, "TESR_SunAmount"))
@@ -759,9 +761,9 @@ void ShaderManager::UpdateConstants() {
 			if (ShaderConst.GameTime.y > ShaderConst.SunTiming.w || ShaderConst.GameTime.y < ShaderConst.SunTiming.x)
 				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
 			else if (ShaderConst.GameTime.y > ShaderConst.SunTiming.z && fabs(deltaz) - ShaderConst.SunDir.z <= 0.0f)
-				ShaderConst.SunDir.z = deltaz;
+				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
 			else if (ShaderConst.GameTime.y < ShaderConst.SunTiming.y && fabs(deltaz) - ShaderConst.SunDir.z >= 0.0f)
-				ShaderConst.SunDir.z = deltaz;
+				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
 
 			//TODO: use kClimate_Masser and kClimate_Secunda but not sure what to compare against?
 			if (Masser && Secunda)  {
