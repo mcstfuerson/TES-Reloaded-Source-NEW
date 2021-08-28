@@ -321,6 +321,7 @@ struct SettingsShadowStruct {
 		float				Darkness;
 		float				ShadowMapRadius[3];
 		float				ShadowMapFarPlane;
+		bool                UsePostProcessing;
 		ExcludedFormsList	ExcludedForms;
 	};
 	
@@ -334,6 +335,7 @@ struct SettingsShadowStruct {
 		int					Quality;
 		int					ShadowCubeMapSize;
 		float				Darkness;
+		bool                UsePostProcessing;
 		ExcludedFormsList	ExcludedForms;
 	};
 

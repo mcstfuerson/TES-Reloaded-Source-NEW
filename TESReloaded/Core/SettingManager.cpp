@@ -1116,6 +1116,7 @@ void SettingManager::LoadSettings() {
 	GetPrivateProfileStringA("ExteriorsOrtho", "ShadowMapRadius", "2048.0", value, SettingStringBuffer, Filename);
 	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapOrtho] = atof(value);
 
+	SettingsShadows.Exteriors.UsePostProcessing = GetPrivateProfileIntA("Exteriors", "UsePostProcessing", 1, Filename);
 	SettingsShadows.Exteriors.Quality = GetPrivateProfileIntA("Exteriors", "Quality", 0, Filename);
 	GetPrivateProfileStringA("Exteriors", "Darkness", "0.2", value, SettingStringBuffer, Filename);
 	SettingsShadows.Exteriors.Darkness = atof(value);
@@ -1123,6 +1124,7 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.ShadowMapFarPlane = atof(value);
 
 	SettingsShadows.Interiors.Enabled = GetPrivateProfileIntA("Interiors", "Enabled", 1, Filename);
+	SettingsShadows.Interiors.UsePostProcessing = GetPrivateProfileIntA("Interiors", "UsePostProcessing", 1, Filename);
 	SettingsShadows.Interiors.AlphaEnabled = GetPrivateProfileIntA("Interiors", "AlphaEnabled", 1, Filename);
 	SettingsShadows.Interiors.Forms.Activators = GetPrivateProfileIntA("Interiors", "Activators", 1, Filename);
 	SettingsShadows.Interiors.Forms.Actors = GetPrivateProfileIntA("Interiors", "Actors", 1, Filename);
@@ -1141,6 +1143,7 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Interiors.Darkness = atof(value);
 
 	SettingsShadows.ExteriorsPoint.Enabled = GetPrivateProfileIntA("ExteriorsPoint", "Enabled", 1, Filename);
+	SettingsShadows.ExteriorsPoint.UsePostProcessing = GetPrivateProfileIntA("ExteriorsPoint", "UsePostProcessing", 1, Filename);
 	SettingsShadows.ExteriorsPoint.AlphaEnabled = GetPrivateProfileIntA("ExteriorsPoint", "AlphaEnabled", 1, Filename);
 	SettingsShadows.ExteriorsPoint.Forms.Activators = GetPrivateProfileIntA("ExteriorsPoint", "Activators", 1, Filename);
 	SettingsShadows.ExteriorsPoint.Forms.Actors = GetPrivateProfileIntA("ExteriorsPoint", "Actors", 1, Filename);
@@ -1446,6 +1449,7 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 		}
 		else if (!strcmp(Definition, "Shadows")) {
 			strcat(Filename, "Shadows\\Shadows.ini");
+			WritePrivateProfileStringA("Exteriors", "UsePostProcessing", ToString(SettingsShadows.Exteriors.UsePostProcessing).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "Darkness", ToString(SettingsShadows.Exteriors.Darkness).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "Quality", ToString(SettingsShadows.Exteriors.Quality).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNear", "Enabled", ToString(SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
@@ -1453,11 +1457,13 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("ExteriorsFar", "Enabled", ToString(SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsFar", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "Enabled", ToString(SettingsShadows.ExteriorsPoint.Enabled).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsPoint", "UsePostProcessing", ToString(SettingsShadows.ExteriorsPoint.UsePostProcessing).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "AlphaEnabled", ToString(SettingsShadows.ExteriorsPoint.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "Darkness", ToString(SettingsShadows.ExteriorsPoint.Darkness).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "Quality", ToString(SettingsShadows.ExteriorsPoint.Quality).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "LightPoints", ToString(SettingsShadows.ExteriorsPoint.LightPoints).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Enabled", ToString(SettingsShadows.Interiors.Enabled).c_str(), Filename);
+			WritePrivateProfileStringA("Interiors", "UsePostProcessing", ToString(SettingsShadows.Interiors.UsePostProcessing).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "AlphaEnabled", ToString(SettingsShadows.Interiors.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Darkness", ToString(SettingsShadows.Interiors.Darkness).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Quality", ToString(SettingsShadows.Interiors.Quality).c_str(), Filename);
@@ -2024,6 +2030,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 		}
 		else if (!strcmp(Definition, "Shadows")) {
 			if (!strcmp(Section, "Exteriors")) {
+				Settings["UsePostProcessing"] = SettingsShadows.Exteriors.UsePostProcessing;
 				Settings["Darkness"] = SettingsShadows.Exteriors.Darkness;
 				Settings["Quality"] = SettingsShadows.Exteriors.Quality;
 			}
@@ -2037,6 +2044,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			}
 			else if (!strcmp(Section, "Interiors")) {
 				Settings["Enabled"] = SettingsShadows.Interiors.Enabled;
+				Settings["UsePostProcessing"] = SettingsShadows.Interiors.UsePostProcessing;
 				Settings["AlphaEnabled"] = SettingsShadows.Interiors.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.Interiors.Darkness;
 				Settings["Quality"] = SettingsShadows.Interiors.Quality;
@@ -2044,6 +2052,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			}
 			else if (!strcmp(Section, "ExteriorsPoint")) {
 				Settings["Enabled"] = SettingsShadows.ExteriorsPoint.Enabled;
+				Settings["UsePostProcessing"] = SettingsShadows.ExteriorsPoint.UsePostProcessing;
 				Settings["AlphaEnabled"] = SettingsShadows.ExteriorsPoint.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.ExteriorsPoint.Darkness;
 				Settings["Quality"] = SettingsShadows.ExteriorsPoint.Quality;
@@ -2694,7 +2703,10 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				}
 				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.Exteriors.Quality = Value;
+				}
+				else if (!strcmp(Setting, "UsePostProcessing")) {
 					// Special case for forward or post-process shadowing
+					SettingsShadows.Exteriors.UsePostProcessing = Value;
 					TheShaderManager->SwitchShaderStatus("ShadowsExteriors");
 				}
 			}
@@ -2725,7 +2737,10 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				}
 				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.Interiors.Quality = Value;
+				}
+				else if (!strcmp(Setting, "UsePostProcessing")) {
 					// Special case for forward or post-process shadowing
+					SettingsShadows.Interiors.UsePostProcessing = Value;
 					TheShaderManager->SwitchShaderStatus("ShadowsInteriors");
 				}
 			}
@@ -2744,7 +2759,10 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				}
 				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.ExteriorsPoint.Quality = Value;
+				}
+				else if (!strcmp(Setting, "UsePostProcessing")) {
 					// Special case for forward or post-process shadowing
+					SettingsShadows.ExteriorsPoint.UsePostProcessing = Value;
 					TheShaderManager->SwitchShaderStatus("ExteriorsPoint");
 				}
 			}

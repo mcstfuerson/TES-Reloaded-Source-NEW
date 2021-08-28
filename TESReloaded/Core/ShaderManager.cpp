@@ -706,9 +706,9 @@ void ShaderManager::CreateEffects() {
 	if (Effects->WetWorld) CreateEffect(EffectRecordType_WetWorld);
 	if (Effects->Precipitations) CreateEffect(EffectRecordType_Precipitations);
 	if (Effects->Extra) CreateEffect(EffectRecordType_Extra);
-	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriors);
-	if (TheSettingManager->SettingsShadows.ExteriorsPoint.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
-	if (TheSettingManager->SettingsShadows.Interiors.Quality == -1) CreateEffect(EffectRecordType_ShadowsInteriors);
+	if (TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriors);
+	if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
+	if (TheSettingManager->SettingsShadows.Interiors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsInteriors);
 
 }
 
@@ -1117,7 +1117,7 @@ void ShaderManager::UpdateConstants() {
 		}
 
 		//TODO: shadows draw "over" fog, how to fix shader? for now just disable post processing shadows when foggy.
-		if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 || TheSettingManager->SettingsShadows.ExteriorsPoint.Quality == -1) {
+		if (TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing || TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing) {
 			if ((ShaderConst.currentfogEnd < 15000.0f && weatherPercent > .50f) || (ShaderConst.oldfogEnd < 15000.0f && weatherPercent < .50f)) {
 				ShaderConst.DisablePostShadow = true;
 			}
@@ -2055,17 +2055,17 @@ void ShaderManager::CreateEffect(EffectRecordType EffectType) {
 		case EffectRecordType_ShadowsExteriors:
 			strcat(Filename, "Shadows\\ShadowsExteriors.fx");
 			ShadowsExteriorsEffect = new EffectRecord();
-			TheSettingManager->SettingsShadows.Exteriors.Quality = ((int)LoadEffect(ShadowsExteriorsEffect, Filename, NULL)) * -1;
+			TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing = LoadEffect(ShadowsExteriorsEffect, Filename, NULL);
 			break;
 		case EffectRecordType_ShadowsExteriorsPoint:
 			strcat(Filename, "Shadows\\ShadowsExteriorsPoint.fx");
 			ShadowsExteriorsPointEffect = new EffectRecord();
-			TheSettingManager->SettingsShadows.ExteriorsPoint.Quality = ((int)LoadEffect(ShadowsExteriorsPointEffect, Filename, NULL)) * -1;
+			TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing = LoadEffect(ShadowsExteriorsPointEffect, Filename, NULL);
 			break;
 		case EffectRecordType_ShadowsInteriors:
 			strcat(Filename, "Shadows\\ShadowsInteriors.fx");
 			ShadowsInteriorsEffect = new EffectRecord();
-			TheSettingManager->SettingsShadows.Interiors.Quality = ((int)LoadEffect(ShadowsInteriorsEffect, Filename, NULL)) * -1;
+			TheSettingManager->SettingsShadows.Interiors.UsePostProcessing = LoadEffect(ShadowsInteriorsEffect, Filename, NULL);
 			break;
 		case EffectRecordType_Extra:
 			WIN32_FIND_DATAA File;
@@ -2166,15 +2166,15 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 && currentWorldSpace && !ShaderConst.DisablePostShadow) {
+	if (TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing && currentWorldSpace && !ShaderConst.DisablePostShadow) {
 		ShadowsExteriorsEffect->SetCT();
 		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.ExteriorsPoint.Quality == -1 && currentWorldSpace && !ShaderConst.DisablePostShadow) {
+	if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing && currentWorldSpace && !ShaderConst.DisablePostShadow) {
 		ShadowsExteriorsPointEffect->SetCT();
 		ShadowsExteriorsPointEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.Interiors.Quality == -1 && !currentWorldSpace) {
+	if (TheSettingManager->SettingsShadows.Interiors.UsePostProcessing && !currentWorldSpace) {
 		ShadowsInteriorsEffect->SetCT();
 		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
@@ -2464,15 +2464,15 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 	}
 	else if (!strcmp(Name, "ShadowsExteriors")) {
 		DisposeEffect(ShadowsExteriorsEffect);
-		if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriors);
+		if (TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriors);
 	}
 	else if (!strcmp(Name, "ShadowsExteriorsPoint")) {
 		DisposeEffect(ShadowsExteriorsPointEffect);
-		if (TheSettingManager->SettingsShadows.ExteriorsPoint.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
+		if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
 	}
 	else if (!strcmp(Name, "ShadowsInteriors")) {
 		DisposeEffect(ShadowsInteriorsEffect);
-		if (TheSettingManager->SettingsShadows.Interiors.Quality == -1) CreateEffect(EffectRecordType_ShadowsInteriors);
+		if (TheSettingManager->SettingsShadows.Interiors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsInteriors);
 	}
 
 }
