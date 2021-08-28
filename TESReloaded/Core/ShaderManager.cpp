@@ -2145,31 +2145,6 @@ void ShaderManager::DisposeEffect(EffectRecord* TheEffect) {
 
 }
 
-
-void ShaderManager::RenderShadows(IDirect3DSurface9* RenderTarget) {
-
-	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
-	IDirect3DDevice9* Device = TheRenderManager->device;
-	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
-	D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
-
-	TheRenderManager->SetupSceneCamera();
-	Device->SetStreamSource(0, EffectVertex, 0, sizeof(EffectQuad));
-	Device->SetFVF(EFFECTQUADFORMAT);
-	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
-	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 && currentWorldSpace && !ShaderConst.DisablePostShadow) {
-		ShadowsExteriorsEffect->SetCT();
-		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (TheSettingManager->SettingsShadows.ExteriorsPoint.Quality == -1 && currentWorldSpace && !ShaderConst.DisablePostShadow) {
-		ShadowsExteriorsPointEffect->SetCT();
-		ShadowsExteriorsPointEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (TheSettingManager->SettingsShadows.Interiors.Quality == -1 && !currentWorldSpace) {
-		ShadowsInteriorsEffect->SetCT();
-		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-}
 void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
