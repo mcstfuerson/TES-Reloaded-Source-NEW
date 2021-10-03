@@ -1122,6 +1122,22 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Exteriors.Darkness = atof(value);
 	GetPrivateProfileStringA("Exteriors", "ShadowMapFarPlane", "8192.0", value, SettingStringBuffer, Filename);
 	SettingsShadows.Exteriors.ShadowMapFarPlane = atof(value);
+	GetPrivateProfileStringA("Exteriors", "forwardNormBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.forwardNormBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "forwardFarNormBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.forwardFarNormBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "forwardConstBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.forwardConstBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "forwardFarConstBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.forwardFarConstBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "deferredNormBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.deferredNormBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "deferredFarNormBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.deferredFarNormBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "deferredConstBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.deferredConstBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "deferredFarConstBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.deferredFarConstBias = atof(value);
 
 	SettingsShadows.Interiors.Enabled = GetPrivateProfileIntA("Interiors", "Enabled", 1, Filename);
 	SettingsShadows.Interiors.UsePostProcessing = GetPrivateProfileIntA("Interiors", "UsePostProcessing", 1, Filename);
@@ -1451,6 +1467,14 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			strcat(Filename, "Shadows\\Shadows.ini");
 			WritePrivateProfileStringA("Exteriors", "UsePostProcessing", ToString(SettingsShadows.Exteriors.UsePostProcessing).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "Darkness", ToString(SettingsShadows.Exteriors.Darkness).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "forwardNormBias", ToString(SettingsShadows.Exteriors.forwardNormBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "forwardFarNormBias", ToString(SettingsShadows.Exteriors.forwardFarNormBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "forwardConstBias", ToString(SettingsShadows.Exteriors.forwardConstBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "forwardFarConstBias", ToString(SettingsShadows.Exteriors.forwardFarConstBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "deferredNormBias", ToString(SettingsShadows.Exteriors.deferredNormBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "deferredFarNormBias", ToString(SettingsShadows.Exteriors.deferredFarNormBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "deferredConstBias", ToString(SettingsShadows.Exteriors.deferredConstBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "deferredFarConstBias", ToString(SettingsShadows.Exteriors.deferredFarConstBias).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "Quality", ToString(SettingsShadows.Exteriors.Quality).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNear", "Enabled", ToString(SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNear", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
@@ -2032,6 +2056,14 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			if (!strcmp(Section, "Exteriors")) {
 				Settings["UsePostProcessing"] = SettingsShadows.Exteriors.UsePostProcessing;
 				Settings["Darkness"] = SettingsShadows.Exteriors.Darkness;
+				Settings["forwardNormBias"] = SettingsShadows.Exteriors.forwardNormBias;
+				Settings["forwardFarNormBias"] = SettingsShadows.Exteriors.forwardFarNormBias;
+				Settings["forwardConstBias"] = SettingsShadows.Exteriors.forwardConstBias;
+				Settings["forwardFarConstBias"] = SettingsShadows.Exteriors.forwardFarConstBias;
+				Settings["deferredNormBias"] = SettingsShadows.Exteriors.deferredNormBias;
+				Settings["deferredFarNormBias"] = SettingsShadows.Exteriors.deferredFarNormBias;
+				Settings["deferredConstBias"] = SettingsShadows.Exteriors.deferredConstBias;
+				Settings["deferredFarConstBias"] = SettingsShadows.Exteriors.deferredFarConstBias;
 				Settings["Quality"] = SettingsShadows.Exteriors.Quality;
 			}
 			else if (!strcmp(Section, "ExteriorsNear")) {
@@ -2700,6 +2732,38 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 			if (!strcmp(Section, "Exteriors")) {
 				if (!strcmp(Setting, "Darkness")) {
 					SettingsShadows.Exteriors.Darkness = Value;
+				}
+				else if (!strcmp(Setting, "forwardNormBias")) {
+					SettingsShadows.Exteriors.forwardNormBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.x = Value;
+				}
+				else if (!strcmp(Setting, "forwardFarNormBias")) {
+					SettingsShadows.Exteriors.forwardFarNormBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.y = Value;
+				}
+				else if (!strcmp(Setting, "forwardConstBias")) {
+					SettingsShadows.Exteriors.forwardConstBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.z = Value;
+				}
+				else if (!strcmp(Setting, "forwardFarConstBias")) {
+					SettingsShadows.Exteriors.forwardFarConstBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.w = Value;
+				}
+				else if (!strcmp(Setting, "deferredNormBias")) {
+					SettingsShadows.Exteriors.deferredNormBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.x = Value;
+				}
+				else if (!strcmp(Setting, "deferredFarNormBias")) {
+					SettingsShadows.Exteriors.deferredFarNormBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.y = Value;
+				}
+				else if (!strcmp(Setting, "deferredConstBias")) {
+					SettingsShadows.Exteriors.deferredConstBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.z = Value;
+				}
+				else if (!strcmp(Setting, "deferredFarConstBias")) {
+					SettingsShadows.Exteriors.deferredFarConstBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.w = Value;
 				}
 				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.Exteriors.Quality = Value;

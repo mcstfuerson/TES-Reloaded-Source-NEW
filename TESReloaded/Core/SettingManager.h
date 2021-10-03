@@ -322,6 +322,14 @@ struct SettingsShadowStruct {
 		float				ShadowMapRadius[3];
 		float				ShadowMapFarPlane;
 		bool                UsePostProcessing;
+		float				forwardNormBias;
+		float				forwardFarNormBias;
+		float				forwardConstBias;
+		float				forwardFarConstBias;
+		float				deferredNormBias;
+		float				deferredFarNormBias;
+		float				deferredConstBias;
+		float				deferredFarConstBias;
 		ExcludedFormsList	ExcludedForms;
 	};
 	

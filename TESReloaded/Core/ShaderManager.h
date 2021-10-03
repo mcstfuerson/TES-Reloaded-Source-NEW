@@ -38,7 +38,7 @@ enum ShaderType
 struct ShaderConstants {
 	
 	struct ShadowMapStruct {
-		D3DXMATRIXA16	ShadowWorld;
+		D3DXMATRIX	    ShadowWorld;
 		D3DXMATRIX		ShadowViewProj;
 		D3DXMATRIX		ShadowCameraToLight[3];
 		D3DXVECTOR4		ShadowCubeMapLightPosition;
@@ -48,6 +48,8 @@ struct ShaderConstants {
 		D3DXVECTOR4		ShadowCubeMapBlend2;
 		D3DXVECTOR4		ShadowCubeMapBlend3;
 		D3DXVECTOR4		ShadowLightDir;
+		D3DXVECTOR4		ShadowBiasForward;
+		D3DXVECTOR4		ShadowBiasDeferred;
 	};
 	struct WaterStruct {
 		D3DXVECTOR4		waterCoefficients;

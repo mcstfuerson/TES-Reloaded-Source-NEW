@@ -44,14 +44,24 @@ static const void* VFTNiTriStrips = (void*)0x00A7F27C;
 
 #if defined(NEWVEGAS) || defined(OBLIVION)
 ShadowManager::ShadowManager() {
-	
+
 	Logger::Log("Starting the shadows manager...");
 	TheShadowManager = this;
-	
+
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsExteriorsPoint = &TheSettingManager->SettingsShadows.ExteriorsPoint;
+
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.x = TheSettingManager->SettingsShadows.Exteriors.forwardNormBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.y = TheSettingManager->SettingsShadows.Exteriors.forwardFarNormBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.z = TheSettingManager->SettingsShadows.Exteriors.forwardConstBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.w = TheSettingManager->SettingsShadows.Exteriors.forwardFarConstBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.x = TheSettingManager->SettingsShadows.Exteriors.deferredNormBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.y = TheSettingManager->SettingsShadows.Exteriors.deferredFarNormBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.z = TheSettingManager->SettingsShadows.Exteriors.deferredConstBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.w = TheSettingManager->SettingsShadows.Exteriors.deferredFarConstBias;
+
 	UINT ShadowMapSize = 0;
 
 	//TODO: should this setting be on it's own? choose smaller of two for now
@@ -86,7 +96,7 @@ ShadowManager::ShadowManager() {
 	}
 	Device->CreateDepthStencilSurface(ShadowCubeMapSize, ShadowCubeMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &ShadowCubeMapDepthSurface, NULL);
 	ShadowCubeMapViewPort = { 0, 0, ShadowCubeMapSize, ShadowCubeMapSize, 0.0f, 1.0f };
-	
+
 	ShadowCubeMapLights[12] = { NULL };
 	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
 	D3DXVECTOR4* ShadowCubeMapBlend2 = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend2;
@@ -156,7 +166,7 @@ void ShadowManager::GetFrustum(ShadowMapTypeEnum ShadowMapType, D3DMATRIX* Matri
 }
 
 TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, SettingsShadowStruct::FormsStruct* Forms, SettingsShadowStruct::ExcludedFormsList* ExcludedForms) {
-	
+
 	TESObjectREFR* r = NULL;
 
 	if (Ref && Ref->GetNode()) {
@@ -194,14 +204,14 @@ TESObjectREFR* ShadowManager::GetRefO(TESObjectREFR* Ref) {
 }
 
 bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiAVObject* Object) {
-	
+
 	float Distance = 0.0f;
 	bool R = false;
 	NiBound* Bound = Object->GetWorldBound();
 
 	if (Bound) {
 		D3DXVECTOR3 Position = { Bound->Center.x - TheRenderManager->CameraPosition.x, Bound->Center.y - TheRenderManager->CameraPosition.y, Bound->Center.z - TheRenderManager->CameraPosition.z };
-		
+
 		R = true;
 		for (int i = 0; i < 6; ++i) {
 			Distance = D3DXPlaneDotCoord(&ShadowMapFrustum[ShadowMapType][i], &Position);
@@ -273,7 +283,7 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 }
 
 void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
-	
+
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	int StartIndex = 0;
@@ -285,7 +295,7 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 	NiD3DShaderDeclaration* ShaderDeclaration = Geo->shader->ShaderDeclaration;
 
 	if (Geo->m_pcName && !memcmp(Geo->m_pcName, "Torch", 5)) return; // No torch geo, it is too near the light and a bad square is rendered.
-	
+
 	ShadowData->x = 0.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
 	ShadowData->y = 0.0f; // Alpha control
 	if (GeoData) {
@@ -390,7 +400,7 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 }
 
 void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* ShadowLightDir, D3DXVECTOR4* ShadowData) {
-	
+
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	float FarPlane = ShadowsExteriors->ShadowMapFarPlane;
@@ -428,11 +438,11 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 		for (UInt32 x = 0; x < *SettingGridsToLoad; x++) {
 			for (UInt32 y = 0; y < *SettingGridsToLoad; y++) {
 				if (TESObjectCELL* Cell = Tes->gridCellArray->GetCell(x, y)) {
-						NiNode* CellNode = Cell->niNode;
-						for (int i = 2; i < 6; i++) {
-							NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i];
-							if (TerrainNode->m_children.end) RenderTerrain(TerrainNode->m_children.data[0], ShadowMapType, ShadowData);
-						}
+					NiNode* CellNode = Cell->niNode;
+					for (int i = 2; i < 6; i++) {
+						NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i];
+						if (TerrainNode->m_children.end) RenderTerrain(TerrainNode->m_children.data[0], ShadowMapType, ShadowData);
+					}
 					TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
 					while (Entry) {
 						if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowsExteriors->Forms[ShadowMapType], &ShadowsExteriors->ExcludedForms)) {
@@ -615,9 +625,25 @@ void ShadowManager::RenderExteriorShadows() {
 
 	ClearShadowCubeMaps(Device, -1, ShadowCubeMapStateEnum::Exterior);
 
-	At.x = PlayerNode->m_worldTransform.pos.x - TheRenderManager->CameraPosition.x;
-	At.y = PlayerNode->m_worldTransform.pos.y - TheRenderManager->CameraPosition.y;
-	At.z = PlayerNode->m_worldTransform.pos.z - TheRenderManager->CameraPosition.z;
+	if (stabilizeShadowMap) {
+		At.x = LookAtPosition.x - TheRenderManager->CameraPosition.x;
+		At.y = LookAtPosition.y - TheRenderManager->CameraPosition.y;
+		At.z = LookAtPosition.z - TheRenderManager->CameraPosition.z;
+		D3DXVECTOR3 newPos(PlayerNode->m_worldTransform.pos.x, PlayerNode->m_worldTransform.pos.y, PlayerNode->m_worldTransform.pos.z);
+
+		if(D3DXVec3Length(&(newPos - LookAtPosition)) > ShadowsExteriors->ShadowMapRadius[MapNear]/2.0f){
+			LookAtPosition = newPos;
+		}
+	}
+	else {
+		At.x = PlayerNode->m_worldTransform.pos.x - TheRenderManager->CameraPosition.x;
+		At.y = PlayerNode->m_worldTransform.pos.y - TheRenderManager->CameraPosition.y;
+		At.z = PlayerNode->m_worldTransform.pos.z - TheRenderManager->CameraPosition.z;
+	}
+
+	if (TheKeyboardManager->OnKeyDown(26)) {
+		stabilizeShadowMap = !stabilizeShadowMap;
+	}
 
 	RenderShadowMap(MapNear, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
 	RenderShadowMap(MapFar, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
@@ -675,7 +701,7 @@ void ShadowManager::RenderInteriorShadows() {
 			LightIndex = GetExtSceneLights(SceneLights, Lights, LightIndex);
 			SetAllShadowMapLightPos(Lights, LightIndex);
 			LightIndex = -1; //clears shadowmaps
-		}	
+		}
 	}
 	else {
 		LightIndex = 0;
@@ -859,7 +885,7 @@ static __declspec(naked) void RenderShadowMapHook() {
 }
 
 void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* LightPoint) {
-	
+
 	SettingsShadowStruct::InteriorsStruct* ShadowSettings;
 	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
 
@@ -884,7 +910,7 @@ void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* L
 				LightPoint->CanCarry = 2;
 			}
 		}
-	}		
+	}
 	else {
 		LightPoint->CastShadows = !(Light->flags & TESForm::FormFlags::kFormFlags_NotCastShadows);
 		LightPoint->CanCarry = 0;
@@ -935,7 +961,7 @@ static __declspec(naked) void AddCastShadowFlagHook() {
 
 #if defined(NEWVEGAS)
 void LeavesNodeName(BSTreeNode* TreeNode) {
-	
+
 	TreeNode->m_children.data[1]->SetName("Leaves");
 
 }
@@ -945,7 +971,7 @@ static __declspec(naked) void LeavesNodeNameHook() {
 	__asm
 	{
 		pushad
-		push	eax 
+		push	eax
 		call	LeavesNodeName
 		pop		eax
 		popad
@@ -956,7 +982,7 @@ static __declspec(naked) void LeavesNodeNameHook() {
 #endif
 
 void CreateShadowsHook() {
-	
+
 	WriteRelJump(kRenderShadowMapHook,		(UInt32)RenderShadowMapHook);
 	WriteRelJump(kAddCastShadowFlagHook,	(UInt32)AddCastShadowFlagHook);
 
@@ -974,7 +1000,7 @@ void CreateShadowsHook() {
 }
 
 void EditorCastShadowFlag(HWND Window, TESForm* Form) {
-	
+
 	if (Window && Form) {
 		SetDlgItemTextA(Window, 0x697, "Does Not Cast Shadows");
 		SetWindowPos(GetDlgItem(Window, 0x697), HWND_BOTTOM, 0, 0, 140, 15, SWP_NOMOVE | SWP_NOZORDER);

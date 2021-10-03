@@ -147,6 +147,10 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend2;
 	else if (!strcmp(Name, "TESR_ShadowCubeMapBlend3"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend3;
+	else if (!strcmp(Name, "TESR_ShadowBiasDeferred"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred;
+	else if (!strcmp(Name, "TESR_ShadowBiasForward"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward;
 	else if (!strcmp(Name, "TESR_ReciprocalResolution"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ReciprocalResolution;
 	else if (!strcmp(Name, "TESR_ReciprocalResolutionWater"))
