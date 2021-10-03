@@ -80,8 +80,7 @@ public:
 	ShadowCubeMapStateEnum	ShadowCubeMapState;
 	bool					AlphaEnabled;
 	bool					FakeExtShadowLightDirSet;
-	bool					stabilizeShadowMap;
-	D3DXVECTOR4				fakeExtShadowLightDir;
+	D3DXVECTOR4				FakeExtShadowLightDir;
 	D3DXVECTOR3				LookAtPosition;
 	int                     ShadowCubeLightCount;
 };

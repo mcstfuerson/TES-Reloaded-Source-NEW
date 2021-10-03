@@ -512,12 +512,12 @@ void ShadowManager::RenderShadowCubeMapFakeInt(int LightIndex, SettingsShadowStr
 
 	if (!FakeExtShadowLightDirSet) {
 		FakeExtShadowLightDirSet = true;
-		fakeExtShadowLightDir = TheRenderManager->CameraPosition;
+		FakeExtShadowLightDir = TheRenderManager->CameraPosition;
 	}
 
-	Eye.x = ((ShadowLightDir->x * 4000) + fakeExtShadowLightDir.x) - TheRenderManager->CameraPosition.x;
-	Eye.y = ((ShadowLightDir->y * 4000) + fakeExtShadowLightDir.y) - TheRenderManager->CameraPosition.y;
-	Eye.z = ((ShadowLightDir->z * 4000) + fakeExtShadowLightDir.z) - TheRenderManager->CameraPosition.z;
+	Eye.x = ((ShadowLightDir->x * 4000) + FakeExtShadowLightDir.x) - TheRenderManager->CameraPosition.x;
+	Eye.y = ((ShadowLightDir->y * 4000) + FakeExtShadowLightDir.y) - TheRenderManager->CameraPosition.y;
+	Eye.z = ((ShadowLightDir->z * 4000) + FakeExtShadowLightDir.z) - TheRenderManager->CameraPosition.z;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].x = Eye.x;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].y = Eye.y;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].z = Eye.z;
@@ -625,24 +625,13 @@ void ShadowManager::RenderExteriorShadows() {
 
 	ClearShadowCubeMaps(Device, -1, ShadowCubeMapStateEnum::Exterior);
 
-	if (stabilizeShadowMap) {
-		At.x = LookAtPosition.x - TheRenderManager->CameraPosition.x;
-		At.y = LookAtPosition.y - TheRenderManager->CameraPosition.y;
-		At.z = LookAtPosition.z - TheRenderManager->CameraPosition.z;
-		D3DXVECTOR3 newPos(PlayerNode->m_worldTransform.pos.x, PlayerNode->m_worldTransform.pos.y, PlayerNode->m_worldTransform.pos.z);
+	At.x = LookAtPosition.x - TheRenderManager->CameraPosition.x;
+	At.y = LookAtPosition.y - TheRenderManager->CameraPosition.y;
+	At.z = LookAtPosition.z - TheRenderManager->CameraPosition.z;
+	D3DXVECTOR3 newPos(PlayerNode->m_worldTransform.pos.x, PlayerNode->m_worldTransform.pos.y, PlayerNode->m_worldTransform.pos.z);
 
-		if(D3DXVec3Length(&(newPos - LookAtPosition)) > ShadowsExteriors->ShadowMapRadius[MapNear]/2.0f){
-			LookAtPosition = newPos;
-		}
-	}
-	else {
-		At.x = PlayerNode->m_worldTransform.pos.x - TheRenderManager->CameraPosition.x;
-		At.y = PlayerNode->m_worldTransform.pos.y - TheRenderManager->CameraPosition.y;
-		At.z = PlayerNode->m_worldTransform.pos.z - TheRenderManager->CameraPosition.z;
-	}
-
-	if (TheKeyboardManager->OnKeyDown(26)) {
-		stabilizeShadowMap = !stabilizeShadowMap;
+	if(D3DXVec3Length(&(newPos - LookAtPosition)) > ShadowsExteriors->ShadowMapRadius[MapNear]/2.0f){
+		LookAtPosition = newPos;
 	}
 
 	RenderShadowMap(MapNear, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
