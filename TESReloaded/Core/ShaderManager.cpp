@@ -724,6 +724,7 @@ void ShaderManager::InitializeConstants() {
 	ShaderConst.SnowAccumulation.Params.w = 0.0f;
 	ShaderConst.WetWorld.Data.x = 0.0f;
 	GameDay = 0;
+	ShaderConst.EveningTransLightDirSet = false;
 }
 
 void ShaderManager::UpdateConstants() {
@@ -731,6 +732,7 @@ void ShaderManager::UpdateConstants() {
 	bool IsThirdPersonView;
 	Sky* WorldSky = Tes->sky;
 	NiNode* SunRoot = WorldSky->sun->RootNode;
+	Sun* Sun = WorldSky->sun;
 	Moon* Masser = WorldSky->masserMoon;
 	Moon* Secunda = WorldSky->secundaMoon;
 	TESClimate* currentClimate = WorldSky->firstClimate;
@@ -822,7 +824,7 @@ void ShaderManager::UpdateConstants() {
 				ShaderConst.SunDir.w = 1.0f;
 				ShaderConst.MasserDir.w = 1.0f;
 				ShaderConst.SecundaDir.w = 1.0f;
-				//Day
+				ShaderConst.ShadowMap.ShadowLightDir.w = 1.0f;
 				if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.y && ShaderConst.GameTime.y <= ShaderConst.SunTiming.z) {
 					ShaderConst.SunAmount.x = 0.0f;
 					ShaderConst.SunAmount.y = 1.0f;
@@ -832,8 +834,9 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - ShaderConst.SunAmount.y);
 					ShaderConst.OverrideVanillaDirectionalLight = false;
 					ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
+					ShaderConst.DayPhase = Day;
+					ShaderConst.EveningTransLightDirSet = false;
 				}
-				//Night
 				else if ((ShaderConst.GameTime.y >= ShaderConst.SunTiming.w && ShaderConst.GameTime.y <= 23.99) || (ShaderConst.GameTime.y >= 0 && ShaderConst.GameTime.y <= ShaderConst.SunTiming.x)) {
 					ShaderConst.SunAmount.x = 0.0f;
 					ShaderConst.SunAmount.y = 0.0f;
@@ -841,6 +844,8 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.SunAmount.w = 1.0f;
 					ShaderConst.MasserAmount.x = ShaderConst.MasserFade;
 					ShaderConst.SecundaAmount.x = ShaderConst.SecundaFade;
+					ShaderConst.DayPhase = Night;
+					ShaderConst.EveningTransLightDirSet = false;
 					if (TheSettingManager->SettingsMain.Main.DirectionalLightOverride) {
 						ShaderConst.DirectionalLight.x = TheShaderManager->ShaderConst.MasserDir.x * -1;
 						ShaderConst.DirectionalLight.y = TheShaderManager->ShaderConst.MasserDir.y * -1;
@@ -853,7 +858,6 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 					}
 				}
-				//Sunrise begin -> end fade from night
 				else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.x && ShaderConst.GameTime.y <= ShaderConst.SunTiming.y) {
 					if ((ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 <= ShaderConst.SunTiming.y - ShaderConst.SunTiming.x) { 
 						ShaderConst.SunAmount.x = (ShaderConst.GameTime.y - ShaderConst.SunTiming.x ) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x);
@@ -863,9 +867,42 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.MasserAmount.x = (ShaderConst.MasserFade - (ShaderConst.SunAmount.x / 0.4f));
 						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.x / 0.4f));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
-						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;				
+						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;		
+
+						float start = 0.2f;
+						float end = 0.6f;
+						float diff = end - start;
+						float scale = (ShaderConst.SunAmount.x - start) / diff;
+
+						ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(scale, 0.1f, 1.0f);
+						ShaderConst.DayPhase = Dawn;
+						ShaderConst.EveningTransLightDirSet = false;
+
+						if (ShaderConst.MasserAmount.x > 0.0f) {
+							ShaderConst.OverrideVanillaDirectionalLight = true;
+							if (!ShaderConst.MorningTransLightDirSet) {
+								ShaderConst.DirectionalLight.x = std::lerp(ShaderConst.SunDir.x * -1, TheShaderManager->ShaderConst.MasserDir.x * -1, ShaderConst.MasserAmount.x);
+								ShaderConst.DirectionalLight.y = std::lerp(ShaderConst.SunDir.y * -1, TheShaderManager->ShaderConst.MasserDir.y * -1, ShaderConst.MasserAmount.x);
+								ShaderConst.DirectionalLight.z = std::lerp(ShaderConst.SunDir.z * -1, TheShaderManager->ShaderConst.MasserDir.z * -1, ShaderConst.MasserAmount.x);
+							}
+							else {
+								ShaderConst.DirectionalLight.x = std::lerp(ShaderConst.MorningTransLightDir.x, TheShaderManager->ShaderConst.MasserDir.x * -1, ShaderConst.MasserAmount.x);
+								ShaderConst.DirectionalLight.y = std::lerp(ShaderConst.MorningTransLightDir.y, TheShaderManager->ShaderConst.MasserDir.y * -1, ShaderConst.MasserAmount.x);
+								ShaderConst.DirectionalLight.z = std::lerp(ShaderConst.MorningTransLightDir.z, TheShaderManager->ShaderConst.MasserDir.z * -1, ShaderConst.MasserAmount.x);
+							}
+							ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.MasserDir;
+							ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(ShaderConst.MasserAmount.x, 0.1f, 1.0f);
+						}
+						else {
+							if (!ShaderConst.MorningTransLightDirSet && ShaderConst.MasserAmount.x > -0.1f) {
+								ShaderConst.MorningTransLightDir = D3DXVECTOR4(Tes->niDirectionalLight->m_direction.x, Tes->niDirectionalLight->m_direction.y, Tes->niDirectionalLight->m_direction.z, 1);							
+								if (fabs(ShaderConst.MorningTransLightDir.x) > 1.0f) {
+									ShaderConst.MorningTransLightDirSet = true;
+									((NiVector4*)&ShaderConst.MorningTransLightDir)->Normalize();
+								}
+							}
+						}
 					}
-					//Sunrise begin -> end fade to day
 					else {
 						ShaderConst.SunAmount.x = 2.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x);
 						ShaderConst.SunAmount.y = (ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x) - 1.0f;
@@ -875,9 +912,10 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.x + ShaderConst.SunAmount.y));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
+						ShaderConst.DayPhase = Sunrise;
+						ShaderConst.EveningTransLightDirSet = false;
 					}
 				}
-				//Sunset begin -> end fade from day
 				else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.z && ShaderConst.GameTime.y <= ShaderConst.SunTiming.w) {
 					if ((ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 <= ShaderConst.SunTiming.w - ShaderConst.SunTiming.z) {
 						ShaderConst.SunAmount.x = 0.0f;
@@ -888,8 +926,9 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.y + ShaderConst.SunAmount.z));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
+						ShaderConst.DayPhase = Sunset;
+						ShaderConst.EveningTransLightDirSet = false;
 					}
-					//Sunset begin -> end fade to night
 					else {
 						ShaderConst.SunAmount.x = 0.0f;
 						ShaderConst.SunAmount.y = 0.0f;
@@ -899,6 +938,29 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.z / 0.3f));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
+						ShaderConst.DayPhase = Dusk;
+
+						if (ShaderConst.SunAmount.z < .5) {
+							float start = 0.5f;
+							float end = 0.3f;
+							float diff = start - end;
+							float scale = (ShaderConst.SunAmount.z - end) / diff;
+							ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(scale, 0.1f, 1.0f);
+						}
+						if (ShaderConst.MasserAmount.x > 0.0f) {
+							ShaderConst.OverrideVanillaDirectionalLight = true;
+
+							if (!ShaderConst.EveningTransLightDirSet) {
+								ShaderConst.EveningTransLightDir = D3DXVECTOR4(Tes->niDirectionalLight->m_direction.x, Tes->niDirectionalLight->m_direction.y, Tes->niDirectionalLight->m_direction.z, 1);
+								((NiVector4*)&ShaderConst.EveningTransLightDir)->Normalize();
+								ShaderConst.EveningTransLightDirSet = true;
+							}
+							ShaderConst.DirectionalLight.x = std::lerp(ShaderConst.EveningTransLightDir.x, TheShaderManager->ShaderConst.MasserDir.x * -1, ShaderConst.MasserAmount.x);
+							ShaderConst.DirectionalLight.y = std::lerp(ShaderConst.EveningTransLightDir.y, TheShaderManager->ShaderConst.MasserDir.y * -1, ShaderConst.MasserAmount.x);
+							ShaderConst.DirectionalLight.z = std::lerp(ShaderConst.EveningTransLightDir.z, TheShaderManager->ShaderConst.MasserDir.z * -1, ShaderConst.MasserAmount.x);
+							ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.MasserDir;
+							ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(ShaderConst.MasserAmount.x, 0.1f, 1.0f);
+						}
 					}
 				}
 
@@ -1064,6 +1126,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.currentsunGlare = 0.5f;
 			ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 			ShaderConst.OverrideVanillaDirectionalLight = false;
+			ShaderConst.EveningTransLightDirSet = false;
 			TESObjectCELL::LightingData* LightData = currentCell->lighting;
 
 			if (!(currentCell->flags0 & currentCell->kFlags0_BehaveLikeExterior)) {

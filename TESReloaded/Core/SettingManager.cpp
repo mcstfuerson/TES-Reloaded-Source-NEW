@@ -1476,10 +1476,13 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("Exteriors", "deferredConstBias", ToString(SettingsShadows.Exteriors.deferredConstBias).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "deferredFarConstBias", ToString(SettingsShadows.Exteriors.deferredFarConstBias).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "Quality", ToString(SettingsShadows.Exteriors.Quality).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "ShadowMapFarPlane", ToString(SettingsShadows.Exteriors.ShadowMapFarPlane).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNear", "Enabled", ToString(SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNear", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsNear", "ShadowMapRadius", ToString(SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsFar", "Enabled", ToString(SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsFar", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsFar", "ShadowMapRadius", ToString(SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "Enabled", ToString(SettingsShadows.ExteriorsPoint.Enabled).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "UsePostProcessing", ToString(SettingsShadows.ExteriorsPoint.UsePostProcessing).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "AlphaEnabled", ToString(SettingsShadows.ExteriorsPoint.AlphaEnabled).c_str(), Filename);
@@ -2064,15 +2067,18 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["deferredFarNormBias"] = SettingsShadows.Exteriors.deferredFarNormBias;
 				Settings["deferredConstBias"] = SettingsShadows.Exteriors.deferredConstBias;
 				Settings["deferredFarConstBias"] = SettingsShadows.Exteriors.deferredFarConstBias;
+				Settings["ShadowMapFarPlane"] = SettingsShadows.Exteriors.ShadowMapFarPlane;
 				Settings["Quality"] = SettingsShadows.Exteriors.Quality;
 			}
 			else if (!strcmp(Section, "ExteriorsNear")) {
 				Settings["Enabled"] = SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapNear];
 				Settings["AlphaEnabled"] = SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear];
+				Settings["ShadowMapRadius"] = SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapNear];
 			}
 			else if (!strcmp(Section, "ExteriorsFar")) {
 				Settings["Enabled"] = SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapFar];
 				Settings["AlphaEnabled"] = SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar];
+				Settings["ShadowMapRadius"] = SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapFar];
 			}
 			else if (!strcmp(Section, "Interiors")) {
 				Settings["Enabled"] = SettingsShadows.Interiors.Enabled;
@@ -2733,6 +2739,9 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				if (!strcmp(Setting, "Darkness")) {
 					SettingsShadows.Exteriors.Darkness = Value;
 				}
+				else if (!strcmp(Setting, "ShadowMapFarPlane")) {
+					SettingsShadows.Exteriors.ShadowMapFarPlane = Value;
+				}
 				else if (!strcmp(Setting, "forwardNormBias")) {
 					SettingsShadows.Exteriors.forwardNormBias = Value;
 					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.x = Value;
@@ -2779,12 +2788,16 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapNear] = Value;
 				else if (!strcmp(Setting, "AlphaEnabled"))
 					SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear] = Value;
+				else if (!strcmp(Setting, "ShadowMapRadius"))
+					SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapNear] = Value;
 			}
 			else if (!strcmp(Section, "ExteriorsFar")) {
 				if (!strcmp(Setting, "Enabled"))
 					SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapFar] = Value;
 				else if (!strcmp(Setting, "AlphaEnabled"))
 					SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar] = Value;
+				else if (!strcmp(Setting, "ShadowMapRadius"))
+					SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapFar] = Value;
 			}
 			else if (!strcmp(Section, "Interiors")) {
 				if (!strcmp(Setting, "Enabled")) {

@@ -35,6 +35,16 @@ enum ShaderType
 	ShaderType_Pixel,
 };
 
+enum DayPhase
+{
+	Dawn,
+	Sunrise,
+	Day,
+	Sunset,
+	Dusk,
+	Night
+};
+
 struct ShaderConstants {
 	
 	struct ShadowMapStruct {
@@ -171,6 +181,7 @@ struct ShaderConstants {
 	D3DXVECTOR4				DirectionalLight; //currently only used for moon lighting
 	bool					OverrideVanillaDirectionalLight;
 	bool					DisablePostShadow;
+	DayPhase				DayPhase;
 	D3DXVECTOR4				SunDir;
 	D3DXVECTOR4				SunTiming;
 	D3DXVECTOR4				SunAmount;
@@ -232,6 +243,10 @@ struct ShaderConstants {
 	WetWorldStruct			WetWorld;
 	SharpeningStruct		Sharpening;
 	VolumetricFogStruct		VolumetricFog;
+	bool					EveningTransLightDirSet;
+	D3DXVECTOR4				EveningTransLightDir;
+	bool					MorningTransLightDirSet;
+	D3DXVECTOR4				MorningTransLightDir;
 };
 
 struct ShaderValue {

@@ -81,8 +81,14 @@ public:
 	bool					AlphaEnabled;
 	bool					FakeExtShadowLightDirSet;
 	D3DXVECTOR4				FakeExtShadowLightDir;
+	D3DXVECTOR4				ShadowLightDirOld;
+	D3DXVECTOR4				ShadowLightDirNew;
+	bool					UpdateShadowLightDir;
+	float					UpdateTargetTime;
 	D3DXVECTOR3				LookAtPosition;
 	int                     ShadowCubeLightCount;
+	int						GameHour;
+	float					GameTime;
 };
 
 void CreateShadowsHook();
