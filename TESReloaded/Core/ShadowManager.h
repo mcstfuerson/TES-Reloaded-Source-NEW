@@ -51,6 +51,7 @@ public:
 	void                    SetAllShadowMapLightPos(NiPointLight** Lights, int LightIndex);
 	void                    SetShadowMapLightPos(NiPointLight** Lights, int index);
 	void                    SetShadowCubeMapRegisters(int index);
+	void					ResetIntervals();
 
 
 

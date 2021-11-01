@@ -725,9 +725,21 @@ void ShaderManager::InitializeConstants() {
 	ShaderConst.WetWorld.Data.x = 0.0f;
 	GameDay = 0;
 	ShaderConst.EveningTransLightDirSet = false;
+	isFullyInitialized = false;
+	InitFrameCount = 0;
 }
 
 void ShaderManager::UpdateConstants() {
+
+	//Is fully init'd after two frame passes due to time calculations with sundir
+	if (!isFullyInitialized) {
+		if (InitFrameCount < 2) {
+			InitFrameCount++;
+		}
+		else {
+			isFullyInitialized = true;
+		}
+	}
 
 	bool IsThirdPersonView;
 	Sky* WorldSky = Tes->sky;

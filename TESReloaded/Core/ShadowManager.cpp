@@ -105,8 +105,7 @@ ShadowManager::ShadowManager() {
 	ShadowCubeMapBlend2->x = 1.0f; ShadowCubeMapBlend2->y = 1.0f; ShadowCubeMapBlend2->z = 1.0f; ShadowCubeMapBlend2->w = 1.0f;
 	ShadowCubeMapBlend3->x = 1.0f; ShadowCubeMapBlend3->y = 1.0f; ShadowCubeMapBlend3->z = 1.0f; ShadowCubeMapBlend3->w = 1.0f;
 
-	GameHour = -1;
-	GameTime = -1;
+	ResetIntervals();
 
 }
 
@@ -606,7 +605,7 @@ void ShadowManager::RenderShadowCubeMap(int LightIndex, std::map<int, std::vecto
 //TODO: rename
 void ShadowManager::RenderExteriorShadows() {
 
-	if (!Player->GetWorldSpace()) {
+	if (!Player->GetWorldSpace() || !TheShaderManager->isFullyInitialized) {
 		return;
 	}
 
@@ -645,14 +644,15 @@ void ShadowManager::RenderExteriorShadows() {
 	}
 
 	if (ShadowLightDir->z < 0.0f && TheShaderManager->ShaderConst.DayPhase == Dusk) {
+		Logger::Log("Dusk ShadowLightDir z : %f", ShadowLightDir->z);
 		ShadowLightDir = &TheShaderManager->ShaderConst.MasserDir;
 	}
 	else if (ShadowLightDir->z < 0.0f && TheShaderManager->ShaderConst.DayPhase == Dawn) {
 		ShadowLightDir = &TheShaderManager->ShaderConst.SunDir;
 	}
-	
-	if ((NewGameTime - GameTime) > .10f) {
-		if (GameTime > 0) {
+	float gameTimeDiff = NewGameTime - GameTime;
+	if ((gameTimeDiff) > .10f) {
+		if (GameTime > 0 && !(gameTimeDiff > .15f)) {
 			//Logger::Log("Normal Update Flow");
 			UpdateShadowLightDir = true;
 			UpdateTargetTime = NewGameTime + 0.025f;
@@ -920,6 +920,11 @@ void ShadowManager::SetShadowCubeMapRegisters(int index) {
 void ShadowManager::AddSceneLight(NiPointLight* Light, int Key, std::map<int, NiPointLight*>& SceneLights) {
 	while (SceneLights[Key]) { --Key; }
 	SceneLights[Key] = Light;
+}
+
+void ShadowManager::ResetIntervals() {
+	GameHour = -1;
+	GameTime = -1;
 }
 
 static __declspec(naked) void RenderShadowMapHook() {

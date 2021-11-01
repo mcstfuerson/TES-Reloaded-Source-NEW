@@ -336,6 +336,7 @@ public:
 
 
 	int						GameDay;
+	int						InitFrameCount;
 	struct					EffectQuad { float x, y, z; float u, v; };
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
@@ -347,6 +348,7 @@ public:
 	IDirect3DSurface9*		RenderSurfaceSMAA;
 	bool					RenderedBufferFilled;
 	bool					DepthBufferFilled;
+	bool					isFullyInitialized;
 	IDirect3DVertexBuffer9*	EffectVertex;
 	EffectRecord*			UnderwaterEffect;
 	EffectRecord*			WaterLensEffect;

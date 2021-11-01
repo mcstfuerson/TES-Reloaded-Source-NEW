@@ -3373,7 +3373,10 @@ bool Settings::TrackLoadGame(BSFile* GameFile, char* FileName, UInt8 Arg3) {
 	TheSettingManager->GameLoading = true;
 	r = (this->*LoadGame)(GameFile, FileName, Arg3);
 	TheSettingManager->GameLoading = false;
-	if (r) TheShaderManager->InitializeConstants();
+	if (r) {
+		TheShaderManager->InitializeConstants();
+		TheShadowManager->ResetIntervals();
+	}
 	return r;
 
 }
