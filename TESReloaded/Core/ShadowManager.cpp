@@ -615,8 +615,6 @@ void ShadowManager::RenderExteriorShadows() {
 	D3DXVECTOR4* OrthoData = &TheShaderManager->ShaderConst.Shadow.OrthoData;
 	D3DXVECTOR4* ShadowLightDir = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
 	D3DXVECTOR4 ShadowLightDirInterval;
-	int NewGameHour = (int)TheShaderManager->ShaderConst.GameTime.y;
-	float NewGameTime = TheShaderManager->ShaderConst.GameTime.y;
 
 	D3DXVECTOR4 OrthoDir = D3DXVECTOR3(0.05f, 0.05f, 1.0f);
 	NiNode* PlayerNode = Player->GetNode();
@@ -639,65 +637,72 @@ void ShadowManager::RenderExteriorShadows() {
 		LookAtPosition = newPos;
 	}
 
-	if (NewGameTime < GameTime) {
-		NewGameTime += 24.0f;
-	}
-
 	if (ShadowLightDir->z < 0.0f && TheShaderManager->ShaderConst.DayPhase == Dusk) {
-		Logger::Log("Dusk ShadowLightDir z : %f", ShadowLightDir->z);
 		ShadowLightDir = &TheShaderManager->ShaderConst.MasserDir;
 	}
 	else if (ShadowLightDir->z < 0.0f && TheShaderManager->ShaderConst.DayPhase == Dawn) {
 		ShadowLightDir = &TheShaderManager->ShaderConst.SunDir;
 	}
-	float gameTimeDiff = NewGameTime - GameTime;
-	if ((gameTimeDiff) > .10f) {
-		if (GameTime > 0 && !(gameTimeDiff > .15f)) {
-			//Logger::Log("Normal Update Flow");
-			UpdateShadowLightDir = true;
-			UpdateTargetTime = NewGameTime + 0.025f;
-			ShadowLightDirNew.x = ShadowLightDir->x;
-			ShadowLightDirNew.y = ShadowLightDir->y;
-			ShadowLightDirNew.z = ShadowLightDir->z;
-			ShadowLightDirNew.w = ShadowLightDir->w;
+
+	if (TheSettingManager->SettingsShadows.Exteriors.UseIntervalUpdate) {
+		int NewGameHour = (int)TheShaderManager->ShaderConst.GameTime.y;
+		float NewGameTime = TheShaderManager->ShaderConst.GameTime.y;
+
+		if (NewGameTime < GameTime) {
+			NewGameTime += 24.0f;
 		}
-		else {
-			//Logger::Log("-1 Update Flow");
-			ShadowLightDirInterval.x = ShadowLightDir->x;
-			ShadowLightDirInterval.y = ShadowLightDir->y;
-			ShadowLightDirInterval.z = ShadowLightDir->z;
-			ShadowLightDirInterval.w = ShadowLightDir->w;
-			ShadowLightDirOld = ShadowLightDirInterval;
-			UpdateShadowLightDir = false;
+
+		float gameTimeDiff = NewGameTime - GameTime;
+		if ((gameTimeDiff) > .10f) {
+			if (GameTime > 0 && !(gameTimeDiff > .15f)) {
+				UpdateShadowLightDir = true;
+				UpdateTargetTime = NewGameTime + 0.025f;
+				ShadowLightDirNew.x = ShadowLightDir->x;
+				ShadowLightDirNew.y = ShadowLightDir->y;
+				ShadowLightDirNew.z = ShadowLightDir->z;
+				ShadowLightDirNew.w = ShadowLightDir->w;
+			}
+			else {
+				ShadowLightDirInterval.x = ShadowLightDir->x;
+				ShadowLightDirInterval.y = ShadowLightDir->y;
+				ShadowLightDirInterval.z = ShadowLightDir->z;
+				ShadowLightDirInterval.w = ShadowLightDir->w;
+				ShadowLightDirOld = ShadowLightDirInterval;
+				UpdateShadowLightDir = false;
+			}
+
+			GameTime = NewGameTime;
 		}
-		
-		GameTime = NewGameTime;
-	}
 
-	if (UpdateShadowLightDir) {
-		float newTime = NewGameTime - GameTime;
-		float targetTime = UpdateTargetTime - GameTime;
-		float t = newTime / targetTime;
+		if (UpdateShadowLightDir) {
+			float newTime = NewGameTime - GameTime;
+			float targetTime = UpdateTargetTime - GameTime;
+			float t = newTime / targetTime;
 
-		ShadowLightDirInterval.x = std::lerp(ShadowLightDirOld.x, ShadowLightDirNew.x, t);
-		ShadowLightDirInterval.y = std::lerp(ShadowLightDirOld.y, ShadowLightDirNew.y, t);
-		ShadowLightDirInterval.z = std::lerp(ShadowLightDirOld.z, ShadowLightDirNew.z, t);
+			ShadowLightDirInterval.x = std::lerp(ShadowLightDirOld.x, ShadowLightDirNew.x, t);
+			ShadowLightDirInterval.y = std::lerp(ShadowLightDirOld.y, ShadowLightDirNew.y, t);
+			ShadowLightDirInterval.z = std::lerp(ShadowLightDirOld.z, ShadowLightDirNew.z, t);
 
-		if (newTime >= targetTime) {
-			//Logger::Log("Shadow Pos Update Complete!");
-			UpdateShadowLightDir = false;
-			ShadowLightDirOld = ShadowLightDirInterval;
-			if (UpdateTargetTime >= 24.0f) {
-				GameTime = 0.0f;
+			if (newTime >= targetTime) {
+				UpdateShadowLightDir = false;
+				ShadowLightDirOld = ShadowLightDirInterval;
+				if (UpdateTargetTime >= 24.0f) {
+					GameTime = 0.0f;
+				}
 			}
 		}
+		else {
+			ShadowLightDirInterval = ShadowLightDirOld;
+		}
+
+		RenderShadowMap(MapNear, ShadowsExteriors, &At, &ShadowLightDirInterval, ShadowData);
+		RenderShadowMap(MapFar, ShadowsExteriors, &At, &ShadowLightDirInterval, ShadowData);
 	}
 	else {
-		ShadowLightDirInterval = ShadowLightDirOld;
+		RenderShadowMap(MapNear, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
+		RenderShadowMap(MapFar, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
 	}
 
-	RenderShadowMap(MapNear, ShadowsExteriors, &At, &ShadowLightDirInterval, ShadowData);
-	RenderShadowMap(MapFar, ShadowsExteriors, &At, &ShadowLightDirInterval, ShadowData);
 	RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir, ShadowData);
 
 	ShadowData->x = ShadowsExteriors->Quality;
