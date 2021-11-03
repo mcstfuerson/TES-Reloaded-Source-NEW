@@ -777,11 +777,16 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.SunDir.z = SunRoot->m_localTransform.pos.z;
 			((NiVector4*)&ShaderConst.SunDir)->Normalize();
 			if (ShaderConst.GameTime.y > ShaderConst.SunTiming.w || ShaderConst.GameTime.y < ShaderConst.SunTiming.x)
+			{
 				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
-			else if (ShaderConst.GameTime.y > ShaderConst.SunTiming.z && fabs(deltaz) - ShaderConst.SunDir.z <= 0.0f)
+			}
+			else if (ShaderConst.GameTime.y > ShaderConst.SunTiming.z && fabs(deltaz) - ShaderConst.SunDir.z < 0.0f)
+			{
 				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
-			else if (ShaderConst.GameTime.y < ShaderConst.SunTiming.y && fabs(deltaz) - ShaderConst.SunDir.z >= 0.0f)
+			}
+			else if (ShaderConst.GameTime.y < ShaderConst.SunTiming.y && fabs(deltaz) - ShaderConst.SunDir.z > 0.0f) {
 				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
+			}
 
 			//TODO: use kClimate_Masser and kClimate_Secunda but not sure what to compare against?
 			if (Masser && Secunda)  {
