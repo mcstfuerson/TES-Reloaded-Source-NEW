@@ -249,7 +249,7 @@ void ShadowManager::RenderObject(NiAVObject* Object, D3DXVECTOR4* ShadowData, bo
 		else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
 			NiGeometry* Geo = (NiGeometry*)Object;
 			if (Geo->shader) {
-				if (!HasWater || (HasWater && Geo->GetWorldBound()->Center.z > TheShaderManager->ShaderConst.Water.waterSettings.x)) {
+				if (!HasWater || (HasWater && Geo->GetWorldBound()->Center.z > 0.0f)) {
 					NiGeometryBufferData* GeoData = Geo->geomData->BuffData;
 					if (GeoData) {
 						Render(Geo, ShadowData);
@@ -642,6 +642,11 @@ void ShadowManager::RenderExteriorShadows() {
 	}
 	else if (ShadowLightDir->z < 0.0f && TheShaderManager->ShaderConst.DayPhase == Dawn) {
 		ShadowLightDir = &TheShaderManager->ShaderConst.SunDir;
+	}
+
+	//reduces shadow artifacts caused by low z value
+	if (ShadowLightDir->z < 0.3f) {
+		ShadowLightDir->z = 0.3f;
 	}
 
 	if (TheSettingManager->SettingsShadows.Exteriors.UseIntervalUpdate) {
