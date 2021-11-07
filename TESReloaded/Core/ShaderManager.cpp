@@ -731,16 +731,6 @@ void ShaderManager::InitializeConstants() {
 
 void ShaderManager::UpdateConstants() {
 
-	//Is fully init'd after two frame passes due to time calculations with sundir
-	if (!isFullyInitialized) {
-		if (InitFrameCount < 2) {
-			InitFrameCount++;
-		}
-		else {
-			isFullyInitialized = true;
-		}
-	}
-
 	bool IsThirdPersonView;
 	Sky* WorldSky = Tes->sky;
 	NiNode* SunRoot = WorldSky->sun->RootNode;
@@ -758,6 +748,16 @@ void ShaderManager::UpdateConstants() {
 
 	IsThirdPersonView = Player->IsThirdPersonView(TheSettingManager->SettingsMain.CameraMode.Enabled, TheRenderManager->FirstPersonView);
 	TheRenderManager->GetSceneCameraData();
+
+	//Is fully init'd after two frame passes due to time calculations with sundir
+	if (!isFullyInitialized && currentWorldSpace) {
+		if (InitFrameCount < 2) {
+			InitFrameCount++;
+		}
+		else {
+			isFullyInitialized = true;
+		}
+	}
 
 	ShaderConst.GameTime.x = TimeGlobals::GetGameTime();
 	ShaderConst.GameTime.y = ShaderConst.GameTime.x / 3600.0f;
