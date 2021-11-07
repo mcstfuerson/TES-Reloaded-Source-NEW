@@ -31,6 +31,7 @@ public:
 	TESObjectREFR*			GetRef(TESObjectREFR* Ref, SettingsShadowStruct::FormsStruct* Forms, SettingsShadowStruct::ExcludedFormsList* ExcludedForms);
 	TESObjectREFR*			GetRefO(TESObjectREFR* Ref);
 	void					RenderObject(NiAVObject* Node, D3DXVECTOR4* ShadowData, bool HasWater);
+	void					RenderObjectPoint(NiAVObject* Node, D3DXVECTOR4* ShadowData, bool HasWater);
 	void					RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType, D3DXVECTOR4* ShadowData);
 	void					Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData);
 	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir, D3DXVECTOR4* ShadowData);

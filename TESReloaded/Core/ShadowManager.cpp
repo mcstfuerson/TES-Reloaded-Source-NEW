@@ -265,6 +265,35 @@ void ShadowManager::RenderObject(NiAVObject* Object, D3DXVECTOR4* ShadowData, bo
 
 }
 
+void ShadowManager::RenderObjectPoint(NiAVObject* Object, D3DXVECTOR4* ShadowData, bool HasWater) {
+
+	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
+		void* VFT = *(void**)Object;
+		if (VFT == VFTNiNode || VFT == VFTBSFadeNode || VFT == VFTBSFaceGenNiNode || VFT == VFTBSTreeNode) {
+			NiNode* Node = (NiNode*)Object;
+			for (int i = 0; i < Node->m_children.end; i++) {
+				RenderObjectPoint(Node->m_children.data[i], ShadowData, HasWater);
+			}
+		}
+		else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
+			NiGeometry* Geo = (NiGeometry*)Object;
+			if (Geo->shader) {
+				if (!HasWater || (HasWater && Geo->GetWorldBound()->Center.z > TheShaderManager->ShaderConst.Water.waterSettings.x)) {
+					NiGeometryBufferData* GeoData = Geo->geomData->BuffData;
+					if (GeoData) {
+						Render(Geo, ShadowData);
+					}
+					else if (Geo->skinInstance && Geo->skinInstance->SkinPartition && Geo->skinInstance->SkinPartition->Partitions) {
+						GeoData = Geo->skinInstance->SkinPartition->Partitions[0].BuffData;
+						if (GeoData) Render(Geo, ShadowData);
+					}
+				}
+			}
+		}
+	}
+
+}
+
 void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType, D3DXVECTOR4* ShadowData ) {
 
 	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
@@ -594,7 +623,7 @@ void ShadowManager::RenderShadowCubeMap(int LightIndex, std::map<int, std::vecto
 				RenderState->SetPixelShader(ShadowCubeMapPixelShader, false);
 				std::vector<NiNode*>::iterator RefNode;
 				for (RefNode = refMap[L].begin(); RefNode != refMap[L].end(); ++RefNode) {
-					RenderObject((*RefNode), ShadowData, TheShaderManager->ShaderConst.HasWater);
+					RenderObjectPoint((*RefNode), ShadowData, TheShaderManager->ShaderConst.HasWater);
 				}
 				Device->EndScene();
 			}
