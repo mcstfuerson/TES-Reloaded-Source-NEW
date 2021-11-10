@@ -727,6 +727,7 @@ void ShaderManager::InitializeConstants() {
 	ShaderConst.EveningTransLightDirSet = false;
 	isFullyInitialized = false;
 	InitFrameCount = 0;
+	InitFrameTarget = 2;
 }
 
 void ShaderManager::UpdateConstants() {
@@ -751,10 +752,10 @@ void ShaderManager::UpdateConstants() {
 
 	//Is fully init'd after two frame passes due to time calculations with sundir
 	if (!isFullyInitialized && currentWorldSpace) {
-		if (InitFrameCount < 2) {
+		if (InitFrameCount < InitFrameTarget) {
 			InitFrameCount++;
 		}
-		else {
+		else {	
 			isFullyInitialized = true;
 		}
 	}
@@ -1144,6 +1145,9 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 			ShaderConst.OverrideVanillaDirectionalLight = false;
 			ShaderConst.EveningTransLightDirSet = false;
+			isFullyInitialized = false;
+			InitFrameCount = 0;
+			InitFrameTarget = 2;
 			TESObjectCELL::LightingData* LightData = currentCell->lighting;
 
 			if (!(currentCell->flags0 & currentCell->kFlags0_BehaveLikeExterior)) {

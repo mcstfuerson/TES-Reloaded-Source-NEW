@@ -337,6 +337,7 @@ public:
 
 	int						GameDay;
 	int						InitFrameCount;
+	int						InitFrameTarget;
 	struct					EffectQuad { float x, y, z; float u, v; };
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
