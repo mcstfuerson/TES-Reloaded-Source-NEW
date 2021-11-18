@@ -44,14 +44,24 @@ static const void* VFTNiTriStrips = (void*)0x00A7F27C;
 
 #if defined(NEWVEGAS) || defined(OBLIVION)
 ShadowManager::ShadowManager() {
-	
+
 	Logger::Log("Starting the shadows manager...");
 	TheShadowManager = this;
-	
+
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsInteriors = &TheSettingManager->SettingsShadows.Interiors;
 	SettingsShadowStruct::InteriorsStruct* ShadowsExteriorsPoint = &TheSettingManager->SettingsShadows.ExteriorsPoint;
+
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.x = TheSettingManager->SettingsShadows.Exteriors.forwardNormBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.y = TheSettingManager->SettingsShadows.Exteriors.forwardFarNormBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.z = TheSettingManager->SettingsShadows.Exteriors.forwardConstBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.w = TheSettingManager->SettingsShadows.Exteriors.forwardFarConstBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.x = TheSettingManager->SettingsShadows.Exteriors.deferredNormBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.y = TheSettingManager->SettingsShadows.Exteriors.deferredFarNormBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.z = TheSettingManager->SettingsShadows.Exteriors.deferredConstBias;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.w = TheSettingManager->SettingsShadows.Exteriors.deferredFarConstBias;
+
 	UINT ShadowMapSize = 0;
 
 	//TODO: should this setting be on it's own? choose smaller of two for now
@@ -86,7 +96,7 @@ ShadowManager::ShadowManager() {
 	}
 	Device->CreateDepthStencilSurface(ShadowCubeMapSize, ShadowCubeMapSize, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, true, &ShadowCubeMapDepthSurface, NULL);
 	ShadowCubeMapViewPort = { 0, 0, ShadowCubeMapSize, ShadowCubeMapSize, 0.0f, 1.0f };
-	
+
 	ShadowCubeMapLights[12] = { NULL };
 	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
 	D3DXVECTOR4* ShadowCubeMapBlend2 = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend2;
@@ -94,6 +104,8 @@ ShadowManager::ShadowManager() {
 	ShadowCubeMapBlend->x =  1.0f; ShadowCubeMapBlend->y = 1.0f; ShadowCubeMapBlend->z = 1.0f; ShadowCubeMapBlend->w = 1.0f;
 	ShadowCubeMapBlend2->x = 1.0f; ShadowCubeMapBlend2->y = 1.0f; ShadowCubeMapBlend2->z = 1.0f; ShadowCubeMapBlend2->w = 1.0f;
 	ShadowCubeMapBlend3->x = 1.0f; ShadowCubeMapBlend3->y = 1.0f; ShadowCubeMapBlend3->z = 1.0f; ShadowCubeMapBlend3->w = 1.0f;
+
+	ResetIntervals();
 
 }
 
@@ -156,7 +168,7 @@ void ShadowManager::GetFrustum(ShadowMapTypeEnum ShadowMapType, D3DMATRIX* Matri
 }
 
 TESObjectREFR* ShadowManager::GetRef(TESObjectREFR* Ref, SettingsShadowStruct::FormsStruct* Forms, SettingsShadowStruct::ExcludedFormsList* ExcludedForms) {
-	
+
 	TESObjectREFR* r = NULL;
 
 	if (Ref && Ref->GetNode()) {
@@ -194,14 +206,14 @@ TESObjectREFR* ShadowManager::GetRefO(TESObjectREFR* Ref) {
 }
 
 bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiAVObject* Object) {
-	
+
 	float Distance = 0.0f;
 	bool R = false;
 	NiBound* Bound = Object->GetWorldBound();
 
 	if (Bound) {
 		D3DXVECTOR3 Position = { Bound->Center.x - TheRenderManager->CameraPosition.x, Bound->Center.y - TheRenderManager->CameraPosition.y, Bound->Center.z - TheRenderManager->CameraPosition.z };
-		
+
 		R = true;
 		for (int i = 0; i < 6; ++i) {
 			Distance = D3DXPlaneDotCoord(&ShadowMapFrustum[ShadowMapType][i], &Position);
@@ -226,13 +238,41 @@ bool ShadowManager::InFrustum(ShadowMapTypeEnum ShadowMapType, NiAVObject* Objec
 }
 void ShadowManager::RenderObject(NiAVObject* Object, D3DXVECTOR4* ShadowData, bool HasWater) {
 
-	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled) && Object->GetWorldBoundRadius() >= ShadowMapObjectMinBound) {
+	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
 		void* VFT = *(void**)Object;
 		if (VFT == VFTNiNode || VFT == VFTBSFadeNode || VFT == VFTBSFaceGenNiNode || VFT == VFTBSTreeNode) {
-			if (VFT == VFTBSFadeNode && ((BSFadeNode*)Object)->FadeAlpha <= 0.2f) return;
 			NiNode* Node = (NiNode*)Object;
 			for (int i = 0; i < Node->m_children.end; i++) {
 				RenderObject(Node->m_children.data[i], ShadowData, HasWater);
+			}
+		}
+		else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
+			NiGeometry* Geo = (NiGeometry*)Object;
+			if (Geo->shader) {
+				if (!HasWater || (HasWater && Geo->GetWorldBound()->Center.z > 0.0f)) {
+					NiGeometryBufferData* GeoData = Geo->geomData->BuffData;
+					if (GeoData) {
+						Render(Geo, ShadowData);
+					}
+					else if (Geo->skinInstance && Geo->skinInstance->SkinPartition && Geo->skinInstance->SkinPartition->Partitions) {
+						GeoData = Geo->skinInstance->SkinPartition->Partitions[0].BuffData;
+						if (GeoData) Render(Geo, ShadowData);
+					}
+				}
+			}
+		}
+	}
+
+}
+
+void ShadowManager::RenderObjectPoint(NiAVObject* Object, D3DXVECTOR4* ShadowData, bool HasWater) {
+
+	if (Object && !(Object->m_flags & NiAVObject::kFlag_AppCulled)) {
+		void* VFT = *(void**)Object;
+		if (VFT == VFTNiNode || VFT == VFTBSFadeNode || VFT == VFTBSFaceGenNiNode || VFT == VFTBSTreeNode) {
+			NiNode* Node = (NiNode*)Object;
+			for (int i = 0; i < Node->m_children.end; i++) {
+				RenderObjectPoint(Node->m_children.data[i], ShadowData, HasWater);
 			}
 		}
 		else if (VFT == VFTNiTriShape || VFT == VFTNiTriStrips) {
@@ -274,7 +314,7 @@ void ShadowManager::RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMa
 }
 
 void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
-	
+
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	int StartIndex = 0;
@@ -286,7 +326,7 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 	NiD3DShaderDeclaration* ShaderDeclaration = Geo->shader->ShaderDeclaration;
 
 	if (Geo->m_pcName && !memcmp(Geo->m_pcName, "Torch", 5)) return; // No torch geo, it is too near the light and a bad square is rendered.
-	
+
 	ShadowData->x = 0.0f; // Type of geo (0 normal, 1 actors (skinned), 2 speedtree leaves)
 	ShadowData->y = 0.0f; // Alpha control
 	if (GeoData) {
@@ -315,24 +355,19 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 		}
 		else {
 			BSShaderProperty* LProp = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Lighting);
-			if (LProp->IsLightingProperty()) {
-				if (AlphaEnabled) {
-					NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
-					if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) {
-						if (NiTexture* Texture = *((BSShaderPPLightingProperty*)LProp)->textures[0]) {
-							ShadowData->y = 1.0f;
-							RenderState->SetTexture(0, Texture->rendererData->dTexture);
-							RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
-							RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
-							RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
-							RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
-							RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
-						}
+			if (AlphaEnabled) {
+				NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
+				if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) {
+					if (NiTexture* Texture = *((BSShaderPPLightingProperty*)LProp)->textures[0]) {
+						ShadowData->y = 1.0f;
+						RenderState->SetTexture(0, Texture->rendererData->dTexture);
+						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP, false);
+						RenderState->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP, false);
+						RenderState->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT, false);
+						RenderState->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT, false);
+						RenderState->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT, false);
 					}
 				}
-			}
-			else {
-				return;
 			}
 		}
 		TheRenderManager->PackGeometryBuffer(GeoData, ModelData, SkinInstance, ShaderDeclaration);
@@ -396,7 +431,7 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 }
 
 void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* ShadowLightDir, D3DXVECTOR4* ShadowData) {
-	
+
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	float FarPlane = ShadowsExteriors->ShadowMapFarPlane;
@@ -423,7 +458,7 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 	Device->SetDepthStencilSurface(ShadowMapDepthSurface[ShadowMapType]);
 	Device->SetViewport(&ShadowMapViewPort[ShadowMapType]);
 	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
-	if (ShadowsExteriors->Enabled[ShadowMapType] && ShadowLightDir->z > 0.0f) {
+	if (ShadowsExteriors->Enabled[ShadowMapType]) {
 		RenderState->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE, RenderStateArgs);
 		RenderState->SetRenderState(D3DRS_ZWRITEENABLE, 1, RenderStateArgs);
 		RenderState->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE, RenderStateArgs);
@@ -434,11 +469,11 @@ void ShadowManager::RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsSha
 		for (UInt32 x = 0; x < *SettingGridsToLoad; x++) {
 			for (UInt32 y = 0; y < *SettingGridsToLoad; y++) {
 				if (TESObjectCELL* Cell = Tes->gridCellArray->GetCell(x, y)) {
-						NiNode* CellNode = Cell->niNode;
-						for (int i = 2; i < 6; i++) {
-							NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i];
-							if (TerrainNode->m_children.end) RenderTerrain(TerrainNode->m_children.data[0], ShadowMapType, ShadowData);
-						}
+					NiNode* CellNode = Cell->niNode;
+					for (int i = 2; i < 6; i++) {
+						NiNode* TerrainNode = (NiNode*)CellNode->m_children.data[i];
+						if (TerrainNode->m_children.end) RenderTerrain(TerrainNode->m_children.data[0], ShadowMapType, ShadowData);
+					}
 					TList<TESObjectREFR>::Entry* Entry = &Cell->objectList.First;
 					while (Entry) {
 						if (TESObjectREFR* Ref = GetRef(Entry->item, &ShadowsExteriors->Forms[ShadowMapType], &ShadowsExteriors->ExcludedForms)) {
@@ -505,14 +540,20 @@ void ShadowManager::RenderShadowCubeMapFakeInt(int LightIndex, SettingsShadowStr
 	D3DXVECTOR3 At, Eye;
 	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
 	D3DXVECTOR4* ShadowLightDir = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
-	Eye.x = (ShadowLightDir->x * 6000) - TheRenderManager->CameraPosition.x;
-	Eye.y = (ShadowLightDir->y * 6000) - TheRenderManager->CameraPosition.y;
-	Eye.z = (ShadowLightDir->z * 6000) - TheRenderManager->CameraPosition.z;
+
+	if (!FakeExtShadowLightDirSet) {
+		FakeExtShadowLightDirSet = true;
+		FakeExtShadowLightDir = TheRenderManager->CameraPosition;
+	}
+
+	Eye.x = ((ShadowLightDir->x * 4000) + FakeExtShadowLightDir.x) - TheRenderManager->CameraPosition.x;
+	Eye.y = ((ShadowLightDir->y * 4000) + FakeExtShadowLightDir.y) - TheRenderManager->CameraPosition.y;
+	Eye.z = ((ShadowLightDir->z * 4000) + FakeExtShadowLightDir.z) - TheRenderManager->CameraPosition.z;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].x = Eye.x;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].y = Eye.y;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].z = Eye.z;
-	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].w = 7000;
-	ShadowCubeMapBlend->x = 0.4f;
+	TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[LightIndex].w = 15000;
+	ShadowCubeMapBlend->x = 0.6f;
 
 	std::map<int, std::vector<NiNode*>> refMap;
 	TList<TESObjectREFR>::Entry* Entry = &Player->parentCell->objectList.First;
@@ -582,7 +623,7 @@ void ShadowManager::RenderShadowCubeMap(int LightIndex, std::map<int, std::vecto
 				RenderState->SetPixelShader(ShadowCubeMapPixelShader, false);
 				std::vector<NiNode*>::iterator RefNode;
 				for (RefNode = refMap[L].begin(); RefNode != refMap[L].end(); ++RefNode) {
-					RenderObject((*RefNode), ShadowData, TheShaderManager->ShaderConst.HasWater);
+					RenderObjectPoint((*RefNode), ShadowData, TheShaderManager->ShaderConst.HasWater);
 				}
 				Device->EndScene();
 			}
@@ -593,7 +634,7 @@ void ShadowManager::RenderShadowCubeMap(int LightIndex, std::map<int, std::vecto
 //TODO: rename
 void ShadowManager::RenderExteriorShadows() {
 
-	if (!Player->GetWorldSpace()) {
+	if (!Player->GetWorldSpace() || !TheShaderManager->isFullyInitialized) {
 		return;
 	}
 
@@ -602,6 +643,7 @@ void ShadowManager::RenderExteriorShadows() {
 	D3DXVECTOR4* ShadowData = &TheShaderManager->ShaderConst.Shadow.Data;
 	D3DXVECTOR4* OrthoData = &TheShaderManager->ShaderConst.Shadow.OrthoData;
 	D3DXVECTOR4* ShadowLightDir = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
+	D3DXVECTOR4 ShadowLightDirInterval;
 
 	D3DXVECTOR4 OrthoDir = D3DXVECTOR3(0.05f, 0.05f, 1.0f);
 	NiNode* PlayerNode = Player->GetNode();
@@ -615,21 +657,91 @@ void ShadowManager::RenderExteriorShadows() {
 
 	ClearShadowCubeMaps(Device, -1, ShadowCubeMapStateEnum::Exterior);
 
-	At.x = PlayerNode->m_worldTransform.pos.x - TheRenderManager->CameraPosition.x;
-	At.y = PlayerNode->m_worldTransform.pos.y - TheRenderManager->CameraPosition.y;
-	At.z = PlayerNode->m_worldTransform.pos.z - TheRenderManager->CameraPosition.z;
+	At.x = LookAtPosition.x - TheRenderManager->CameraPosition.x;
+	At.y = LookAtPosition.y - TheRenderManager->CameraPosition.y;
+	At.z = LookAtPosition.z - TheRenderManager->CameraPosition.z;
+	D3DXVECTOR3 newPos(PlayerNode->m_worldTransform.pos.x, PlayerNode->m_worldTransform.pos.y, PlayerNode->m_worldTransform.pos.z);
 
-	RenderShadowMap(MapNear, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
-	RenderShadowMap(MapFar, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
+	if(D3DXVec3Length(&(newPos - LookAtPosition)) > ShadowsExteriors->ShadowMapRadius[MapNear]/2.0f){
+		LookAtPosition = newPos;
+	}
+
+	if (ShadowLightDir->z < 0.0f && TheShaderManager->ShaderConst.DayPhase == Dusk) {
+		ShadowLightDir = &TheShaderManager->ShaderConst.MasserDir;
+	}
+	else if (ShadowLightDir->z < 0.0f && TheShaderManager->ShaderConst.DayPhase == Dawn) {
+		ShadowLightDir = &TheShaderManager->ShaderConst.SunDir;
+	}
+
+	//reduces shadow artifacts caused by low z value
+	if (ShadowLightDir->z < 0.3f) {
+		ShadowLightDir->z = 0.3f;
+	}
+
+	if (TheSettingManager->SettingsShadows.Exteriors.UseIntervalUpdate) {
+		int NewGameHour = (int)TheShaderManager->ShaderConst.GameTime.y;
+		float NewGameTime = TheShaderManager->ShaderConst.GameTime.y;
+
+		if (NewGameTime < GameTime) {
+			NewGameTime += 24.0f;
+		}
+
+		float gameTimeDiff = NewGameTime - GameTime;
+		if ((gameTimeDiff) > .10f) {
+			if (GameTime > 0 && !(gameTimeDiff > .15f)) {
+				UpdateShadowLightDir = true;
+				UpdateTargetTime = NewGameTime + 0.025f;
+				ShadowLightDirNew.x = ShadowLightDir->x;
+				ShadowLightDirNew.y = ShadowLightDir->y;
+				ShadowLightDirNew.z = ShadowLightDir->z;
+				ShadowLightDirNew.w = ShadowLightDir->w;
+			}
+			else {
+				ShadowLightDirInterval.x = ShadowLightDir->x;
+				ShadowLightDirInterval.y = ShadowLightDir->y;
+				ShadowLightDirInterval.z = ShadowLightDir->z;
+				ShadowLightDirInterval.w = ShadowLightDir->w;
+				ShadowLightDirOld = ShadowLightDirInterval;
+				UpdateShadowLightDir = false;
+			}
+
+			GameTime = NewGameTime;
+		}
+
+		if (UpdateShadowLightDir) {
+			float newTime = NewGameTime - GameTime;
+			float targetTime = UpdateTargetTime - GameTime;
+			float t = newTime / targetTime;
+
+			ShadowLightDirInterval.x = std::lerp(ShadowLightDirOld.x, ShadowLightDirNew.x, t);
+			ShadowLightDirInterval.y = std::lerp(ShadowLightDirOld.y, ShadowLightDirNew.y, t);
+			ShadowLightDirInterval.z = std::lerp(ShadowLightDirOld.z, ShadowLightDirNew.z, t);
+
+			if (newTime >= targetTime) {
+				UpdateShadowLightDir = false;
+				ShadowLightDirOld = ShadowLightDirInterval;
+				if (UpdateTargetTime >= 24.0f) {
+					GameTime = 0.0f;
+				}
+			}
+		}
+		else {
+			ShadowLightDirInterval = ShadowLightDirOld;
+		}
+
+		RenderShadowMap(MapNear, ShadowsExteriors, &At, &ShadowLightDirInterval, ShadowData);
+		RenderShadowMap(MapFar, ShadowsExteriors, &At, &ShadowLightDirInterval, ShadowData);
+	}
+	else {
+		RenderShadowMap(MapNear, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
+		RenderShadowMap(MapFar, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
+	}
+
 	RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir, ShadowData);
 
 	ShadowData->x = ShadowsExteriors->Quality;
 	ShadowData->y = ShadowsExteriors->Darkness;
-	if (ShadowLightDir->z < 0.1f) {
-		if (ShadowData->y == 0.0f) ShadowData->y = 0.1f;
-		ShadowData->y += log(ShadowLightDir->z) / -10.0f;
-		if (ShadowData->y > 1.0f) ShadowData->y = 1.0f;
-	}
+
 	ShadowData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapNear];
 	ShadowData->w = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapFar];
 	OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
@@ -660,7 +772,7 @@ void ShadowManager::RenderInteriorShadows() {
 	int LightIndex = -1;
 
 	if (!(Player->parentCell->flags0 & Player->parentCell->kFlags0_BehaveLikeExterior && ShadowLightDir->z > 0.01f)) {
-
+		FakeExtShadowLightDirSet = false;
 		if (ShadowSettings->Enabled) {
 			LightIndex = GetShadowSceneLights(SceneLights, Lights, LightIndex, ShadowSettings);
 			SetAllShadowMapLightPos(Lights, LightIndex);
@@ -679,7 +791,7 @@ void ShadowManager::RenderInteriorShadows() {
 			LightIndex = GetExtSceneLights(SceneLights, Lights, LightIndex);
 			SetAllShadowMapLightPos(Lights, LightIndex);
 			LightIndex = -1; //clears shadowmaps
-		}	
+		}
 	}
 	else {
 		LightIndex = 0;
@@ -695,6 +807,9 @@ void ShadowManager::RenderInteriorShadows() {
 }
 
 void ShadowManager::RenderShadowMaps() {
+	Global->RenderShadowMaps();
+	//return;
+
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	IDirect3DSurface9* DepthSurface = NULL;
 
@@ -846,6 +961,11 @@ void ShadowManager::AddSceneLight(NiPointLight* Light, int Key, std::map<int, Ni
 	SceneLights[Key] = Light;
 }
 
+void ShadowManager::ResetIntervals() {
+	GameHour = -1;
+	GameTime = -1;
+}
+
 static __declspec(naked) void RenderShadowMapHook() {
 
 	__asm
@@ -860,7 +980,7 @@ static __declspec(naked) void RenderShadowMapHook() {
 }
 
 void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* LightPoint) {
-	
+
 	SettingsShadowStruct::InteriorsStruct* ShadowSettings;
 	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
 
@@ -885,7 +1005,7 @@ void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* L
 				LightPoint->CanCarry = 2;
 			}
 		}
-	}		
+	}
 	else {
 		LightPoint->CastShadows = !(Light->flags & TESForm::FormFlags::kFormFlags_NotCastShadows);
 		LightPoint->CanCarry = 0;
@@ -936,7 +1056,7 @@ static __declspec(naked) void AddCastShadowFlagHook() {
 
 #if defined(NEWVEGAS)
 void LeavesNodeName(BSTreeNode* TreeNode) {
-	
+
 	TreeNode->m_children.data[1]->SetName("Leaves");
 
 }
@@ -946,7 +1066,7 @@ static __declspec(naked) void LeavesNodeNameHook() {
 	__asm
 	{
 		pushad
-		push	eax 
+		push	eax
 		call	LeavesNodeName
 		pop		eax
 		popad
@@ -957,7 +1077,7 @@ static __declspec(naked) void LeavesNodeNameHook() {
 #endif
 
 void CreateShadowsHook() {
-	
+
 	WriteRelJump(kRenderShadowMapHook,		(UInt32)RenderShadowMapHook);
 	WriteRelJump(kAddCastShadowFlagHook,	(UInt32)AddCastShadowFlagHook);
 
@@ -975,7 +1095,7 @@ void CreateShadowsHook() {
 }
 
 void EditorCastShadowFlag(HWND Window, TESForm* Form) {
-	
+
 	if (Window && Form) {
 		SetDlgItemTextA(Window, 0x697, "Does Not Cast Shadows");
 		SetWindowPos(GetDlgItem(Window, 0x697), HWND_BOTTOM, 0, 0, 140, 15, SWP_NOMOVE | SWP_NOZORDER);

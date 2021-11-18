@@ -91,6 +91,7 @@ struct SettingsMainStruct {
 		float	MoonPhaseLumHalf;
 		float	MoonPhaseLumTQtr;
 		float	MoonPhaseLumFull;
+		float	InteriorDimmerCoeff;
 		UInt8	ScreenshotType;
 		UInt8	AnisotropicFilter;
 		UInt16	ScreenshotKey;
@@ -320,6 +321,16 @@ struct SettingsShadowStruct {
 		float				Darkness;
 		float				ShadowMapRadius[3];
 		float				ShadowMapFarPlane;
+		bool                UsePostProcessing;
+		bool				UseIntervalUpdate;
+		float				forwardNormBias;
+		float				forwardFarNormBias;
+		float				forwardConstBias;
+		float				forwardFarConstBias;
+		float				deferredNormBias;
+		float				deferredFarNormBias;
+		float				deferredConstBias;
+		float				deferredFarConstBias;
 		ExcludedFormsList	ExcludedForms;
 	};
 	
@@ -333,6 +344,7 @@ struct SettingsShadowStruct {
 		int					Quality;
 		int					ShadowCubeMapSize;
 		float				Darkness;
+		bool                UsePostProcessing;
 		ExcludedFormsList	ExcludedForms;
 	};
 

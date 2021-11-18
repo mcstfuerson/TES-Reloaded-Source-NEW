@@ -2,6 +2,8 @@
 #include <ctime>
 #include <math.h>
 #include <WeatherMode.h>
+#include <algorithm>
+#include <iostream>
 #define EFFECTQUADFORMAT D3DFVF_XYZ | D3DFVF_TEX1
 
 #if defined(NEWVEGAS)
@@ -145,6 +147,10 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend2;
 	else if (!strcmp(Name, "TESR_ShadowCubeMapBlend3"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend3;
+	else if (!strcmp(Name, "TESR_ShadowBiasDeferred"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred;
+	else if (!strcmp(Name, "TESR_ShadowBiasForward"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward;
 	else if (!strcmp(Name, "TESR_ReciprocalResolution"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ReciprocalResolution;
 	else if (!strcmp(Name, "TESR_ReciprocalResolutionWater"))
@@ -155,6 +161,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheRenderManager->CameraPosition;
 	else if (!strcmp(Name, "TESR_SunDirection"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SunDir;
+	else if (!strcmp(Name, "TESR_ShadowLightDir"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
 	else if (!strcmp(Name, "TESR_SunTiming"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SunTiming;
 	else if (!strcmp(Name, "TESR_SunAmount"))
@@ -171,6 +179,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.RaysPhaseCoeff;
 	else if (!strcmp(Name, "TESR_GameTime"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.GameTime;
+	else if (!strcmp(Name, "TESR_InteriorDimmer"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.InteriorDimmer;
 	else if (!strcmp(Name, "TESR_TextureData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.TextureData;
 	else if (!strcmp(Name, "TESR_WaterCoefficients"))
@@ -700,9 +710,9 @@ void ShaderManager::CreateEffects() {
 	if (Effects->WetWorld) CreateEffect(EffectRecordType_WetWorld);
 	if (Effects->Precipitations) CreateEffect(EffectRecordType_Precipitations);
 	if (Effects->Extra) CreateEffect(EffectRecordType_Extra);
-	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriors);
-	if (TheSettingManager->SettingsShadows.ExteriorsPoint.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
-	if (TheSettingManager->SettingsShadows.Interiors.Quality == -1) CreateEffect(EffectRecordType_ShadowsInteriors);
+	if (TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriors);
+	if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
+	if (TheSettingManager->SettingsShadows.Interiors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsInteriors);
 
 }
 
@@ -714,6 +724,10 @@ void ShaderManager::InitializeConstants() {
 	ShaderConst.SnowAccumulation.Params.w = 0.0f;
 	ShaderConst.WetWorld.Data.x = 0.0f;
 	GameDay = 0;
+	ShaderConst.EveningTransLightDirSet = false;
+	isFullyInitialized = false;
+	InitFrameCount = 0;
+	InitFrameTarget = 2;
 }
 
 void ShaderManager::UpdateConstants() {
@@ -721,6 +735,7 @@ void ShaderManager::UpdateConstants() {
 	bool IsThirdPersonView;
 	Sky* WorldSky = Tes->sky;
 	NiNode* SunRoot = WorldSky->sun->RootNode;
+	Sun* Sun = WorldSky->sun;
 	Moon* Masser = WorldSky->masserMoon;
 	Moon* Secunda = WorldSky->secundaMoon;
 	TESClimate* currentClimate = WorldSky->firstClimate;
@@ -734,6 +749,16 @@ void ShaderManager::UpdateConstants() {
 
 	IsThirdPersonView = Player->IsThirdPersonView(TheSettingManager->SettingsMain.CameraMode.Enabled, TheRenderManager->FirstPersonView);
 	TheRenderManager->GetSceneCameraData();
+
+	//Is fully init'd after two frame passes due to time calculations with sundir
+	if (!isFullyInitialized && currentWorldSpace) {
+		if (InitFrameCount < InitFrameTarget) {
+			InitFrameCount++;
+		}
+		else {	
+			isFullyInitialized = true;
+		}
+	}
 
 	ShaderConst.GameTime.x = TimeGlobals::GetGameTime();
 	ShaderConst.GameTime.y = ShaderConst.GameTime.x / 3600.0f;
@@ -753,11 +778,16 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.SunDir.z = SunRoot->m_localTransform.pos.z;
 			((NiVector4*)&ShaderConst.SunDir)->Normalize();
 			if (ShaderConst.GameTime.y > ShaderConst.SunTiming.w || ShaderConst.GameTime.y < ShaderConst.SunTiming.x)
+			{
 				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
-			else if (ShaderConst.GameTime.y > ShaderConst.SunTiming.z && fabs(deltaz) - ShaderConst.SunDir.z <= 0.0f)
-				ShaderConst.SunDir.z = deltaz;
-			else if (ShaderConst.GameTime.y < ShaderConst.SunTiming.y && fabs(deltaz) - ShaderConst.SunDir.z >= 0.0f)
-				ShaderConst.SunDir.z = deltaz;
+			}
+			else if (ShaderConst.GameTime.y > ShaderConst.SunTiming.z && fabs(deltaz) - ShaderConst.SunDir.z < 0.0f)
+			{
+				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
+			}
+			else if (ShaderConst.GameTime.y < ShaderConst.SunTiming.y && fabs(deltaz) - ShaderConst.SunDir.z > 0.0f) {
+				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
+			}
 
 			//TODO: use kClimate_Masser and kClimate_Secunda but not sure what to compare against?
 			if (Masser && Secunda)  {
@@ -812,7 +842,7 @@ void ShaderManager::UpdateConstants() {
 				ShaderConst.SunDir.w = 1.0f;
 				ShaderConst.MasserDir.w = 1.0f;
 				ShaderConst.SecundaDir.w = 1.0f;
-				//Day
+				ShaderConst.ShadowMap.ShadowLightDir.w = 1.0f;
 				if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.y && ShaderConst.GameTime.y <= ShaderConst.SunTiming.z) {
 					ShaderConst.SunAmount.x = 0.0f;
 					ShaderConst.SunAmount.y = 1.0f;
@@ -822,8 +852,9 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - ShaderConst.SunAmount.y);
 					ShaderConst.OverrideVanillaDirectionalLight = false;
 					ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
+					ShaderConst.DayPhase = Day;
+					ShaderConst.EveningTransLightDirSet = false;
 				}
-				//Night
 				else if ((ShaderConst.GameTime.y >= ShaderConst.SunTiming.w && ShaderConst.GameTime.y <= 23.99) || (ShaderConst.GameTime.y >= 0 && ShaderConst.GameTime.y <= ShaderConst.SunTiming.x)) {
 					ShaderConst.SunAmount.x = 0.0f;
 					ShaderConst.SunAmount.y = 0.0f;
@@ -831,6 +862,8 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.SunAmount.w = 1.0f;
 					ShaderConst.MasserAmount.x = ShaderConst.MasserFade;
 					ShaderConst.SecundaAmount.x = ShaderConst.SecundaFade;
+					ShaderConst.DayPhase = Night;
+					ShaderConst.EveningTransLightDirSet = false;
 					if (TheSettingManager->SettingsMain.Main.DirectionalLightOverride) {
 						ShaderConst.DirectionalLight.x = TheShaderManager->ShaderConst.MasserDir.x * -1;
 						ShaderConst.DirectionalLight.y = TheShaderManager->ShaderConst.MasserDir.y * -1;
@@ -843,7 +876,6 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 					}
 				}
-				//Sunrise begin -> end fade from night
 				else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.x && ShaderConst.GameTime.y <= ShaderConst.SunTiming.y) {
 					if ((ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 <= ShaderConst.SunTiming.y - ShaderConst.SunTiming.x) { 
 						ShaderConst.SunAmount.x = (ShaderConst.GameTime.y - ShaderConst.SunTiming.x ) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x);
@@ -853,9 +885,42 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.MasserAmount.x = (ShaderConst.MasserFade - (ShaderConst.SunAmount.x / 0.4f));
 						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.x / 0.4f));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
-						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;				
+						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;		
+
+						float start = 0.2f;
+						float end = 0.6f;
+						float diff = end - start;
+						float scale = (ShaderConst.SunAmount.x - start) / diff;
+
+						ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(scale, 0.1f, 1.0f);
+						ShaderConst.DayPhase = Dawn;
+						ShaderConst.EveningTransLightDirSet = false;
+
+						if (ShaderConst.MasserAmount.x > 0.0f) {
+							ShaderConst.OverrideVanillaDirectionalLight = true;
+							if (!ShaderConst.MorningTransLightDirSet) {
+								ShaderConst.DirectionalLight.x = std::lerp(ShaderConst.SunDir.x * -1, TheShaderManager->ShaderConst.MasserDir.x * -1, ShaderConst.MasserAmount.x);
+								ShaderConst.DirectionalLight.y = std::lerp(ShaderConst.SunDir.y * -1, TheShaderManager->ShaderConst.MasserDir.y * -1, ShaderConst.MasserAmount.x);
+								ShaderConst.DirectionalLight.z = std::lerp(ShaderConst.SunDir.z * -1, TheShaderManager->ShaderConst.MasserDir.z * -1, ShaderConst.MasserAmount.x);
+							}
+							else {
+								ShaderConst.DirectionalLight.x = std::lerp(ShaderConst.MorningTransLightDir.x, TheShaderManager->ShaderConst.MasserDir.x * -1, ShaderConst.MasserAmount.x);
+								ShaderConst.DirectionalLight.y = std::lerp(ShaderConst.MorningTransLightDir.y, TheShaderManager->ShaderConst.MasserDir.y * -1, ShaderConst.MasserAmount.x);
+								ShaderConst.DirectionalLight.z = std::lerp(ShaderConst.MorningTransLightDir.z, TheShaderManager->ShaderConst.MasserDir.z * -1, ShaderConst.MasserAmount.x);
+							}
+							ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.MasserDir;
+							ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(ShaderConst.MasserAmount.x, 0.1f, 1.0f);
+						}
+						else {
+							if (!ShaderConst.MorningTransLightDirSet && ShaderConst.MasserAmount.x > -0.1f) {
+								ShaderConst.MorningTransLightDir = D3DXVECTOR4(Tes->niDirectionalLight->m_direction.x, Tes->niDirectionalLight->m_direction.y, Tes->niDirectionalLight->m_direction.z, 1);							
+								if (fabs(ShaderConst.MorningTransLightDir.x) > 1.0f) {
+									ShaderConst.MorningTransLightDirSet = true;
+									((NiVector4*)&ShaderConst.MorningTransLightDir)->Normalize();
+								}
+							}
+						}
 					}
-					//Sunrise begin -> end fade to day
 					else {
 						ShaderConst.SunAmount.x = 2.0f - (ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x);
 						ShaderConst.SunAmount.y = (ShaderConst.GameTime.y - ShaderConst.SunTiming.x) * 2 / (ShaderConst.SunTiming.y - ShaderConst.SunTiming.x) - 1.0f;
@@ -865,9 +930,10 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.x + ShaderConst.SunAmount.y));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
+						ShaderConst.DayPhase = Sunrise;
+						ShaderConst.EveningTransLightDirSet = false;
 					}
 				}
-				//Sunset begin -> end fade from day
 				else if (ShaderConst.GameTime.y >= ShaderConst.SunTiming.z && ShaderConst.GameTime.y <= ShaderConst.SunTiming.w) {
 					if ((ShaderConst.GameTime.y - ShaderConst.SunTiming.z) * 2 <= ShaderConst.SunTiming.w - ShaderConst.SunTiming.z) {
 						ShaderConst.SunAmount.x = 0.0f;
@@ -878,8 +944,9 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.y + ShaderConst.SunAmount.z));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
+						ShaderConst.DayPhase = Sunset;
+						ShaderConst.EveningTransLightDirSet = false;
 					}
-					//Sunset begin -> end fade to night
 					else {
 						ShaderConst.SunAmount.x = 0.0f;
 						ShaderConst.SunAmount.y = 0.0f;
@@ -889,6 +956,29 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.SecundaAmount.x = (ShaderConst.SecundaFade - (ShaderConst.SunAmount.z / 0.3f));
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
+						ShaderConst.DayPhase = Dusk;
+
+						if (ShaderConst.SunAmount.z < .5) {
+							float start = 0.5f;
+							float end = 0.3f;
+							float diff = start - end;
+							float scale = (ShaderConst.SunAmount.z - end) / diff;
+							ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(scale, 0.1f, 1.0f);
+						}
+						if (ShaderConst.MasserAmount.x > 0.0f) {
+							ShaderConst.OverrideVanillaDirectionalLight = true;
+
+							if (!ShaderConst.EveningTransLightDirSet) {
+								ShaderConst.EveningTransLightDir = D3DXVECTOR4(Tes->niDirectionalLight->m_direction.x, Tes->niDirectionalLight->m_direction.y, Tes->niDirectionalLight->m_direction.z, 1);
+								((NiVector4*)&ShaderConst.EveningTransLightDir)->Normalize();
+								ShaderConst.EveningTransLightDirSet = true;
+							}
+							ShaderConst.DirectionalLight.x = std::lerp(ShaderConst.EveningTransLightDir.x, TheShaderManager->ShaderConst.MasserDir.x * -1, ShaderConst.MasserAmount.x);
+							ShaderConst.DirectionalLight.y = std::lerp(ShaderConst.EveningTransLightDir.y, TheShaderManager->ShaderConst.MasserDir.y * -1, ShaderConst.MasserAmount.x);
+							ShaderConst.DirectionalLight.z = std::lerp(ShaderConst.EveningTransLightDir.z, TheShaderManager->ShaderConst.MasserDir.z * -1, ShaderConst.MasserAmount.x);
+							ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.MasserDir;
+							ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(ShaderConst.MasserAmount.x, 0.1f, 1.0f);
+						}
 					}
 				}
 
@@ -1054,7 +1144,12 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.currentsunGlare = 0.5f;
 			ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 			ShaderConst.OverrideVanillaDirectionalLight = false;
+			ShaderConst.EveningTransLightDirSet = false;
+			isFullyInitialized = false;
+			InitFrameCount = 0;
+			InitFrameTarget = 2;
 			TESObjectCELL::LightingData* LightData = currentCell->lighting;
+
 			if (!(currentCell->flags0 & currentCell->kFlags0_BehaveLikeExterior)) {
 				ShaderConst.fogColor.x = LightData->fog.r / 255.0f;
 				ShaderConst.fogColor.y = LightData->fog.g / 255.0f;
@@ -1076,10 +1171,41 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.fogData.x = LightData->fogNear;
 			ShaderConst.fogData.y = LightData->fogFar;
 			ShaderConst.fogData.z = ShaderConst.currentsunGlare;
+
+			//TODO: Dimmer Settings check
+			if (ShaderConst.InteriorLighting.find(currentCell->GetEditorName()) == ShaderConst.InteriorLighting.end()) {
+				ShaderConstants::SimpleLightingStruct sls;
+				sls.r = LightData->ambient.r;
+				sls.g = LightData->ambient.g;
+				sls.b = LightData->ambient.b;
+				sls.a = LightData->ambient.a;
+				ShaderConst.InteriorLighting.emplace(currentCell->GetEditorName(), sls);
+			}
+
+			//TODO do these 
+			ShaderConst.InteriorDimmerStart = 6.0f;
+			ShaderConst.InteriorDimmerEnd = 9.0f;
+			float dimmer;
+			if (ShaderConst.GameTime.y > 12) {
+				dimmer = ShaderConst.GameTime.y - (12 + ShaderConst.InteriorDimmerStart);
+				dimmer = 1 - (dimmer / (ShaderConst.InteriorDimmerEnd - ShaderConst.InteriorDimmerStart));
+				dimmer = std::clamp(dimmer, 0.0f, 1.0f);
+			}
+			else {
+				dimmer = ShaderConst.GameTime.y - ShaderConst.InteriorDimmerStart;
+				dimmer = (dimmer / (ShaderConst.InteriorDimmerEnd - ShaderConst.InteriorDimmerStart));
+				dimmer = std::clamp(dimmer, 0.0f, 1.0f);
+			}
+
+			ShaderConst.InteriorDimmer.x = dimmer;
+			float dimmerAdj = std::clamp(dimmer, TheSettingManager->SettingsMain.Main.InteriorDimmerCoeff, 1.0f);
+			LightData->ambient.r = ShaderConst.InteriorLighting[currentCell->GetEditorName()].r * dimmerAdj;
+			LightData->ambient.g = ShaderConst.InteriorLighting[currentCell->GetEditorName()].g * dimmerAdj;
+			LightData->ambient.b = ShaderConst.InteriorLighting[currentCell->GetEditorName()].b * dimmerAdj;
 		}
 
 		//TODO: shadows draw "over" fog, how to fix shader? for now just disable post processing shadows when foggy.
-		if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 || TheSettingManager->SettingsShadows.ExteriorsPoint.Quality == -1) {
+		if (TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing || TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing) {
 			if ((ShaderConst.currentfogEnd < 15000.0f && weatherPercent > .50f) || (ShaderConst.oldfogEnd < 15000.0f && weatherPercent < .50f)) {
 				ShaderConst.DisablePostShadow = true;
 			}
@@ -1191,10 +1317,22 @@ void ShaderManager::UpdateConstants() {
 		}
 		
 		if (TheSettingManager->SettingsMain.Effects.Precipitations) {
-			if (currentWeather->weatherType == TESWeather::WeatherType::kType_Rainy)
-				ShaderConst.Precipitations.RainData.x = weatherPercent;
-			else if (!previousWeather || (previousWeather && previousWeather->weatherType == TESWeather::WeatherType::kType_Rainy))
-				ShaderConst.Precipitations.RainData.x = 1.0f - weatherPercent;
+			if (currentWeather->weatherType == TESWeather::WeatherType::kType_Rainy) {
+				if (weatherPercent > 0.8f) {
+					ShaderConst.Precipitations.RainData.x = (weatherPercent - 0.8f) / (1.0f - 0.8f);
+				}
+				else {
+					ShaderConst.Precipitations.RainData.x = 0.0f;
+				}
+			}
+			else if (!previousWeather || (previousWeather && previousWeather->weatherType == TESWeather::WeatherType::kType_Rainy)) {
+				if ((1.0f - weatherPercent) > 0.8f) {
+					ShaderConst.Precipitations.RainData.x = ((1.0f - weatherPercent) - 0.8f) / (1.0f - 0.8f);
+				}
+				else {
+					ShaderConst.Precipitations.RainData.x = 0.0f;
+				}
+			}
 			if (currentWeather->weatherType == TESWeather::WeatherType::kType_Snow)
 				ShaderConst.Precipitations.SnowData.x = weatherPercent;
 			else if (!previousWeather || (previousWeather && previousWeather->weatherType == TESWeather::WeatherType::kType_Snow))
@@ -2005,17 +2143,17 @@ void ShaderManager::CreateEffect(EffectRecordType EffectType) {
 		case EffectRecordType_ShadowsExteriors:
 			strcat(Filename, "Shadows\\ShadowsExteriors.fx");
 			ShadowsExteriorsEffect = new EffectRecord();
-			TheSettingManager->SettingsShadows.Exteriors.Quality = ((int)LoadEffect(ShadowsExteriorsEffect, Filename, NULL)) * -1;
+			TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing = LoadEffect(ShadowsExteriorsEffect, Filename, NULL);
 			break;
 		case EffectRecordType_ShadowsExteriorsPoint:
 			strcat(Filename, "Shadows\\ShadowsExteriorsPoint.fx");
 			ShadowsExteriorsPointEffect = new EffectRecord();
-			TheSettingManager->SettingsShadows.ExteriorsPoint.Quality = ((int)LoadEffect(ShadowsExteriorsPointEffect, Filename, NULL)) * -1;
+			TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing = LoadEffect(ShadowsExteriorsPointEffect, Filename, NULL);
 			break;
 		case EffectRecordType_ShadowsInteriors:
 			strcat(Filename, "Shadows\\ShadowsInteriors.fx");
 			ShadowsInteriorsEffect = new EffectRecord();
-			TheSettingManager->SettingsShadows.Interiors.Quality = ((int)LoadEffect(ShadowsInteriorsEffect, Filename, NULL)) * -1;
+			TheSettingManager->SettingsShadows.Interiors.UsePostProcessing = LoadEffect(ShadowsInteriorsEffect, Filename, NULL);
 			break;
 		case EffectRecordType_Extra:
 			WIN32_FIND_DATAA File;
@@ -2095,31 +2233,6 @@ void ShaderManager::DisposeEffect(EffectRecord* TheEffect) {
 
 }
 
-
-void ShaderManager::RenderShadows(IDirect3DSurface9* RenderTarget) {
-
-	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
-	IDirect3DDevice9* Device = TheRenderManager->device;
-	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
-	D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
-
-	TheRenderManager->SetupSceneCamera();
-	Device->SetStreamSource(0, EffectVertex, 0, sizeof(EffectQuad));
-	Device->SetFVF(EFFECTQUADFORMAT);
-	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
-	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 && currentWorldSpace && !ShaderConst.DisablePostShadow) {
-		ShadowsExteriorsEffect->SetCT();
-		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (TheSettingManager->SettingsShadows.ExteriorsPoint.Quality == -1 && currentWorldSpace && !ShaderConst.DisablePostShadow) {
-		ShadowsExteriorsPointEffect->SetCT();
-		ShadowsExteriorsPointEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (TheSettingManager->SettingsShadows.Interiors.Quality == -1 && !currentWorldSpace) {
-		ShadowsInteriorsEffect->SetCT();
-		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-}
 void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
@@ -2141,15 +2254,15 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1 && currentWorldSpace && !ShaderConst.DisablePostShadow) {
+	if (TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing && currentWorldSpace && !ShaderConst.DisablePostShadow) {
 		ShadowsExteriorsEffect->SetCT();
 		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.ExteriorsPoint.Quality == -1 && currentWorldSpace && !ShaderConst.DisablePostShadow) {
+	if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing && currentWorldSpace && !ShaderConst.DisablePostShadow) {
 		ShadowsExteriorsPointEffect->SetCT();
 		ShadowsExteriorsPointEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.Interiors.Quality == -1 && !currentWorldSpace) {
+	if (TheSettingManager->SettingsShadows.Interiors.UsePostProcessing && !currentWorldSpace) {
 		ShadowsInteriorsEffect->SetCT();
 		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
@@ -2439,15 +2552,15 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 	}
 	else if (!strcmp(Name, "ShadowsExteriors")) {
 		DisposeEffect(ShadowsExteriorsEffect);
-		if (TheSettingManager->SettingsShadows.Exteriors.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriors);
+		if (TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriors);
 	}
 	else if (!strcmp(Name, "ShadowsExteriorsPoint")) {
 		DisposeEffect(ShadowsExteriorsPointEffect);
-		if (TheSettingManager->SettingsShadows.ExteriorsPoint.Quality == -1) CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
+		if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
 	}
 	else if (!strcmp(Name, "ShadowsInteriors")) {
 		DisposeEffect(ShadowsInteriorsEffect);
-		if (TheSettingManager->SettingsShadows.Interiors.Quality == -1) CreateEffect(EffectRecordType_ShadowsInteriors);
+		if (TheSettingManager->SettingsShadows.Interiors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsInteriors);
 	}
 
 }

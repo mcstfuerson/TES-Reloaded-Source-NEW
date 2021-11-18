@@ -108,6 +108,8 @@ SettingManager::SettingManager() {
 	SettingsMain.Main.MoonPhaseLumTQtr = atof(value);
 	GetPrivateProfileStringA("Main", "MoonPhaseLumFull", "1.00", value, SettingStringBuffer, Filename);
 	SettingsMain.Main.MoonPhaseLumFull = atof(value);
+	GetPrivateProfileStringA("Main", "InteriorDimmerCoeff", "1.00", value, SettingStringBuffer, Filename);
+	SettingsMain.Main.InteriorDimmerCoeff = atof(value);
 	SettingsMain.Main.SaveSettings = GetPrivateProfileIntA("Main", "SaveSettings", 1, Filename);
 	SettingsMain.Main.ReplaceIntro = GetPrivateProfileIntA("Main", "ReplaceIntro", 0, Filename);	
 
@@ -1114,13 +1116,32 @@ void SettingManager::LoadSettings() {
 	GetPrivateProfileStringA("ExteriorsOrtho", "ShadowMapRadius", "2048.0", value, SettingStringBuffer, Filename);
 	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapOrtho] = atof(value);
 
+	SettingsShadows.Exteriors.UsePostProcessing = GetPrivateProfileIntA("Exteriors", "UsePostProcessing", 1, Filename);
+	SettingsShadows.Exteriors.UseIntervalUpdate = GetPrivateProfileIntA("Exteriors", "UseIntervalUpdate", 1, Filename);
 	SettingsShadows.Exteriors.Quality = GetPrivateProfileIntA("Exteriors", "Quality", 0, Filename);
 	GetPrivateProfileStringA("Exteriors", "Darkness", "0.2", value, SettingStringBuffer, Filename);
 	SettingsShadows.Exteriors.Darkness = atof(value);
 	GetPrivateProfileStringA("Exteriors", "ShadowMapFarPlane", "8192.0", value, SettingStringBuffer, Filename);
 	SettingsShadows.Exteriors.ShadowMapFarPlane = atof(value);
+	GetPrivateProfileStringA("Exteriors", "forwardNormBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.forwardNormBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "forwardFarNormBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.forwardFarNormBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "forwardConstBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.forwardConstBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "forwardFarConstBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.forwardFarConstBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "deferredNormBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.deferredNormBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "deferredFarNormBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.deferredFarNormBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "deferredConstBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.deferredConstBias = atof(value);
+	GetPrivateProfileStringA("Exteriors", "deferredFarConstBias", "0.001", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.deferredFarConstBias = atof(value);
 
 	SettingsShadows.Interiors.Enabled = GetPrivateProfileIntA("Interiors", "Enabled", 1, Filename);
+	SettingsShadows.Interiors.UsePostProcessing = GetPrivateProfileIntA("Interiors", "UsePostProcessing", 1, Filename);
 	SettingsShadows.Interiors.AlphaEnabled = GetPrivateProfileIntA("Interiors", "AlphaEnabled", 1, Filename);
 	SettingsShadows.Interiors.Forms.Activators = GetPrivateProfileIntA("Interiors", "Activators", 1, Filename);
 	SettingsShadows.Interiors.Forms.Actors = GetPrivateProfileIntA("Interiors", "Actors", 1, Filename);
@@ -1139,6 +1160,7 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Interiors.Darkness = atof(value);
 
 	SettingsShadows.ExteriorsPoint.Enabled = GetPrivateProfileIntA("ExteriorsPoint", "Enabled", 1, Filename);
+	SettingsShadows.ExteriorsPoint.UsePostProcessing = GetPrivateProfileIntA("ExteriorsPoint", "UsePostProcessing", 1, Filename);
 	SettingsShadows.ExteriorsPoint.AlphaEnabled = GetPrivateProfileIntA("ExteriorsPoint", "AlphaEnabled", 1, Filename);
 	SettingsShadows.ExteriorsPoint.Forms.Activators = GetPrivateProfileIntA("ExteriorsPoint", "Activators", 1, Filename);
 	SettingsShadows.ExteriorsPoint.Forms.Actors = GetPrivateProfileIntA("ExteriorsPoint", "Actors", 1, Filename);
@@ -1224,6 +1246,7 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 			WritePrivateProfileStringA("Main", "MoonPhaseLumHalf", ToString(SettingsMain.Main.MoonPhaseLumHalf).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "MoonPhaseLumTQtr", ToString(SettingsMain.Main.MoonPhaseLumTQtr).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "MoonPhaseLumFull", ToString(SettingsMain.Main.MoonPhaseLumFull).c_str(), SettingsMain.Main.MainFile);
+			WritePrivateProfileStringA("Main", "InteriorDimmerCoeff", ToString(SettingsMain.Main.InteriorDimmerCoeff).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "ScreenshotKey", ToString(SettingsMain.Main.ScreenshotKey).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "FPSOverlay", ToString(SettingsMain.Main.FPSOverlay).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "DirectionalLightOverride", ToString(SettingsMain.Main.DirectionalLightOverride).c_str(), SettingsMain.Main.MainFile);
@@ -1443,18 +1466,32 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 		}
 		else if (!strcmp(Definition, "Shadows")) {
 			strcat(Filename, "Shadows\\Shadows.ini");
+			WritePrivateProfileStringA("Exteriors", "UsePostProcessing", ToString(SettingsShadows.Exteriors.UsePostProcessing).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "Darkness", ToString(SettingsShadows.Exteriors.Darkness).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "forwardNormBias", ToString(SettingsShadows.Exteriors.forwardNormBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "forwardFarNormBias", ToString(SettingsShadows.Exteriors.forwardFarNormBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "forwardConstBias", ToString(SettingsShadows.Exteriors.forwardConstBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "forwardFarConstBias", ToString(SettingsShadows.Exteriors.forwardFarConstBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "deferredNormBias", ToString(SettingsShadows.Exteriors.deferredNormBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "deferredFarNormBias", ToString(SettingsShadows.Exteriors.deferredFarNormBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "deferredConstBias", ToString(SettingsShadows.Exteriors.deferredConstBias).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "deferredFarConstBias", ToString(SettingsShadows.Exteriors.deferredFarConstBias).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "Quality", ToString(SettingsShadows.Exteriors.Quality).c_str(), Filename);
+			WritePrivateProfileStringA("Exteriors", "ShadowMapFarPlane", ToString(SettingsShadows.Exteriors.ShadowMapFarPlane).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNear", "Enabled", ToString(SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNear", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsNear", "ShadowMapRadius", ToString(SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsFar", "Enabled", ToString(SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsFar", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsFar", "ShadowMapRadius", ToString(SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapFar]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "Enabled", ToString(SettingsShadows.ExteriorsPoint.Enabled).c_str(), Filename);
+			WritePrivateProfileStringA("ExteriorsPoint", "UsePostProcessing", ToString(SettingsShadows.ExteriorsPoint.UsePostProcessing).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "AlphaEnabled", ToString(SettingsShadows.ExteriorsPoint.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "Darkness", ToString(SettingsShadows.ExteriorsPoint.Darkness).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "Quality", ToString(SettingsShadows.ExteriorsPoint.Quality).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "LightPoints", ToString(SettingsShadows.ExteriorsPoint.LightPoints).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Enabled", ToString(SettingsShadows.Interiors.Enabled).c_str(), Filename);
+			WritePrivateProfileStringA("Interiors", "UsePostProcessing", ToString(SettingsShadows.Interiors.UsePostProcessing).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "AlphaEnabled", ToString(SettingsShadows.Interiors.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Darkness", ToString(SettingsShadows.Interiors.Darkness).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Quality", ToString(SettingsShadows.Interiors.Quality).c_str(), Filename);
@@ -1772,6 +1809,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["MoonPhaseLumHalf"] = SettingsMain.Main.MoonPhaseLumHalf;
 				Settings["MoonPhaseLumTQtr"] = SettingsMain.Main.MoonPhaseLumTQtr;
 				Settings["MoonPhaseLumFull"] = SettingsMain.Main.MoonPhaseLumFull;
+				Settings["InteriorDimmerCoeff"] = SettingsMain.Main.InteriorDimmerCoeff;				
 			}
 			else if (!strcmp(Section, "CameraMode")) {
 				Settings["NearDistanceFirst"] = SettingsMain.CameraMode.NearDistanceFirst;
@@ -2020,19 +2058,32 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 		}
 		else if (!strcmp(Definition, "Shadows")) {
 			if (!strcmp(Section, "Exteriors")) {
+				Settings["UsePostProcessing"] = SettingsShadows.Exteriors.UsePostProcessing;
 				Settings["Darkness"] = SettingsShadows.Exteriors.Darkness;
+				Settings["forwardNormBias"] = SettingsShadows.Exteriors.forwardNormBias;
+				Settings["forwardFarNormBias"] = SettingsShadows.Exteriors.forwardFarNormBias;
+				Settings["forwardConstBias"] = SettingsShadows.Exteriors.forwardConstBias;
+				Settings["forwardFarConstBias"] = SettingsShadows.Exteriors.forwardFarConstBias;
+				Settings["deferredNormBias"] = SettingsShadows.Exteriors.deferredNormBias;
+				Settings["deferredFarNormBias"] = SettingsShadows.Exteriors.deferredFarNormBias;
+				Settings["deferredConstBias"] = SettingsShadows.Exteriors.deferredConstBias;
+				Settings["deferredFarConstBias"] = SettingsShadows.Exteriors.deferredFarConstBias;
+				Settings["ShadowMapFarPlane"] = SettingsShadows.Exteriors.ShadowMapFarPlane;
 				Settings["Quality"] = SettingsShadows.Exteriors.Quality;
 			}
 			else if (!strcmp(Section, "ExteriorsNear")) {
 				Settings["Enabled"] = SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapNear];
 				Settings["AlphaEnabled"] = SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear];
+				Settings["ShadowMapRadius"] = SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapNear];
 			}
 			else if (!strcmp(Section, "ExteriorsFar")) {
 				Settings["Enabled"] = SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapFar];
 				Settings["AlphaEnabled"] = SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar];
+				Settings["ShadowMapRadius"] = SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapFar];
 			}
 			else if (!strcmp(Section, "Interiors")) {
 				Settings["Enabled"] = SettingsShadows.Interiors.Enabled;
+				Settings["UsePostProcessing"] = SettingsShadows.Interiors.UsePostProcessing;
 				Settings["AlphaEnabled"] = SettingsShadows.Interiors.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.Interiors.Darkness;
 				Settings["Quality"] = SettingsShadows.Interiors.Quality;
@@ -2040,6 +2091,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			}
 			else if (!strcmp(Section, "ExteriorsPoint")) {
 				Settings["Enabled"] = SettingsShadows.ExteriorsPoint.Enabled;
+				Settings["UsePostProcessing"] = SettingsShadows.ExteriorsPoint.UsePostProcessing;
 				Settings["AlphaEnabled"] = SettingsShadows.ExteriorsPoint.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.ExteriorsPoint.Darkness;
 				Settings["Quality"] = SettingsShadows.ExteriorsPoint.Quality;
@@ -2254,6 +2306,8 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsMain.Main.MoonPhaseLumTQtr = Value;
 				else if (!strcmp(Setting, "MoonPhaseLumFull"))
 					SettingsMain.Main.MoonPhaseLumFull = Value;
+				else if (!strcmp(Setting, "InteriorDimmerCoeff"))
+					SettingsMain.Main.InteriorDimmerCoeff = Value;
 			}
 			else if (!strcmp(Section, "CameraMode")) {
 				if (!strcmp(Setting, "NearDistanceFirst"))
@@ -2686,9 +2740,47 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				if (!strcmp(Setting, "Darkness")) {
 					SettingsShadows.Exteriors.Darkness = Value;
 				}
+				else if (!strcmp(Setting, "ShadowMapFarPlane")) {
+					SettingsShadows.Exteriors.ShadowMapFarPlane = Value;
+				}
+				else if (!strcmp(Setting, "forwardNormBias")) {
+					SettingsShadows.Exteriors.forwardNormBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.x = Value;
+				}
+				else if (!strcmp(Setting, "forwardFarNormBias")) {
+					SettingsShadows.Exteriors.forwardFarNormBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.y = Value;
+				}
+				else if (!strcmp(Setting, "forwardConstBias")) {
+					SettingsShadows.Exteriors.forwardConstBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.z = Value;
+				}
+				else if (!strcmp(Setting, "forwardFarConstBias")) {
+					SettingsShadows.Exteriors.forwardFarConstBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasForward.w = Value;
+				}
+				else if (!strcmp(Setting, "deferredNormBias")) {
+					SettingsShadows.Exteriors.deferredNormBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.x = Value;
+				}
+				else if (!strcmp(Setting, "deferredFarNormBias")) {
+					SettingsShadows.Exteriors.deferredFarNormBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.y = Value;
+				}
+				else if (!strcmp(Setting, "deferredConstBias")) {
+					SettingsShadows.Exteriors.deferredConstBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.z = Value;
+				}
+				else if (!strcmp(Setting, "deferredFarConstBias")) {
+					SettingsShadows.Exteriors.deferredFarConstBias = Value;
+					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.w = Value;
+				}
 				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.Exteriors.Quality = Value;
+				}
+				else if (!strcmp(Setting, "UsePostProcessing")) {
 					// Special case for forward or post-process shadowing
+					SettingsShadows.Exteriors.UsePostProcessing = Value;
 					TheShaderManager->SwitchShaderStatus("ShadowsExteriors");
 				}
 			}
@@ -2697,12 +2789,16 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapNear] = Value;
 				else if (!strcmp(Setting, "AlphaEnabled"))
 					SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear] = Value;
+				else if (!strcmp(Setting, "ShadowMapRadius"))
+					SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapNear] = Value;
 			}
 			else if (!strcmp(Section, "ExteriorsFar")) {
 				if (!strcmp(Setting, "Enabled"))
 					SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapFar] = Value;
 				else if (!strcmp(Setting, "AlphaEnabled"))
 					SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapFar] = Value;
+				else if (!strcmp(Setting, "ShadowMapRadius"))
+					SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapFar] = Value;
 			}
 			else if (!strcmp(Section, "Interiors")) {
 				if (!strcmp(Setting, "Enabled")) {
@@ -2719,7 +2815,10 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				}
 				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.Interiors.Quality = Value;
+				}
+				else if (!strcmp(Setting, "UsePostProcessing")) {
 					// Special case for forward or post-process shadowing
+					SettingsShadows.Interiors.UsePostProcessing = Value;
 					TheShaderManager->SwitchShaderStatus("ShadowsInteriors");
 				}
 			}
@@ -2738,7 +2837,10 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				}
 				else if (!strcmp(Setting, "Quality")) {
 					SettingsShadows.ExteriorsPoint.Quality = Value;
+				}
+				else if (!strcmp(Setting, "UsePostProcessing")) {
 					// Special case for forward or post-process shadowing
+					SettingsShadows.ExteriorsPoint.UsePostProcessing = Value;
 					TheShaderManager->SwitchShaderStatus("ExteriorsPoint");
 				}
 			}
@@ -3272,7 +3374,10 @@ bool Settings::TrackLoadGame(BSFile* GameFile, char* FileName, UInt8 Arg3) {
 	TheSettingManager->GameLoading = true;
 	r = (this->*LoadGame)(GameFile, FileName, Arg3);
 	TheSettingManager->GameLoading = false;
-	if (r) TheShaderManager->InitializeConstants();
+	if (r) {
+		TheShaderManager->InitializeConstants();
+		TheShadowManager->ResetIntervals();
+	}
 	return r;
 
 }

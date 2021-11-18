@@ -31,6 +31,7 @@ public:
 	TESObjectREFR*			GetRef(TESObjectREFR* Ref, SettingsShadowStruct::FormsStruct* Forms, SettingsShadowStruct::ExcludedFormsList* ExcludedForms);
 	TESObjectREFR*			GetRefO(TESObjectREFR* Ref);
 	void					RenderObject(NiAVObject* Node, D3DXVECTOR4* ShadowData, bool HasWater);
+	void					RenderObjectPoint(NiAVObject* Node, D3DXVECTOR4* ShadowData, bool HasWater);
 	void					RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType, D3DXVECTOR4* ShadowData);
 	void					Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData);
 	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir, D3DXVECTOR4* ShadowData);
@@ -51,6 +52,7 @@ public:
 	void                    SetAllShadowMapLightPos(NiPointLight** Lights, int LightIndex);
 	void                    SetShadowMapLightPos(NiPointLight** Lights, int index);
 	void                    SetShadowCubeMapRegisters(int index);
+	void					ResetIntervals();
 
 
 
@@ -79,7 +81,16 @@ public:
 	TESObjectCELL*			CurrentCell;
 	ShadowCubeMapStateEnum	ShadowCubeMapState;
 	bool					AlphaEnabled;
+	bool					FakeExtShadowLightDirSet;
+	D3DXVECTOR4				FakeExtShadowLightDir;
+	D3DXVECTOR4				ShadowLightDirOld;
+	D3DXVECTOR4				ShadowLightDirNew;
+	bool					UpdateShadowLightDir;
+	float					UpdateTargetTime;
+	D3DXVECTOR3				LookAtPosition;
 	int                     ShadowCubeLightCount;
+	int						GameHour;
+	float					GameTime;
 };
 
 void CreateShadowsHook();

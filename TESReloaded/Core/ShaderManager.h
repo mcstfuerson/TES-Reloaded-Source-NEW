@@ -35,10 +35,20 @@ enum ShaderType
 	ShaderType_Pixel,
 };
 
+enum DayPhase
+{
+	Dawn,
+	Sunrise,
+	Day,
+	Sunset,
+	Dusk,
+	Night
+};
+
 struct ShaderConstants {
 	
 	struct ShadowMapStruct {
-		D3DXMATRIXA16	ShadowWorld;
+		D3DXMATRIX	    ShadowWorld;
 		D3DXMATRIX		ShadowViewProj;
 		D3DXMATRIX		ShadowCameraToLight[3];
 		D3DXVECTOR4		ShadowCubeMapLightPosition;
@@ -48,6 +58,8 @@ struct ShaderConstants {
 		D3DXVECTOR4		ShadowCubeMapBlend2;
 		D3DXVECTOR4		ShadowCubeMapBlend3;
 		D3DXVECTOR4		ShadowLightDir;
+		D3DXVECTOR4		ShadowBiasForward;
+		D3DXVECTOR4		ShadowBiasDeferred;
 	};
 	struct WaterStruct {
 		D3DXVECTOR4		waterCoefficients;
@@ -153,13 +165,23 @@ struct ShaderConstants {
 		TESWeather::ColorData		colors[10];
 		float			hdrInfo[14];
 	};
-	typedef std::map<std::string, SimpleWeatherStruct> WeatherMap;	
+
+	struct SimpleLightingStruct {
+		UInt8	r;
+		UInt8	g;
+		UInt8	b;
+		UInt8	a;
+	};
+
+	typedef std::map<std::string, SimpleWeatherStruct> WeatherMap;
+	typedef std::map<std::string, SimpleLightingStruct> InteriorLightingMap;
 
 	D3DXVECTOR4				ReciprocalResolution;
 	D3DXVECTOR4				ReciprocalResolutionWater;
 	D3DXVECTOR4				DirectionalLight; //currently only used for moon lighting
 	bool					OverrideVanillaDirectionalLight;
 	bool					DisablePostShadow;
+	DayPhase				DayPhase;
 	D3DXVECTOR4				SunDir;
 	D3DXVECTOR4				SunTiming;
 	D3DXVECTOR4				SunAmount;
@@ -171,10 +193,14 @@ struct ShaderConstants {
 	float					SecundaFade;
 	bool					MoonsExist;
 	WeatherMap				OrigWeathers;
+	InteriorLightingMap		InteriorLighting;
 	float					MoonPhaseCoeff;
 	D3DXVECTOR4				RaysPhaseCoeff;
 	D3DXVECTOR4				GameTime;
 	D3DXVECTOR4				Tick;
+	D3DXVECTOR4				InteriorDimmer;
+	float					InteriorDimmerStart;
+	float					InteriorDimmerEnd;
 	D3DXVECTOR4				TextureData;
 	TESWeather*				pWeather;
 	float					currentsunGlare;
@@ -217,6 +243,10 @@ struct ShaderConstants {
 	WetWorldStruct			WetWorld;
 	SharpeningStruct		Sharpening;
 	VolumetricFogStruct		VolumetricFog;
+	bool					EveningTransLightDirSet;
+	D3DXVECTOR4				EveningTransLightDir;
+	bool					MorningTransLightDirSet;
+	D3DXVECTOR4				MorningTransLightDir;
 };
 
 struct ShaderValue {
@@ -248,6 +278,7 @@ public:
 
 	void					CreateCT();
 	void					SetCT();
+	void					SetCustomCT();
 	bool					LoadShader(const char* Name);
 	
 	ShaderType				Type;
@@ -305,6 +336,8 @@ public:
 
 
 	int						GameDay;
+	int						InitFrameCount;
+	int						InitFrameTarget;
 	struct					EffectQuad { float x, y, z; float u, v; };
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
@@ -316,6 +349,7 @@ public:
 	IDirect3DSurface9*		RenderSurfaceSMAA;
 	bool					RenderedBufferFilled;
 	bool					DepthBufferFilled;
+	bool					isFullyInitialized;
 	IDirect3DVertexBuffer9*	EffectVertex;
 	EffectRecord*			UnderwaterEffect;
 	EffectRecord*			WaterLensEffect;
