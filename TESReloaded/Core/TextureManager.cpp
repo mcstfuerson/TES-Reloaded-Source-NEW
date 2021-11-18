@@ -55,6 +55,9 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Filename) {
 		case TextureRecordType_OrthoMapBuffer:
 			Texture = TheShadowManager->ShadowMapTexture[ShadowManager::ShadowMapTypeEnum::MapOrtho];
 			break;
+		case TextureRecordType_ShadowMapBufferSkin:
+			Texture = TheShadowManager->ShadowMapTexture[ShadowManager::ShadowMapTypeEnum::MapSkin];
+			break;
 		case TextureRecordType_ShadowCubeMapBuffer0:
 			Texture = TheShadowManager->ShadowCubeMapTexture[0];
 			break;
@@ -195,6 +198,13 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, UInt32 Regi
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
 						Type = TextureRecordType_ShadowMapBufferFar;
 						strcpy(Filename, WordShadowMapBufferFar);
+					}
+				}
+				if (!Type) {
+					SamplerParser = strstr(Sampler, WordShadowMapBufferSkin);
+					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
+						Type = TextureRecordType_ShadowMapBufferSkin;
+						strcpy(Filename, WordShadowMapBufferSkin);
 					}
 				}
 				if (!Type) {

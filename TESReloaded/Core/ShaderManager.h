@@ -50,7 +50,7 @@ struct ShaderConstants {
 	struct ShadowMapStruct {
 		D3DXMATRIX	    ShadowWorld;
 		D3DXMATRIX		ShadowViewProj;
-		D3DXMATRIX		ShadowCameraToLight[3];
+		D3DXMATRIX		ShadowCameraToLight[4];
 		D3DXVECTOR4		ShadowCubeMapLightPosition;
 		D3DXVECTOR4		ShadowLightPosition[12];
 		D3DXVECTOR4		ShadowCubeMapFarPlanes;
@@ -88,6 +88,7 @@ struct ShaderConstants {
 	};
 	struct ShadowStruct {
 		D3DXVECTOR4		Data;
+		D3DXVECTOR4		ShadowSkinData;
 		D3DXVECTOR4		OrthoData;
 	};
 	struct PrecipitationsStruct {

@@ -81,7 +81,7 @@ ShadowManager::ShadowManager() {
 	ShadowCubeMapPixel = new ShaderRecord();
 	if (ShadowCubeMapPixel->LoadShader("ShadowCubeMap.pso")) Device->CreatePixelShader((const DWORD*)ShadowCubeMapPixel->Function, &ShadowCubeMapPixelShader);
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 4; i++) {
 		UINT ShadowMapSize = ShadowsExteriors->ShadowMapSize[i];
 		Device->CreateTexture(ShadowMapSize, ShadowMapSize, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R32F, D3DPOOL_DEFAULT, &ShadowMapTexture[i], NULL);
 		ShadowMapTexture[i]->GetSurfaceLevel(0, &ShadowMapSurface[i]);
@@ -641,13 +641,14 @@ void ShadowManager::RenderExteriorShadows() {
 	SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors = &TheSettingManager->SettingsShadows.Exteriors;
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	D3DXVECTOR4* ShadowData = &TheShaderManager->ShaderConst.Shadow.Data;
+	D3DXVECTOR4* ShadowSkinData = &TheShaderManager->ShaderConst.Shadow.ShadowSkinData;
 	D3DXVECTOR4* OrthoData = &TheShaderManager->ShaderConst.Shadow.OrthoData;
 	D3DXVECTOR4* ShadowLightDir = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
 	D3DXVECTOR4 ShadowLightDirInterval;
 
 	D3DXVECTOR4 OrthoDir = D3DXVECTOR3(0.05f, 0.05f, 1.0f);
 	NiNode* PlayerNode = Player->GetNode();
-	D3DXVECTOR3 At, Eye;
+	D3DXVECTOR3 At, Eye, SkinAt;
 	std::map<int, NiPointLight*> SceneLights;
 	NiPointLight* Lights[12] = { NULL };
 	int LightIndex = -1;
@@ -656,6 +657,10 @@ void ShadowManager::RenderExteriorShadows() {
 	CurrentPixel = ShadowMapPixel;
 
 	ClearShadowCubeMaps(Device, -1, ShadowCubeMapStateEnum::Exterior);
+
+	SkinAt.x = PlayerNode->m_worldTransform.pos.x - TheRenderManager->CameraPosition.x;
+	SkinAt.y = PlayerNode->m_worldTransform.pos.y - TheRenderManager->CameraPosition.y;
+	SkinAt.z = PlayerNode->m_worldTransform.pos.z - TheRenderManager->CameraPosition.z;
 
 	At.x = LookAtPosition.x - TheRenderManager->CameraPosition.x;
 	At.y = LookAtPosition.y - TheRenderManager->CameraPosition.y;
@@ -731,10 +736,12 @@ void ShadowManager::RenderExteriorShadows() {
 
 		RenderShadowMap(MapNear, ShadowsExteriors, &At, &ShadowLightDirInterval, ShadowData);
 		RenderShadowMap(MapFar, ShadowsExteriors, &At, &ShadowLightDirInterval, ShadowData);
+		RenderShadowMap(MapSkin, ShadowsExteriors, &SkinAt, &ShadowLightDirInterval, ShadowData);
 	}
 	else {
 		RenderShadowMap(MapNear, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
 		RenderShadowMap(MapFar, ShadowsExteriors, &At, ShadowLightDir, ShadowData);
+		RenderShadowMap(MapSkin, ShadowsExteriors, &SkinAt, ShadowLightDir, ShadowData);
 	}
 
 	RenderShadowMap(MapOrtho, ShadowsExteriors, &At, &OrthoDir, ShadowData);
@@ -745,6 +752,7 @@ void ShadowManager::RenderExteriorShadows() {
 	ShadowData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapNear];
 	ShadowData->w = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapFar];
 	OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
+	ShadowSkinData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapSkin];
 }
 
 //TODO: rename, doesn't apply solely to interiors
@@ -844,6 +852,10 @@ void ShadowManager::ClearShadowMap(IDirect3DDevice9* Device) {
 	Device->SetRenderTarget(0, ShadowMapSurface[MapOrtho]);
 	Device->SetDepthStencilSurface(ShadowMapDepthSurface[MapOrtho]);
 	Device->SetViewport(&ShadowMapViewPort[MapOrtho]);
+	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
+	Device->SetRenderTarget(0, ShadowMapSurface[MapSkin]);
+	Device->SetDepthStencilSurface(ShadowMapDepthSurface[MapSkin]);
+	Device->SetViewport(&ShadowMapViewPort[MapSkin]);
 	Device->Clear(0L, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
 }
 

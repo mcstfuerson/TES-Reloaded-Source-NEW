@@ -313,13 +313,13 @@ struct SettingsShadowStruct {
 	};
 
 	struct ExteriorsStruct {
-		FormsStruct			Forms[3];
-		bool				Enabled[3];
-		bool				AlphaEnabled[3];
+		FormsStruct			Forms[4];
+		bool				Enabled[4];
+		bool				AlphaEnabled[4];
 		int					Quality;
-		int					ShadowMapSize[3];
+		int					ShadowMapSize[4];
 		float				Darkness;
-		float				ShadowMapRadius[3];
+		float				ShadowMapRadius[4];
 		float				ShadowMapFarPlane;
 		bool                UsePostProcessing;
 		bool				UseIntervalUpdate;

@@ -81,6 +81,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Skin.SkinColor;
 	else if (!strcmp(Name, "TESR_ShadowData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Shadow.Data;
+	else if (!strcmp(Name, "TESR_ShadowSkinData"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Shadow.ShadowSkinData;
 	else if (!strcmp(Name, "TESR_ShadowCubeData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowCube.Data;
 	else if (!strcmp(Name, "TESR_OrthoData"))
@@ -111,6 +113,8 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCameraToLight[1];
 	else if (!strcmp(Name, "TESR_ShadowCameraToLightTransformOrtho"))
 		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCameraToLight[2];
+	else if (!strcmp(Name, "TESR_ShadowCameraToLightTransformSkin"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCameraToLight[3];
 	else if (!strcmp(Name, "TESR_ShadowCubeMapLightPosition"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition;
 	else if (!strcmp(Name, "TESR_ShadowLightPosition"))

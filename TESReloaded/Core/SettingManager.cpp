@@ -1100,6 +1100,22 @@ void SettingManager::LoadSettings() {
 	GetPrivateProfileStringA("ExteriorsFar", "ShadowMapRadius", "8192.0", value, SettingStringBuffer, Filename);
 	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapFar] = atof(value);
 
+	SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapSkin] = GetPrivateProfileIntA("ExteriorsSkin", "Enabled", 1, Filename);
+	SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapSkin] = GetPrivateProfileIntA("ExteriorsSkin", "AlphaEnabled", 0, Filename);
+	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapSkin].Activators = GetPrivateProfileIntA("ExteriorsSkin", "Activators", 0, Filename);
+	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapSkin].Actors = GetPrivateProfileIntA("ExteriorsSkin", "Actors", 1, Filename);
+	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapSkin].Apparatus = GetPrivateProfileIntA("ExteriorsSkin", "Apparatus", 0, Filename);
+	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapSkin].Books = GetPrivateProfileIntA("ExteriorsSkin", "Books", 0, Filename);
+	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapSkin].Containers = GetPrivateProfileIntA("ExteriorsSkin", "Containers", 1, Filename);
+	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapSkin].Doors = GetPrivateProfileIntA("ExteriorsSkin", "Doors", 1, Filename);
+	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapSkin].Furniture = GetPrivateProfileIntA("ExteriorsSkin", "Furniture", 0, Filename);
+	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapSkin].Misc = GetPrivateProfileIntA("ExteriorsSkin", "Misc", 0, Filename);
+	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapSkin].Statics = GetPrivateProfileIntA("ExteriorsSkin", "Statics", 1, Filename);
+	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapSkin].Trees = GetPrivateProfileIntA("ExteriorsSkin", "Trees", 1, Filename);
+	SettingsShadows.Exteriors.ShadowMapSize[ShadowManager::ShadowMapTypeEnum::MapSkin] = GetPrivateProfileIntA("ExteriorsSkin", "ShadowMapSize", 4096, Filename);
+	GetPrivateProfileStringA("ExteriorsSkin", "ShadowMapRadius", "512.0", value, SettingStringBuffer, Filename);
+	SettingsShadows.Exteriors.ShadowMapRadius[ShadowManager::ShadowMapTypeEnum::MapSkin] = atof(value);
+
 	SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapOrtho] = GetPrivateProfileIntA("ExteriorsOrtho", "Enabled", 0, Filename);
 	SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapOrtho] = GetPrivateProfileIntA("ExteriorsOrtho", "AlphaEnabled", 0, Filename);
 	SettingsShadows.Exteriors.Forms[ShadowManager::ShadowMapTypeEnum::MapOrtho].Activators = GetPrivateProfileIntA("ExteriorsOrtho", "Activators", 0, Filename);

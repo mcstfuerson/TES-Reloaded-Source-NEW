@@ -9,6 +9,7 @@ public:
 		MapNear		= 0,
 		MapFar		= 1,
 		MapOrtho	= 2,
+		MapSkin     = 3,
 	};
 	enum ShadowCubeMapStateEnum {
 		None		   = 0,
@@ -56,15 +57,15 @@ public:
 
 
 
-	IDirect3DTexture9*		ShadowMapTexture[3];
-	IDirect3DSurface9*		ShadowMapSurface[3];
-	IDirect3DSurface9*		ShadowMapDepthSurface[3];
+	IDirect3DTexture9*		ShadowMapTexture[4];
+	IDirect3DSurface9*		ShadowMapSurface[4];
+	IDirect3DSurface9*		ShadowMapDepthSurface[4];
 	ShaderRecord*			ShadowMapVertex;
 	ShaderRecord*			ShadowMapPixel;
 	IDirect3DVertexShader9* ShadowMapVertexShader;
 	IDirect3DPixelShader9*  ShadowMapPixelShader;
-	D3DVIEWPORT9			ShadowMapViewPort[3];
-	D3DXPLANE				ShadowMapFrustum[3][6];
+	D3DVIEWPORT9			ShadowMapViewPort[4];
+	D3DXPLANE				ShadowMapFrustum[4][6];
 	NiVector4				BillboardRight;
 	NiVector4				BillboardUp;
 	IDirect3DCubeTexture9*	ShadowCubeMapTexture[12];
