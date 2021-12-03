@@ -753,6 +753,12 @@ void ShadowManager::RenderExteriorShadows() {
 	ShadowData->w = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapFar];
 	OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
 	ShadowSkinData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapSkin];
+	if (MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) {
+		ShadowSkinData->x = 1.0f;
+	}
+	else {
+		ShadowSkinData->x = 0.0f;
+	}
 }
 
 //TODO: rename, doesn't apply solely to interiors
@@ -950,7 +956,7 @@ void ShadowManager::SetShadowMapLightPos(NiPointLight** Lights, int index) {
 	D3DXVECTOR3 At, Eye;
 	NiPoint3* LightPos = &Lights[index]->m_worldTransform.pos;
 	float FarPlane = Lights[index]->Spec.r; // Light radius is stored in Spec.r, Spec.g and Spec.b for NiPointLight
-	if (Lights[index]->CanCarry) FarPlane = 256.0f; // Set torch shadow to a fixed value to obtain a better effect
+	if (Lights[index]->CanCarry) FarPlane = 257.00f; // Set torch shadow to a fixed value to obtain a better effect
 	Eye.x = LightPos->x - TheRenderManager->CameraPosition.x;
 	Eye.y = LightPos->y - TheRenderManager->CameraPosition.y;
 	Eye.z = LightPos->z - TheRenderManager->CameraPosition.z;
