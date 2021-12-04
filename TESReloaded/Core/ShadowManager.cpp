@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <list>
+#include <string>  
 #if defined(NEWVEGAS)
 #define RenderStateArgs 0, 0
 #define kRockParams 0x01200658
@@ -504,7 +505,7 @@ void ShadowManager::RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex
 							NiPoint3* LightPos = &Lights[L]->m_worldTransform.pos;
 							float FarPlane = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[L].w;
 							if (Ref->GetNode()->GetDistance(LightPos) - Ref->GetNode()->GetWorldBoundRadius() <= FarPlane * 1.2f) {
-								refMap[L].emplace_back(Ref->GetNode());
+									refMap[L].emplace_back(Ref->GetNode());
 							}
 						}
 					}
@@ -527,7 +528,10 @@ void ShadowManager::RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex
 				NiPoint3* LightPos = &Lights[L]->m_worldTransform.pos;
 				float FarPlane = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[L].w;
 				if (Ref->GetNode()->GetDistance(LightPos) - Ref->GetNode()->GetWorldBoundRadius() <= FarPlane * 1.2f) {
-					refMap[L].emplace_back(Ref->GetNode());
+					std::string str2 = Ref->GetNode()->m_pcName;
+					if (str2.find("CSRmFloor") == std::string::npos) {
+						refMap[L].emplace_back(Ref->GetNode());
+					} 					
 				}
 			}
 		}
@@ -573,7 +577,7 @@ void ShadowManager::RenderShadowCubeMap(int LightIndex, std::map<int, std::vecto
 	D3DXVECTOR3 Eye, At, Up;
 
 	Device->SetDepthStencilSurface(ShadowCubeMapDepthSurface);
-	for (int L = 0; L <= LightIndex; L++) {
+	for (int L = 0; L <= LightIndex; L++) {		
 		SetShadowCubeMapRegisters(L);
 		float FarPlane = TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[L].w;
 		D3DXMatrixPerspectiveFovRH(&Proj, D3DXToRadian(90.0f), 1.0f, 1.0f, FarPlane);
