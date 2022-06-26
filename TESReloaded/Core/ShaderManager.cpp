@@ -29,6 +29,7 @@
 #define ShallowColorB shallowColorB
 #define ShallowColorA shallowColorA
 #define TerrainShaders "SLS2001.vso SLS2001.pso SLS2064.vso SLS2068.pso SLS2042.vso SLS2048.pso SLS2043.vso SLS2049.pso"
+#define InteriorShadowShaders "SLS2022.pso SLS2021.pso SLS2016.vso SLS2015.vso SLS2015.pso SLS2012.vso SLS2011.vso SLS2010.pso SLS2008.vso SLS2007.vso SLS2002.vso SLS2002.pso SLS2000.vso SLS2000.pso SLS1006.vso SLS1005.vso SLS1004.pso SLS1S006.vso SLS1S005.vso SLS1003.pso SLS2009.pso SM3002.vso SM3001.vso SM3001.pso SM3000.vso SM3LL001.pso SM3LL000.pso"
 #define BloodShaders "GDECALS.vso GDECAL.pso SLS2040.vso SLS2046.pso"
 #elif defined(SKYRIM)
 #define sunGlare general.sunGlare
@@ -118,31 +119,69 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 	else if (!strcmp(Name, "TESR_ShadowCubeMapLightPosition"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapLightPosition;
 	else if (!strcmp(Name, "TESR_ShadowLightPosition"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition;
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition;
 	else if (!strcmp(Name, "TESR_ShadowLightPosition0"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[0];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[0];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition1"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[1];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[1];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition2"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[2];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[2];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition3"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[3];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[3];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition4"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[4];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[4];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition5"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[5];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[5];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition6"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[6];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[6];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition7"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[7];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[7];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition8"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[8];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[8];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition9"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[9];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[9];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition10"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[10];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[10];
 	else if (!strcmp(Name, "TESR_ShadowLightPosition11"))
-		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowLightPosition[11];
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[11];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition;
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition0"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[0];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition1"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[1];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition2"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[2];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition3"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[3];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition4"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[4];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition5"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[5];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition6"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[6];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition7"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[7];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition8"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[8];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition9"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[9];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition10"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[10];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition11"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[11];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition12"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[12];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition13"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[13];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition14"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[14];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition15"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[15];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition16"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[16];
+	else if (!strcmp(Name, "TESR_ShadowCullLightPosition17"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->ShaderConst.ShadowMap.ShadowCullLightPosition[17];
 	else if (!strcmp(Name, "TESR_ShadowCubeMapFarPlanes"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapFarPlanes;
 	else if (!strcmp(Name, "TESR_ShadowCubeMapBlend"))
@@ -656,6 +695,7 @@ ShaderManager::ShaderManager() {
 	SnowEffect = NULL;
 	ShadowsExteriorsEffect = NULL;
 	ShadowsExteriorsPointEffect = NULL;
+	ShadowsExteriorsPointDialogEffect = NULL;
 	ShadowsInteriorsEffect = NULL;
 	WaterHeightMapVertexShader = NULL;
 	WaterHeightMapPixelShader = NULL;
@@ -715,7 +755,7 @@ void ShaderManager::CreateEffects() {
 	if (Effects->Precipitations) CreateEffect(EffectRecordType_Precipitations);
 	if (Effects->Extra) CreateEffect(EffectRecordType_Extra);
 	if (TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriors);
-	if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
+	if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing) { CreateEffect(EffectRecordType_ShadowsExteriorsPoint); CreateEffect(EffectRecordType_ShadowsExteriorsPointDialog); }
 	if (TheSettingManager->SettingsShadows.Interiors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsInteriors);
 
 }
@@ -731,7 +771,22 @@ void ShaderManager::InitializeConstants() {
 	ShaderConst.EveningTransLightDirSet = false;
 	isFullyInitialized = false;
 	InitFrameCount = 0;
-	InitFrameTarget = 2;
+	InitFrameTarget = 10;
+}
+
+void ShaderManager::UpdateLocationState() {
+	if (Player->GetWorldSpace()) {
+		if (LocationState != CellLocation::Exterior) {
+			LocationState = CellLocation::Exterior;
+			DisposeShader("InteriorShadows");
+		}
+	}
+	else {
+		if (LocationState != CellLocation::Interior) {
+			LocationState = CellLocation::Interior;
+			CreateShader("InteriorShadows");
+		}
+	}
 }
 
 void ShaderManager::UpdateConstants() {
@@ -760,6 +815,7 @@ void ShaderManager::UpdateConstants() {
 			InitFrameCount++;
 		}
 		else {	
+			TheShadowManager->ResetIntervals();
 			isFullyInitialized = true;
 		}
 	}
@@ -1151,7 +1207,6 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.EveningTransLightDirSet = false;
 			isFullyInitialized = false;
 			InitFrameCount = 0;
-			InitFrameTarget = 2;
 			TESObjectCELL::LightingData* LightData = currentCell->lighting;
 
 			if (!(currentCell->flags0 & currentCell->kFlags0_BehaveLikeExterior)) {
@@ -1176,7 +1231,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.fogData.y = LightData->fogFar;
 			ShaderConst.fogData.z = ShaderConst.currentsunGlare;
 
-			//TODO: Dimmer Settings check
+			//TODO: Dimmer Settings check, should only run once on cell change
 			if (ShaderConst.InteriorLighting.find(currentCell->GetEditorName()) == ShaderConst.InteriorLighting.end()) {
 				ShaderConstants::SimpleLightingStruct sls;
 				sls.r = LightData->ambient.r;
@@ -1203,6 +1258,7 @@ void ShaderManager::UpdateConstants() {
 
 			ShaderConst.InteriorDimmer.x = dimmer;
 			float dimmerAdj = std::clamp(dimmer, TheSettingManager->SettingsMain.Main.InteriorDimmerCoeff, 1.0f);
+			//TODO: look up should only run once on cell change
 			LightData->ambient.r = ShaderConst.InteriorLighting[currentCell->GetEditorName()].r * dimmerAdj;
 			LightData->ambient.g = ShaderConst.InteriorLighting[currentCell->GetEditorName()].g * dimmerAdj;
 			LightData->ambient.b = ShaderConst.InteriorLighting[currentCell->GetEditorName()].b * dimmerAdj;
@@ -1758,8 +1814,8 @@ void ShaderManager::CreateShader(const char* Name) {
 #elif defined(OBLIVION)
 	NiD3DVertexShaderEx** PrecipitationVertexShaders = (NiD3DVertexShaderEx**)0x00B466E0;
 	NiD3DPixelShaderEx** PrecipitationPixelShaders = (NiD3DPixelShaderEx**)0x00B46708;
-	NiD3DVertexShaderEx** ShadowLightVertexShaders = (NiD3DVertexShaderEx**)0x00B45364;
-	NiD3DPixelShaderEx** ShadowLightPixelShaders = (NiD3DPixelShaderEx**)0x00B45144;
+	NiD3DVertexShaderEx** ShadowLightVertexShaders = (NiD3DVertexShaderEx**)0x00B4528C;
+	NiD3DPixelShaderEx** ShadowLightPixelShaders = (NiD3DPixelShaderEx**)0x00B45088;
 
 	if (!strcmp(Name, "Water")) {
 		WaterShader* WS = (WaterShader*)GetShaderDefinition(17)->Shader;
@@ -1797,19 +1853,37 @@ void ShaderManager::CreateShader(const char* Name) {
 		for each (NiD3DPixelShader* PS in SS->Pixel) LoadShader(PS);
 	}
 	else if (!strcmp(Name, "Terrain")) {
-		for (int i = 0; i < 76; i++) {
+		for (int i = 0; i < 130; i++) {
 			NiD3DVertexShaderEx* VS = ShadowLightVertexShaders[i];
-			if (VS && strstr(TerrainShaders, VS->ShaderName)) LoadShader(VS);
+			if (VS && strstr(TerrainShaders, VS->ShaderName)) {
+				LoadShader(VS);
+			}
 		}
-		for (int i = 0; i < 82; i++) {
+		for (int i = 0; i < 130; i++) {
 			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
-			if (PS && strstr(TerrainShaders, PS->ShaderName)) LoadShader(PS);
+			if (PS && strstr(TerrainShaders, PS->ShaderName)) {
+				LoadShader(PS);
+			}
 		}
 	}
 	else if (!strcmp(Name, "Blood")) {
 		GeometryDecalShader* GDS = (GeometryDecalShader*)GetShaderDefinition(16)->Shader;
 		for each (NiD3DVertexShader* VS in GDS->Vertex) LoadShader(VS);
 		for each (NiD3DPixelShader* PS in GDS->Pixel) LoadShader(PS);
+	}
+	else if (!strcmp(Name, "InteriorShadows")) {
+		for (int i = 0; i < 130; i++) {
+			NiD3DVertexShaderEx* VS = ShadowLightVertexShaders[i];
+			if (VS && strstr(InteriorShadowShaders, VS->ShaderName)) {
+				LoadShader(VS);
+			}
+		}
+		for (int i = 0; i < 130; i++) {
+			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
+			if (PS && strstr(InteriorShadowShaders, PS->ShaderName)) {
+				LoadShader(PS);
+			}
+		}
 	}
 #elif defined(SKYRIM)
 	if (!strcmp(Name, "Water")) {
@@ -1883,8 +1957,8 @@ void ShaderManager::DisposeShader(const char* Name) {
 	}
 #elif defined(OBLIVION)
 	ShaderDefinition* (__cdecl * GetShaderDefinition)(UInt32) = (ShaderDefinition* (__cdecl *)(UInt32))0x007B4290;
-	NiD3DVertexShaderEx** ShadowLightVertexShaders = (NiD3DVertexShaderEx**)0x00B45364;
-	NiD3DPixelShaderEx** ShadowLightPixelShaders = (NiD3DPixelShaderEx**)0x00B45144;
+	NiD3DVertexShaderEx** ShadowLightVertexShaders = (NiD3DVertexShaderEx**)0x00B4528C;
+	NiD3DPixelShaderEx** ShadowLightPixelShaders = (NiD3DPixelShaderEx**)0x00B45088;
 
 	if (!strcmp(Name, "Water")) {
 		WaterShader* WS = (WaterShader*)GetShaderDefinition(17)->Shader;
@@ -1987,14 +2061,14 @@ void ShaderManager::DisposeShader(const char* Name) {
 		}
 	}
 	else if (!strcmp(Name, "Terrain")) {
-		for (int i = 0; i < 76; i++) {
+		for (int i = 0; i < 130; i++) {
 			NiD3DVertexShaderEx* VS = ShadowLightVertexShaders[i];
 			if (VS && VS->ShaderProg && strstr(TerrainShaders, VS->ShaderName)) {
 				VS->ShaderHandle = VS->ShaderHandleBackup;
 				delete VS->ShaderProg; VS->ShaderProg = NULL;
 			}
 		}
-		for (int i = 0; i < 82; i++) {
+		for (int i = 0; i < 130; i++) {
 			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
 			if (PS && PS->ShaderProg && strstr(TerrainShaders, PS->ShaderName)) {
 				PS->ShaderHandle = PS->ShaderHandleBackup;
@@ -2012,6 +2086,22 @@ void ShaderManager::DisposeShader(const char* Name) {
 		}
 		for each (NiD3DPixelShaderEx* PS in GDS->Pixel) {
 			if (PS->ShaderProg) {
+				PS->ShaderHandle = PS->ShaderHandleBackup;
+				delete PS->ShaderProg; PS->ShaderProg = NULL;
+			}
+		}
+	}
+	else if (!strcmp(Name, "InteriorShadows")) {
+		for (int i = 0; i < 130; i++) {
+			NiD3DVertexShaderEx* VS = ShadowLightVertexShaders[i];
+			if (VS && VS->ShaderProg && strstr(InteriorShadowShaders, VS->ShaderName)) {
+				VS->ShaderHandle = VS->ShaderHandleBackup;
+				delete VS->ShaderProg; VS->ShaderProg = NULL;
+			}
+		}
+		for (int i = 0; i < 130; i++) {
+			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
+			if (PS && PS->ShaderProg && strstr(InteriorShadowShaders, PS->ShaderName)) {
 				PS->ShaderHandle = PS->ShaderHandleBackup;
 				delete PS->ShaderProg; PS->ShaderProg = NULL;
 			}
@@ -2154,6 +2244,11 @@ void ShaderManager::CreateEffect(EffectRecordType EffectType) {
 			ShadowsExteriorsPointEffect = new EffectRecord();
 			TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing = LoadEffect(ShadowsExteriorsPointEffect, Filename, NULL);
 			break;
+		case EffectRecordType_ShadowsExteriorsPointDialog:
+			strcat(Filename, "Shadows\\ShadowsExteriorsPointDialog.fx");
+			ShadowsExteriorsPointDialogEffect = new EffectRecord();
+			LoadEffect(ShadowsExteriorsPointDialogEffect, Filename, NULL);
+			break;
 		case EffectRecordType_ShadowsInteriors:
 			strcat(Filename, "Shadows\\ShadowsInteriors.fx");
 			ShadowsInteriorsEffect = new EffectRecord();
@@ -2231,6 +2326,7 @@ void ShaderManager::DisposeEffect(EffectRecord* TheEffect) {
 	else if (TheEffect == SnowEffect) SnowEffect = NULL;
 	else if (TheEffect == ShadowsExteriorsEffect) ShadowsExteriorsEffect = NULL;
 	else if (TheEffect == ShadowsExteriorsPointEffect) ShadowsExteriorsPointEffect = NULL;
+	else if (TheEffect == ShadowsExteriorsPointDialogEffect) ShadowsExteriorsPointDialogEffect = NULL;	
 	else if (TheEffect == ShadowsInteriorsEffect) ShadowsInteriorsEffect = NULL;
 
 	if (TheEffect) delete TheEffect;
@@ -2258,13 +2354,20 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		SnowAccumulationEffect->SetCT();
 		SnowAccumulationEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing && currentWorldSpace && !ShaderConst.DisablePostShadow) {
+	if (TheSettingManager->SettingsShadows.Exteriors.Enabled && TheSettingManager->SettingsShadows.Exteriors.UsePostProcessing && currentWorldSpace && !ShaderConst.DisablePostShadow) {
 		ShadowsExteriorsEffect->SetCT();
 		ShadowsExteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing && currentWorldSpace && !ShaderConst.DisablePostShadow) {
-		ShadowsExteriorsPointEffect->SetCT();
-		ShadowsExteriorsPointEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	if (TheSettingManager->SettingsShadows.ExteriorsPoint.Enabled && TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing && currentWorldSpace && !ShaderConst.DisablePostShadow) {
+
+		if (!(MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion))) {
+			ShadowsExteriorsPointEffect->SetCT();
+			ShadowsExteriorsPointEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		}
+		else {
+			ShadowsExteriorsPointDialogEffect->SetCT();
+			ShadowsExteriorsPointDialogEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		}
 	}
 	if (TheSettingManager->SettingsShadows.Interiors.UsePostProcessing && !currentWorldSpace) {
 		ShadowsInteriorsEffect->SetCT();
@@ -2313,7 +2416,7 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 			GodRaysEffect->SetCT();
 			GodRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
-		if (ShaderConst.MoonsExist && Effects->KhajiitRays && currentWorldSpace && (ShaderConst.SunAmount.x < 0.4 || ShaderConst.SunAmount.z < 0.3)) {
+		else if (ShaderConst.MoonsExist && Effects->KhajiitRays && currentWorldSpace && (ShaderConst.SunAmount.x < 0.4 || ShaderConst.SunAmount.z < 0.3)) {
 			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 			SecundaRaysEffect->SetCT();
 			SecundaRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -2560,7 +2663,11 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 	}
 	else if (!strcmp(Name, "ShadowsExteriorsPoint")) {
 		DisposeEffect(ShadowsExteriorsPointEffect);
-		if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
+		DisposeEffect(ShadowsExteriorsPointDialogEffect);
+		if (TheSettingManager->SettingsShadows.ExteriorsPoint.UsePostProcessing) { 
+			CreateEffect(EffectRecordType_ShadowsExteriorsPoint);
+			CreateEffect(EffectRecordType_ShadowsExteriorsPointDialog);
+		}
 	}
 	else if (!strcmp(Name, "ShadowsInteriors")) {
 		DisposeEffect(ShadowsInteriorsEffect);

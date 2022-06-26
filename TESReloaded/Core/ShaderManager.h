@@ -25,6 +25,7 @@ enum EffectRecordType
 	EffectRecordType_Precipitations,
 	EffectRecordType_ShadowsExteriors,
 	EffectRecordType_ShadowsExteriorsPoint,
+	EffectRecordType_ShadowsExteriorsPointDialog,
 	EffectRecordType_ShadowsInteriors,
 	EffectRecordType_Extra,
 };
@@ -45,6 +46,13 @@ enum DayPhase
 	Night
 };
 
+enum CellLocation
+{
+	Interior,
+	Exterior,
+	Fake_Exterior
+};
+
 struct ShaderConstants {
 	
 	struct ShadowMapStruct {
@@ -52,7 +60,8 @@ struct ShaderConstants {
 		D3DXMATRIX		ShadowViewProj;
 		D3DXMATRIX		ShadowCameraToLight[4];
 		D3DXVECTOR4		ShadowCubeMapLightPosition;
-		D3DXVECTOR4		ShadowLightPosition[12];
+		D3DXVECTOR4		ShadowCastLightPosition[12];
+		D3DXVECTOR4		ShadowCullLightPosition[24];
 		D3DXVECTOR4		ShadowCubeMapFarPlanes;
 		D3DXVECTOR4		ShadowCubeMapBlend;
 		D3DXVECTOR4		ShadowCubeMapBlend2;
@@ -320,6 +329,7 @@ public:
 	void					CreateEffects();
 	void					InitializeConstants();
 	void					UpdateConstants();
+	void					UpdateLocationState();
 	void					BeginScene();
 	void					CreateShader(const char *Name);
 	void					LoadShader(NiD3DVertexShader* Shader);
@@ -329,7 +339,6 @@ public:
 	bool					LoadEffect(EffectRecord* TheEffect, char* Filename, char* CustomEffectName);
 	void					DisposeEffect(EffectRecord* TheEffect);
 	void					RenderEffects(IDirect3DSurface9* RenderTarget);
-	void					RenderShadows(IDirect3DSurface9* RenderTarget);
 	void					SwitchShaderStatus(const char* Name);
 	void					SetCustomConstant(const char* Name, D3DXVECTOR4 Value);
 	void					SetExtraEffectEnabled(const char* Name, bool Value);
@@ -342,6 +351,7 @@ public:
 	struct					EffectQuad { float x, y, z; float u, v; };
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
+	CellLocation			LocationState;
 	IDirect3DTexture9*		SourceTexture;
 	IDirect3DSurface9*		SourceSurface;
 	IDirect3DTexture9* 		RenderedTexture;
@@ -374,6 +384,7 @@ public:
 	EffectRecord*			SnowEffect;
 	EffectRecord*			ShadowsExteriorsEffect;
 	EffectRecord*           ShadowsExteriorsPointEffect;
+	EffectRecord*			ShadowsExteriorsPointDialogEffect;
 	EffectRecord*			ShadowsInteriorsEffect;
 	ExtraEffectsList		ExtraEffects;
 	NiD3DVertexShader*		WaterHeightMapVertexShader;
