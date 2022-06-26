@@ -31,7 +31,7 @@ static char* TitleMenu = "Skyrim Reloaded - Settings";
 #define InfoColumnSize TheSettingManager->SettingsMain.Menu.InfoColumnSize
 #define RowSpace TheSettingManager->SettingsMain.Menu.RowSpace
 #define RowsPerPage TheSettingManager->SettingsMain.Menu.RowsPerPage
-#define IntValues "ScreenshotKey GrassDensity LightShaftPasses CombatEquipmentKey TorchKey Average Min Critical Gap Delay FadeStep FadeMinObjects FadeMinActors GridStep GridMin TimeKey DayR DayG DayB NightR NightG NightB SunriseR SunriseG SunriseB SunsetR SunsetG SunsetB CloudSpeedLower CloudSpeedUpper SunGlare SunDamage TransDelta WindSpeed Mode Quality LightPoints"
+#define IntValues "ScreenshotKey GrassDensity LightShaftPasses CombatEquipmentKey TorchKey Average Min Critical Gap Delay FadeStep FadeMinObjects FadeMinActors GridStep GridMin TimeKey DayR DayG DayB NightR NightG NightB SunriseR SunriseG SunriseB SunsetR SunsetG SunsetB CloudSpeedLower CloudSpeedUpper SunGlare SunDamage TransDelta WindSpeed Mode Quality LightPoints iShadowLightPoints iShadowCullLightPoints"
 #define BoolValues "Enabled DistantBlur SunGlareEnabled TimeEnabled FPSOverlay SleepingEquipment SwimmingEquipment PurgeCells PurgeTextures FatigueEnabled HealthEnabled InfoEnabled AlphaEnabled DirectionalLightOverride UsePostProcessing"
 
 GameMenuManager::GameMenuManager() {
@@ -155,8 +155,10 @@ void GameMenuManager::Render() {
 						TheSettingManager->SetMenuSetting(SelectedItem, SelectedDefinition, SelectedSection, SelectedSectionKey, SelectedSetting, SelectedValue);
 					}
 					if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Menu.KeySave)) {
-						TheSettingManager->SaveSettings(SelectedItem, SelectedDefinition);
-						MenuManager->ShowMessage("Settings saved.");
+						TheSettingManager->SaveSettings(SelectedItem, SelectedDefinition, SelectedSection);
+						if (strcmp(SelectedSection, TheSettingManager->CreateProfileString)) {
+							MenuManager->ShowMessage("Settings saved.");
+						}
 					}
 				}
 			}

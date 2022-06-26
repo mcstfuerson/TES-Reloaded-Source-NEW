@@ -1,3 +1,5 @@
+#pragma once
+
 #include <sstream>
 #include <fstream>
 #include <algorithm>
@@ -445,6 +447,7 @@ void SettingManager::LoadSettings() {
 	SettingsBloomStruct SB;
 	SettingsMotionBlurStruct SM;
 	SettingsWeatherStruct SE;
+	SettingsShadowPointLightsStruct SSPL;
 	
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
@@ -848,6 +851,44 @@ void SettingManager::LoadSettings() {
 
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
+	strcat(Filename, "Shadows\\ShadowPointLights.ini");
+
+	GetPrivateProfileSectionNamesA(Sections, 32767, Filename);
+	pNextSection = Sections;
+	while (*pNextSection != NULL) {
+		SSPL.iShadowLightPoints = GetPrivateProfileIntA(pNextSection, "iShadowLightPoints", 12, Filename);
+		SSPL.iShadowCullLightPoints = GetPrivateProfileIntA(pNextSection, "iShadowCullLightPoints", 18, Filename);
+		GetPrivateProfileStringA(pNextSection, "fShadowObjectScanRadius", "1.2", value, SettingStringBuffer, Filename);
+		SSPL.fShadowObjectScanRadius = atof(value);
+		GetPrivateProfileStringA(pNextSection, "fShadowLightRadiusMin", "1.0", value, SettingStringBuffer, Filename);
+		SSPL.fShadowLightRadiusMin = atof(value);
+		GetPrivateProfileStringA(pNextSection, "fShadowLightRadiusMax", "0.06", value, SettingStringBuffer, Filename);
+		SSPL.fShadowLightRadiusMax = atof(value);
+		GetPrivateProfileStringA(pNextSection, "fShadowCullLightRadiusMin", "0.18", value, SettingStringBuffer, Filename);
+		SSPL.fShadowCullLightRadiusMin = atof(value);
+		GetPrivateProfileStringA(pNextSection, "fShadowCullLightRadiusMax", "0.8", value, SettingStringBuffer, Filename);
+		SSPL.fShadowCullLightRadiusMax = atof(value);
+		SettingsShadowPointLight[pNextSection] = SSPL;
+
+		pNextSection = pNextSection + strlen(pNextSection) + 1;
+	}
+
+	SSPL.iShadowLightPoints = GetPrivateProfileIntA(CreateProfileString, "iShadowLightPoints", 0, Filename);
+	SSPL.iShadowCullLightPoints = GetPrivateProfileIntA(CreateProfileString, "iShadowCullLightPoints", 0, Filename);
+	GetPrivateProfileStringA(CreateProfileString, "fShadowObjectScanRadius", "0.0", value, SettingStringBuffer, Filename);
+	SSPL.fShadowObjectScanRadius = atof(value);
+	GetPrivateProfileStringA(CreateProfileString, "fShadowLightRadiusMin", "0.0", value, SettingStringBuffer, Filename);
+	SSPL.fShadowLightRadiusMin = atof(value);
+	GetPrivateProfileStringA(CreateProfileString, "fShadowLightRadiusMax", "0.0", value, SettingStringBuffer, Filename);
+	SSPL.fShadowLightRadiusMax = atof(value);
+	GetPrivateProfileStringA(CreateProfileString, "fShadowCullLightRadiusMin", "0.0", value, SettingStringBuffer, Filename);
+	SSPL.fShadowCullLightRadiusMin = atof(value);
+	GetPrivateProfileStringA(CreateProfileString, "fShadowCullLightRadiusMax", "0.0", value, SettingStringBuffer, Filename);
+	SSPL.fShadowCullLightRadiusMax = atof(value);
+	SettingsShadowPointLight[CreateProfileString] = SSPL;
+
+	strcpy(Filename, CurrentPath);
+	strcat(Filename, SettingsPath);
 	strcat(Filename, "Bloom\\Bloom.ini");
 	GetPrivateProfileStringA("Default", "BloomIntensity", "1.4", Bloom_BloomIntensity, SettingStringBuffer, Filename);
 	SB.BloomIntensity = atof(Bloom_BloomIntensity);
@@ -1247,7 +1288,7 @@ void SettingManager::LoadSettings() {
 
 }
 
-void SettingManager::SaveSettings(const char* Item, const char* Definition) {
+void SettingManager::SaveSettings(const char* Item, const char* Definition, const char* Section) {
 
 	char Filename[MAX_PATH];
 
@@ -1296,6 +1337,64 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 				v++;
 			}
 		}
+		if (!strcmp(Definition, "ShadowPointLights")) {
+
+			if (!strcmp(Section, CreateProfileString)) {
+				SettingsShadowPointLightsStruct newProfile = SettingsShadowPointLightsStruct();
+
+				if (Player->GetWorldSpace()) {
+					newProfile.iShadowLightPoints = SettingsShadowPointLight["DefaultExterior"].iShadowLightPoints;
+					newProfile.iShadowCullLightPoints = SettingsShadowPointLight["DefaultExterior"].iShadowCullLightPoints;
+					newProfile.fShadowLightRadiusMin = SettingsShadowPointLight["DefaultExterior"].fShadowLightRadiusMin;
+					newProfile.fShadowLightRadiusMax = SettingsShadowPointLight["DefaultExterior"].fShadowLightRadiusMax;
+					newProfile.fShadowCullLightRadiusMin = SettingsShadowPointLight["DefaultExterior"].fShadowCullLightRadiusMin;
+					newProfile.fShadowCullLightRadiusMax = SettingsShadowPointLight["DefaultExterior"].fShadowCullLightRadiusMax;
+					newProfile.fShadowObjectScanRadius = SettingsShadowPointLight["DefaultExterior"].fShadowObjectScanRadius;
+					if (!SettingsShadowPointLight.count(Player->GetWorldSpace()->GetEditorName())) {
+						SettingsShadowPointLight.insert(std::pair<std::string, SettingsShadowPointLightsStruct>(Player->GetWorldSpace()->GetEditorName(), newProfile));
+						MenuManager->ShowMessage("Profile Created.");
+					}
+					else {
+						MenuManager->ShowMessage("Profile already exists.");
+					}
+				}
+				else {
+					newProfile.iShadowLightPoints = SettingsShadowPointLight["DefaultInterior"].iShadowLightPoints;
+					newProfile.iShadowCullLightPoints = SettingsShadowPointLight["DefaultInterior"].iShadowCullLightPoints;
+					newProfile.fShadowLightRadiusMin = SettingsShadowPointLight["DefaultInterior"].fShadowLightRadiusMin;
+					newProfile.fShadowLightRadiusMax = SettingsShadowPointLight["DefaultInterior"].fShadowLightRadiusMax;
+					newProfile.fShadowCullLightRadiusMin = SettingsShadowPointLight["DefaultInterior"].fShadowCullLightRadiusMin;
+					newProfile.fShadowCullLightRadiusMax = SettingsShadowPointLight["DefaultInterior"].fShadowCullLightRadiusMax;
+					newProfile.fShadowObjectScanRadius = SettingsShadowPointLight["DefaultInterior"].fShadowObjectScanRadius;
+					if (!SettingsShadowPointLight.count(Player->parentCell->GetEditorName())) {
+						SettingsShadowPointLight.insert(std::pair<std::string, SettingsShadowPointLightsStruct>(Player->parentCell->GetEditorName(), newProfile));
+						MenuManager->ShowMessage("Profile Created.");
+					}
+					else {
+						MenuManager->ShowMessage("Profile already exists.");
+					}
+				}
+			}
+			else {
+				strcat(Filename, "Shadows\\ShadowPointLights.ini");
+				SettingsShadowPointLightsList::iterator v = SettingsShadowPointLight.begin();
+				while (v != SettingsShadowPointLight.end()) {
+					if (strcmp(v->first.c_str(), CreateProfileString)) {
+						WritePrivateProfileStringA(v->first.c_str(), "iShadowLightPoints", ToString(v->second.iShadowLightPoints).c_str(), Filename);
+						WritePrivateProfileStringA(v->first.c_str(), "iShadowCullLightPoints", ToString(v->second.iShadowCullLightPoints).c_str(), Filename);
+						WritePrivateProfileStringA(v->first.c_str(), "fShadowLightRadiusMin", ToString(v->second.fShadowLightRadiusMin).c_str(), Filename);
+						WritePrivateProfileStringA(v->first.c_str(), "fShadowLightRadiusMax", ToString(v->second.fShadowLightRadiusMax).c_str(), Filename);
+						WritePrivateProfileStringA(v->first.c_str(), "fShadowCullLightRadiusMin", ToString(v->second.fShadowCullLightRadiusMin).c_str(), Filename);
+						WritePrivateProfileStringA(v->first.c_str(), "fShadowCullLightRadiusMax", ToString(v->second.fShadowCullLightRadiusMax).c_str(), Filename);
+						WritePrivateProfileStringA(v->first.c_str(), "fShadowObjectScanRadius", ToString(v->second.fShadowObjectScanRadius).c_str(), Filename);
+					}
+					v++;
+				}
+			}
+
+
+				
+		}
 		else if (!strcmp(Definition, "BloodLens")) {
 			WritePrivateProfileStringA("Effects", "BloodLens", ToString(SettingsMain.Effects.BloodLens).c_str(), SettingsMain.Main.MainFile);
 			strcat(Filename, "Blood\\Blood.ini");
@@ -1319,6 +1418,23 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition) {
 				WritePrivateProfileStringA(v->first.c_str(), "OriginalSaturation", ToString(v->second.OriginalSaturation).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "WhiteCutOff", ToString(v->second.WhiteCutOff).c_str(), Filename);
 				v++;
+			}
+
+			SettingsBloomStruct newProfile = SettingsBloomStruct();
+
+			newProfile.BloomIntensity = 1.4;
+			newProfile.OriginalIntensity = 1;
+			newProfile.BloomSaturation = 0.5;
+			newProfile.OriginalSaturation = 1;
+			newProfile.Luminance = 0.06;
+			newProfile.MiddleGray = 0.18;
+			newProfile.WhiteCutOff = 0.8;
+
+			if (Player->GetWorldSpace()) {
+				SettingsBloom.insert(std::pair<std::string, SettingsBloomStruct>(Player->GetWorldSpace()->GetEditorName(), newProfile));
+			}
+			else {
+				SettingsBloom.insert(std::pair<std::string, SettingsBloomStruct>(Player->parentCell->GetEditorName(), newProfile));
 			}
 		}
 		else if (!strcmp(Definition, "Cinema")) {
@@ -1684,6 +1800,7 @@ DefinitionsList SettingManager::GetMenuDefinitions(const char* Item) {
 		Definitions["Precipitations"] = "Precipitations";
 #if defined(OBLIVION) || defined(NEWVEGAS)
 		Definitions["Shadows"] = "Shadows";
+		Definitions["ShadowPointLights"] = "ShadowPointLights";
 #endif
 		Definitions["Sharpening"] = "Sharpening";
 		Definitions["SMAA"] = "Subpixel Morphological AA";
@@ -1744,9 +1861,54 @@ SectionsList SettingManager::GetMenuSections(const char* Item, const char* Defin
 			}
 		}
 		else if (!strcmp(Definition, "Bloom")) {
+			int index = 0;
+			std::string cell;
+			
+			if (Player->GetWorldSpace()) {
+				cell = Player->GetWorldSpace()->GetEditorName();
+			}
+			else {
+				cell = Player->parentCell->GetEditorName();
+			}
+			 
 			SettingsBloomList::iterator v = SettingsBloom.begin();
+
+			if (SettingsBloom.count(cell)) {
+				Sections[index] = cell;
+				index++;
+			}
+
 			while (v != SettingsBloom.end()) {
-				Sections[(int)v._Ptr] = v->first;
+				if (cell.compare(v->first) != 0) {
+					Sections[index] = v->first;
+					index++;
+				}
+				v++;
+			}
+		}
+		else if (!strcmp(Definition, "ShadowPointLights")) {
+			int index = 0;
+			std::string cell;
+
+			if (Player->GetWorldSpace()) {
+				cell = Player->GetWorldSpace()->GetEditorName();
+			}
+			else {
+				cell = Player->parentCell->GetEditorName();
+			}
+
+			SettingsShadowPointLightsList::iterator v = SettingsShadowPointLight.begin();
+
+			if (SettingsShadowPointLight.count(cell)) {
+				Sections[index] = cell;
+				index++;
+			}
+
+			while (v != SettingsShadowPointLight.end()) {
+				if (cell.compare(v->first) != 0) {
+					Sections[index] = v->first;
+					index++;
+				}
 				v++;
 			}
 		}
@@ -1947,6 +2109,16 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["OriginalIntensity"] = sbs->OriginalIntensity;
 			Settings["OriginalSaturation"] = sbs->OriginalSaturation;
 			Settings["WhiteCutOff"] = sbs->WhiteCutOff;
+		}
+		else if (!strcmp(Definition, "ShadowPointLights")) {
+			SettingsShadowPointLightsStruct* spls = GetSettingsShadowPointLight(Section);
+			Settings["iShadowLightPoints"] = spls->iShadowLightPoints;
+			Settings["iShadowCullLightPoints"] = spls->iShadowCullLightPoints;
+			Settings["fShadowObjectScanRadius"] = spls->fShadowObjectScanRadius;
+			Settings["fShadowLightRadiusMin"] = spls->fShadowLightRadiusMin;
+			Settings["fShadowLightRadiusMax"] = spls->fShadowLightRadiusMax;
+			Settings["fShadowCullLightRadiusMin"] = spls->fShadowCullLightRadiusMin;
+			Settings["fShadowCullLightRadiusMax"] = spls->fShadowCullLightRadiusMax;
 		}
 		else if (!strcmp(Definition, "Cinema")) {
 			Settings["AspectRatio"] = SettingsCinema.AspectRatio;
@@ -2533,6 +2705,25 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				sbs->OriginalSaturation = Value;
 			else if (!strcmp(Setting, "WhiteCutOff"))
 				sbs->WhiteCutOff = Value;
+		}
+		else if (!strcmp(Definition, "ShadowPointLights")) {
+			SettingsShadowPointLightsStruct* spls = GetSettingsShadowPointLight(Section);
+			if (!strcmp(Setting, "iShadowLightPoints"))
+				spls->iShadowLightPoints = Value;
+			else if (!strcmp(Setting, "iShadowCullLightPoints"))
+				spls->iShadowCullLightPoints = Value;
+			else if (!strcmp(Setting, "fShadowLightRadiusMin"))
+				spls->fShadowLightRadiusMin = Value;
+			else if (!strcmp(Setting, "fShadowLightRadiusMax"))
+				spls->fShadowLightRadiusMax = Value;
+			else if (!strcmp(Setting, "fShadowCullLightRadiusMin"))
+				spls->fShadowCullLightRadiusMin = Value;
+			else if (!strcmp(Setting, "fShadowCullLightRadiusMax"))
+				spls->fShadowCullLightRadiusMax = Value;
+			else if (!strcmp(Setting, "fShadowObjectScanRadius"))
+				spls->fShadowObjectScanRadius = Value;
+
+			TheShadowManager->LoadShadowLightPointSettings();
 		}
 		else if (!strcmp(Definition, "Cinema")) {
 			if (!strcmp(Setting, "AspectRatio"))
@@ -3272,6 +3463,16 @@ SettingsBloomStruct* SettingManager::GetSettingsBloom(const char* PlayerLocation
 
 }
 
+SettingsShadowPointLightsStruct* SettingManager::GetSettingsShadowPointLight(const char* PlayerLocation) {
+
+	SettingsShadowPointLightsList::iterator v = SettingsShadowPointLight.find(std::string(PlayerLocation));
+	if (v == SettingsShadowPointLight.end())
+		return NULL;
+	else
+		return &v->second;
+
+}
+
 SettingsMotionBlurStruct* SettingManager::GetSettingsMotionBlur(const char* Section) {
 
 	SettingsMotionBlurList::iterator v = SettingsMotionBlur.find(std::string(Section));
@@ -3327,14 +3528,11 @@ bool Settings::TrackReadSetting(GameSetting* Setting) {
 		Setting->iValue = 0;
 	else if (!strcmp(Setting->Name, "bFull Screen:Display"))
 		SetWindowedMode(Setting->iValue);
-	else if (!strcmp(Setting->Name, "SIntroSequence:General") && TheSettingManager->SettingsMain.Main.ReplaceIntro)
-		Setting->pValue = (char*)IntroMovie;
-	else if (!strcmp(Setting->Name, "SMainMenuMovie:General") && TheSettingManager->SettingsMain.Main.ReplaceIntro)
-		Setting->pValue = (char*)MainMenuMovie;
-	else if ((!strcmp(Setting->Name, "SMainMenuMusic:General") || !strcmp(Setting->Name, "STitleMusic:Loading")) && TheSettingManager->SettingsMain.Main.ReplaceIntro)
-		Setting->pValue = (char*)MainMenuMusic;
 	else if (!strcmp(Setting->Name, "bDoActorShadows:Display") || !strcmp(Setting->Name, "iActorShadowCountExt:Display") || !strcmp(Setting->Name, "iActorShadowCountInt:Display"))
 		Setting->iValue = 0;
+	else if (!strcmp(Setting->Name, "fDefaultFOV:Display")) {
+		TheSettingManager->DefaultFov = Setting->fValue;
+	}
 #if defined(NEWVEGAS)
 	else if (!strcmp(Setting->Name, "bDoCanopyShadowPass:Display"))
 		Setting->iValue = 0;

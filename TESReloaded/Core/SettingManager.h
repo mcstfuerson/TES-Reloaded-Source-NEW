@@ -353,6 +353,16 @@ struct SettingsShadowStruct {
 	InteriorsStruct		ExteriorsPoint;
 };
 
+struct SettingsShadowPointLightsStruct {
+	int		iShadowLightPoints;
+	int		iShadowCullLightPoints;
+	float	fShadowObjectScanRadius;
+	float	fShadowLightRadiusMin;
+	float	fShadowLightRadiusMax;
+	float	fShadowCullLightRadiusMin;
+	float	fShadowCullLightRadiusMax;
+};
+
 struct SettingsWaterStruct {
 	float choppiness;
 	float waveWidth;
@@ -627,6 +637,7 @@ typedef std::map<std::string, SettingsColoringStruct> SettingsColoringList;
 typedef std::map<std::string, SettingsBloomStruct> SettingsBloomList;
 typedef std::map<std::string, SettingsMotionBlurStruct> SettingsMotionBlurList;
 typedef std::map<std::string, SettingsWeatherStruct> SettingsWeatherList;
+typedef std::map<std::string, SettingsShadowPointLightsStruct> SettingsShadowPointLightsList;
 typedef std::map<std::string, std::string> DefinitionsList;
 typedef std::map<UInt32, std::string> SectionsList;
 typedef std::map<std::string, float> SettingsList;
@@ -636,7 +647,7 @@ public:
 	SettingManager();
 
 	void							LoadSettings();
-	void							SaveSettings(const char* Item, const char* Definition);
+	void							SaveSettings(const char* Item, const char* Definition, const char* Section);
 	DefinitionsList					GetMenuItems();
 	DefinitionsList					GetMenuDefinitions(const char* Item);
 	SectionsList					GetMenuSections(const char* Item, const char* Definition);
@@ -648,13 +659,16 @@ public:
 	SettingsAmbientOcclusionStruct*	GetSettingsAmbientOcclusion(const char* Section);
 	SettingsColoringStruct*			GetSettingsColoring(const char* PlayerLocation);
 	SettingsBloomStruct*			GetSettingsBloom(const char* PlayerLocation);
+	SettingsShadowPointLightsStruct*GetSettingsShadowPointLight(const char* PlayerLocation);
 	SettingsMotionBlurStruct*		GetSettingsMotionBlur(const char* Section);
 	SettingsWeatherStruct*			GetSettingsWeather(const char* WeatherName);
 	void							SetSettingsWeather(TESWeather* Weather);
 	SettingsWeatherStruct*			CreateSettingsWeather(const char* WeatherName);
 
+    const char*                     CreateProfileString = "Create New Profile";
 	char							CurrentPath[MAX_PATH];
 	bool							GameLoading;
+	float							DefaultFov;
 	SettingsMainStruct				SettingsMain;
 	SettingsGrassStruct				SettingsGrass;
 	SettingsHDRStruct				SettingsHDR;
@@ -726,6 +740,7 @@ private:
 	SettingsBloomList				SettingsBloom;
 	SettingsMotionBlurList			SettingsMotionBlur;
 	SettingsWeatherList				SettingsWeather;
+	SettingsShadowPointLightsList   SettingsShadowPointLight;
 
 };
 
