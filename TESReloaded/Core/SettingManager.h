@@ -316,7 +316,6 @@ struct SettingsShadowStruct {
 		FormsStruct			Forms[4];
 		bool				Enabled[4];
 		bool				AlphaEnabled[4];
-		int					Quality;
 		int					ShadowMapSize[4];
 		float				Darkness;
 		float				ShadowMapRadius[4];
@@ -340,8 +339,6 @@ struct SettingsShadowStruct {
 		bool				Enabled;
 		bool				AlphaEnabled;
 		bool				TorchesCastShadows;
-		int					LightPoints;
-		int					Quality;
 		int					ShadowCubeMapSize;
 		float				Darkness;
 		bool                UsePostProcessing;
@@ -361,6 +358,7 @@ struct SettingsShadowPointLightsStruct {
 	float	fShadowLightRadiusMax;
 	float	fShadowCullLightRadiusMin;
 	float	fShadowCullLightRadiusMax;
+	bool	bEnabled;
 };
 
 struct SettingsWaterStruct {

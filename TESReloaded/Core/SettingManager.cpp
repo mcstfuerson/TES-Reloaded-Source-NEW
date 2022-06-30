@@ -856,6 +856,7 @@ void SettingManager::LoadSettings() {
 	GetPrivateProfileSectionNamesA(Sections, 32767, Filename);
 	pNextSection = Sections;
 	while (*pNextSection != NULL) {
+		SSPL.bEnabled = GetPrivateProfileIntA(pNextSection, "Enabled", 1, Filename);
 		SSPL.iShadowLightPoints = GetPrivateProfileIntA(pNextSection, "iShadowLightPoints", 12, Filename);
 		SSPL.iShadowCullLightPoints = GetPrivateProfileIntA(pNextSection, "iShadowCullLightPoints", 18, Filename);
 		GetPrivateProfileStringA(pNextSection, "fShadowObjectScanRadius", "1.2", value, SettingStringBuffer, Filename);
@@ -1175,7 +1176,6 @@ void SettingManager::LoadSettings() {
 
 	SettingsShadows.Exteriors.UsePostProcessing = GetPrivateProfileIntA("Exteriors", "UsePostProcessing", 1, Filename);
 	SettingsShadows.Exteriors.UseIntervalUpdate = GetPrivateProfileIntA("Exteriors", "UseIntervalUpdate", 1, Filename);
-	SettingsShadows.Exteriors.Quality = GetPrivateProfileIntA("Exteriors", "Quality", 0, Filename);
 	GetPrivateProfileStringA("Exteriors", "Darkness", "0.2", value, SettingStringBuffer, Filename);
 	SettingsShadows.Exteriors.Darkness = atof(value);
 	GetPrivateProfileStringA("Exteriors", "ShadowMapFarPlane", "8192.0", value, SettingStringBuffer, Filename);
@@ -1209,8 +1209,6 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.Interiors.Forms.Furniture = GetPrivateProfileIntA("Interiors", "Furniture", 1, Filename);
 	SettingsShadows.Interiors.Forms.Misc = GetPrivateProfileIntA("Interiors", "Misc", 0, Filename);
 	SettingsShadows.Interiors.Forms.Statics = GetPrivateProfileIntA("Interiors", "Statics", 1, Filename);
-	SettingsShadows.Interiors.Quality = GetPrivateProfileIntA("Interiors", "Quality", 0, Filename);
-	SettingsShadows.Interiors.LightPoints = GetPrivateProfileIntA("Interiors", "LightPoints", 2, Filename);
 	SettingsShadows.Interiors.TorchesCastShadows = GetPrivateProfileIntA("Interiors", "TorchesCastShadows", 0, Filename);
 	SettingsShadows.Interiors.ShadowCubeMapSize = GetPrivateProfileIntA("Interiors", "ShadowCubeMapSize", 512, Filename);
 	GetPrivateProfileStringA("Interiors", "Darkness", "1.0", value, SettingStringBuffer, Filename);
@@ -1228,8 +1226,6 @@ void SettingManager::LoadSettings() {
 	SettingsShadows.ExteriorsPoint.Forms.Furniture = GetPrivateProfileIntA("ExteriorsPoint", "Furniture", 1, Filename);
 	SettingsShadows.ExteriorsPoint.Forms.Misc = GetPrivateProfileIntA("ExteriorsPoint", "Misc", 0, Filename);
 	SettingsShadows.ExteriorsPoint.Forms.Statics = GetPrivateProfileIntA("ExteriorsPoint", "Statics", 1, Filename);
-	SettingsShadows.ExteriorsPoint.Quality = GetPrivateProfileIntA("ExteriorsPoint", "Quality", 0, Filename);
-	SettingsShadows.ExteriorsPoint.LightPoints = GetPrivateProfileIntA("ExteriorsPoint", "LightPoints", 2, Filename);
 	SettingsShadows.ExteriorsPoint.TorchesCastShadows = GetPrivateProfileIntA("ExteriorsPoint", "TorchesCastShadows", 0, Filename);
 	SettingsShadows.ExteriorsPoint.ShadowCubeMapSize = GetPrivateProfileIntA("ExteriorsPoint", "ShadowCubeMapSize", 512, Filename);
 	GetPrivateProfileStringA("ExteriorsPoint", "Darkness", "1.0", value, SettingStringBuffer, Filename);
@@ -1350,6 +1346,7 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 					newProfile.fShadowCullLightRadiusMin = SettingsShadowPointLight["DefaultExterior"].fShadowCullLightRadiusMin;
 					newProfile.fShadowCullLightRadiusMax = SettingsShadowPointLight["DefaultExterior"].fShadowCullLightRadiusMax;
 					newProfile.fShadowObjectScanRadius = SettingsShadowPointLight["DefaultExterior"].fShadowObjectScanRadius;
+					newProfile.bEnabled = SettingsShadowPointLight["DefaultExterior"].bEnabled;
 					if (!SettingsShadowPointLight.count(Player->GetWorldSpace()->GetEditorName())) {
 						SettingsShadowPointLight.insert(std::pair<std::string, SettingsShadowPointLightsStruct>(Player->GetWorldSpace()->GetEditorName(), newProfile));
 						MenuManager->ShowMessage("Profile Created.");
@@ -1366,6 +1363,7 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 					newProfile.fShadowCullLightRadiusMin = SettingsShadowPointLight["DefaultInterior"].fShadowCullLightRadiusMin;
 					newProfile.fShadowCullLightRadiusMax = SettingsShadowPointLight["DefaultInterior"].fShadowCullLightRadiusMax;
 					newProfile.fShadowObjectScanRadius = SettingsShadowPointLight["DefaultInterior"].fShadowObjectScanRadius;
+					newProfile.bEnabled = SettingsShadowPointLight["DefaultInterior"].bEnabled;
 					if (!SettingsShadowPointLight.count(Player->parentCell->GetEditorName())) {
 						SettingsShadowPointLight.insert(std::pair<std::string, SettingsShadowPointLightsStruct>(Player->parentCell->GetEditorName(), newProfile));
 						MenuManager->ShowMessage("Profile Created.");
@@ -1608,7 +1606,6 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 			WritePrivateProfileStringA("Exteriors", "deferredFarNormBias", ToString(SettingsShadows.Exteriors.deferredFarNormBias).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "deferredConstBias", ToString(SettingsShadows.Exteriors.deferredConstBias).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "deferredFarConstBias", ToString(SettingsShadows.Exteriors.deferredFarConstBias).c_str(), Filename);
-			WritePrivateProfileStringA("Exteriors", "Quality", ToString(SettingsShadows.Exteriors.Quality).c_str(), Filename);
 			WritePrivateProfileStringA("Exteriors", "ShadowMapFarPlane", ToString(SettingsShadows.Exteriors.ShadowMapFarPlane).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNear", "Enabled", ToString(SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsNear", "AlphaEnabled", ToString(SettingsShadows.Exteriors.AlphaEnabled[ShadowManager::ShadowMapTypeEnum::MapNear]).c_str(), Filename);
@@ -1620,14 +1617,10 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 			WritePrivateProfileStringA("ExteriorsPoint", "UsePostProcessing", ToString(SettingsShadows.ExteriorsPoint.UsePostProcessing).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "AlphaEnabled", ToString(SettingsShadows.ExteriorsPoint.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("ExteriorsPoint", "Darkness", ToString(SettingsShadows.ExteriorsPoint.Darkness).c_str(), Filename);
-			WritePrivateProfileStringA("ExteriorsPoint", "Quality", ToString(SettingsShadows.ExteriorsPoint.Quality).c_str(), Filename);
-			WritePrivateProfileStringA("ExteriorsPoint", "LightPoints", ToString(SettingsShadows.ExteriorsPoint.LightPoints).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Enabled", ToString(SettingsShadows.Interiors.Enabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "UsePostProcessing", ToString(SettingsShadows.Interiors.UsePostProcessing).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "AlphaEnabled", ToString(SettingsShadows.Interiors.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Darkness", ToString(SettingsShadows.Interiors.Darkness).c_str(), Filename);
-			WritePrivateProfileStringA("Interiors", "Quality", ToString(SettingsShadows.Interiors.Quality).c_str(), Filename);
-			WritePrivateProfileStringA("Interiors", "LightPoints", ToString(SettingsShadows.Interiors.LightPoints).c_str(), Filename);
 		}
 		else if (!strcmp(Definition, "Sharpening")) {
 			WritePrivateProfileStringA("Effects", "Sharpening", ToString(SettingsMain.Effects.Sharpening).c_str(), SettingsMain.Main.MainFile);
@@ -2119,6 +2112,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["fShadowLightRadiusMax"] = spls->fShadowLightRadiusMax;
 			Settings["fShadowCullLightRadiusMin"] = spls->fShadowCullLightRadiusMin;
 			Settings["fShadowCullLightRadiusMax"] = spls->fShadowCullLightRadiusMax;
+			Settings["bEnabled"] = spls->bEnabled;
 		}
 		else if (!strcmp(Definition, "Cinema")) {
 			Settings["AspectRatio"] = SettingsCinema.AspectRatio;
@@ -2257,7 +2251,6 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["deferredConstBias"] = SettingsShadows.Exteriors.deferredConstBias;
 				Settings["deferredFarConstBias"] = SettingsShadows.Exteriors.deferredFarConstBias;
 				Settings["ShadowMapFarPlane"] = SettingsShadows.Exteriors.ShadowMapFarPlane;
-				Settings["Quality"] = SettingsShadows.Exteriors.Quality;
 			}
 			else if (!strcmp(Section, "ExteriorsNear")) {
 				Settings["Enabled"] = SettingsShadows.Exteriors.Enabled[ShadowManager::ShadowMapTypeEnum::MapNear];
@@ -2274,16 +2267,12 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["UsePostProcessing"] = SettingsShadows.Interiors.UsePostProcessing;
 				Settings["AlphaEnabled"] = SettingsShadows.Interiors.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.Interiors.Darkness;
-				Settings["Quality"] = SettingsShadows.Interiors.Quality;
-				Settings["LightPoints"] = SettingsShadows.Interiors.LightPoints;
 			}
 			else if (!strcmp(Section, "ExteriorsPoint")) {
 				Settings["Enabled"] = SettingsShadows.ExteriorsPoint.Enabled;
 				Settings["UsePostProcessing"] = SettingsShadows.ExteriorsPoint.UsePostProcessing;
 				Settings["AlphaEnabled"] = SettingsShadows.ExteriorsPoint.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.ExteriorsPoint.Darkness;
-				Settings["Quality"] = SettingsShadows.ExteriorsPoint.Quality;
-				Settings["LightPoints"] = SettingsShadows.ExteriorsPoint.LightPoints;
 			}
 		}
 		else if (!strcmp(Definition, "Sharpening")) {
@@ -2722,6 +2711,8 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				spls->fShadowCullLightRadiusMax = Value;
 			else if (!strcmp(Setting, "fShadowObjectScanRadius"))
 				spls->fShadowObjectScanRadius = Value;
+			else if (!strcmp(Setting, "bEnabled"))
+				spls->bEnabled = Value;
 
 			TheShadowManager->LoadShadowLightPointSettings();
 		}
@@ -2982,9 +2973,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsShadows.Exteriors.deferredFarConstBias = Value;
 					TheShaderManager->ShaderConst.ShadowMap.ShadowBiasDeferred.w = Value;
 				}
-				else if (!strcmp(Setting, "Quality")) {
-					SettingsShadows.Exteriors.Quality = Value;
-				}
 				else if (!strcmp(Setting, "UsePostProcessing")) {
 					// Special case for forward or post-process shadowing
 					SettingsShadows.Exteriors.UsePostProcessing = Value;
@@ -3017,12 +3005,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				else if (!strcmp(Setting, "Darkness")) {
 					SettingsShadows.Interiors.Darkness = Value;
 				}
-				else if (!strcmp(Setting, "LightPoints")) {
-					SettingsShadows.Interiors.LightPoints = Value;
-				}
-				else if (!strcmp(Setting, "Quality")) {
-					SettingsShadows.Interiors.Quality = Value;
-				}
 				else if (!strcmp(Setting, "UsePostProcessing")) {
 					// Special case for forward or post-process shadowing
 					SettingsShadows.Interiors.UsePostProcessing = Value;
@@ -3038,12 +3020,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				}
 				else if (!strcmp(Setting, "Darkness")) {
 					SettingsShadows.ExteriorsPoint.Darkness = Value;
-				}
-				else if (!strcmp(Setting, "LightPoints")) {
-					SettingsShadows.ExteriorsPoint.LightPoints = Value;
-				}
-				else if (!strcmp(Setting, "Quality")) {
-					SettingsShadows.ExteriorsPoint.Quality = Value;
 				}
 				else if (!strcmp(Setting, "UsePostProcessing")) {
 					// Special case for forward or post-process shadowing

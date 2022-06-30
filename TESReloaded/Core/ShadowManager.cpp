@@ -842,14 +842,14 @@ void ShadowManager::RenderInteriorShadows() {
 	int ShadowCastLightIndex = -1;
 	int ShadowCullLightIndex = -1;
 
-	if (!(Player->parentCell->flags0 & Player->parentCell->kFlags0_BehaveLikeExterior && ShadowLightDir->z > 0.01f)) {
-		FakeExtShadowLightDirSet = false;
-		FakeExtShadowLightDirCnt = 0;
-		if (ShadowSettings->Enabled) {
+	if (ShadowLightPointSettings->bEnabled) {
+		if (!(Player->parentCell->flags0 & Player->parentCell->kFlags0_BehaveLikeExterior && ShadowLightDir->z > 0.01f)) {
+			FakeExtShadowLightDirSet = false;
+			FakeExtShadowLightDirCnt = 0;
 			GetShadowSceneLights(SceneLights, ShadowCastLights, ShadowCullLights, ShadowCastLightIndex, ShadowCullLightIndex, ShadowLightPointSettings);
 			SetAllShadowCastLightPos(ShadowCastLights, ShadowCastLightIndex);
 			SetAllShadowCullLightPos(ShadowCullLights, ShadowCullLightIndex);
-			if (Player->GetWorldSpace()) {			
+			if (Player->GetWorldSpace()) {
 				RenderShadowCubeMapExt(ShadowCastLights, ShadowCastLightIndex, ShadowLightPointSettings->fShadowObjectScanRadius, ShadowSettings, ShadowData);
 			}
 			else {
@@ -860,17 +860,18 @@ void ShadowManager::RenderInteriorShadows() {
 			CalculateBlend(ShadowCastLights, ShadowCastLightIndex);
 		}
 		else {
-			if (Player->GetWorldSpace()) { //set these to cull the normal exterior shadows
-				GetShadowSceneLights(SceneLights, ShadowCastLights, ShadowCullLights, ShadowCastLightIndex, ShadowCullLightIndex, ShadowLightPointSettings);
-				SetAllShadowCastLightPos(ShadowCastLights, ShadowCastLightIndex);
-				SetAllShadowCullLightPos(ShadowCullLights, ShadowCullLightIndex);
-			}
-			ShadowCastLightIndex = -1; //clears shadowmaps
+			ShadowCastLightIndex = 0;
+			RenderShadowCubeMapFakeInt(ShadowCastLightIndex, ShadowSettings, ShadowData);
+			ClearShadowCubeMaps(Device, ShadowCastLightIndex, ShadowCubeMapStateEnum::Interior);
 		}
 	}
 	else {
-		ShadowCastLightIndex = 0;
-		RenderShadowCubeMapFakeInt(ShadowCastLightIndex, ShadowSettings, ShadowData);
+		if (Player->GetWorldSpace()) { //set these to cull the normal exterior shadows
+			GetShadowSceneLights(SceneLights, ShadowCastLights, ShadowCullLights, ShadowCastLightIndex, ShadowCullLightIndex, ShadowLightPointSettings);
+			SetAllShadowCastLightPos(ShadowCastLights, ShadowCastLightIndex);
+			SetAllShadowCullLightPos(ShadowCullLights, ShadowCullLightIndex);
+		}
+		ShadowCastLightIndex = -1; //clears shadowmaps
 	}
 
 	if (ShadowCastLightIndex < ShadowCubeLightCount) { 
@@ -884,7 +885,7 @@ void ShadowManager::RenderInteriorShadows() {
 	ShadowCubeLightCount = ShadowCastLightIndex;
 	ShadowCubeCullLightCount = ShadowCullLightIndex;
 
-	ShadowData->x = ShadowSettings->Quality;
+	//ShadowData->x = ShadowSettings->Quality;
 	ShadowData->y = ShadowSettings->Darkness;
 	ShadowData->z = 1.0f / (float)ShadowSettings->ShadowCubeMapSize;
 }
