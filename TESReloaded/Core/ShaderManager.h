@@ -70,6 +70,12 @@ struct ShaderConstants {
 		D3DXVECTOR4		ShadowBiasForward;
 		D3DXVECTOR4		ShadowBiasDeferred;
 	};
+
+	struct PointLightStruct {
+		D3DXVECTOR4		LightPosition[2];
+		D3DXVECTOR4		LightColor[2];
+	};
+
 	struct WaterStruct {
 		D3DXVECTOR4		waterCoefficients;
 		D3DXVECTOR4		waveParams;
@@ -228,6 +234,7 @@ struct ShaderConstants {
 	float					oldfogEnd;
 	bool					HasWater;
 	ShadowMapStruct			ShadowMap;
+	PointLightStruct		PointLights;
 	WaterStruct				Water;
 	HDRStruct				HDR;
 	GrassStruct				Grass;

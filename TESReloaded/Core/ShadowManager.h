@@ -48,13 +48,16 @@ public:
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int LightIndex);
 	void					ClearShadowCubeLightRegister(int From);
 	void					ClearShadowCubeLightCullRegister(int From);
+	void					ClearGeneralPointLightRegister(int From);
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
 	void                    AddSceneLight(NiPointLight* Light, int Key, std::map<int, NiPointLight*>& SceneLights);
-	int                     GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** ShadowCastLights, NiPointLight** ShadowCullLights, int& ShadowCastLightIndex, int& ShadowCullLightIndex, SettingsShadowPointLightsStruct* ShadowSettings);
+	int                     GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** ShadowCastLights, NiPointLight** ShadowCullLights, NiPointLight** GeneralPointLights, int& ShadowCastLightIndex, int& ShadowCullLightIndex, int& GeneralPointLightIndex, SettingsShadowPointLightsStruct* ShadowSettings);
 	void                    SetAllShadowCastLightPos(NiPointLight** Lights, int LightIndex);
 	void                    SetShadowCastLightPos(NiPointLight** Lights, int index);
 	void                    SetAllShadowCullLightPos(NiPointLight** Lights, int LightIndex);
 	void                    SetShadowCullLightPos(NiPointLight** Lights, int index);
+	void					SetAllGeneralLightPos(NiPointLight** Lights, int LightIndex);
+	void					SetGeneralLightPos(NiPointLight** Lights, int index);
 	void                    SetShadowCubeMapRegisters(int index);
 	void					ResetIntervals();
 	void					LoadShadowLightPointSettings();
@@ -96,6 +99,7 @@ public:
 	D3DXVECTOR3				LookAtPosition;
 	int                     ShadowCubeLightCount;
 	int						ShadowCubeCullLightCount;
+	int						GeneralPointLightCount;
 	float					GameTime;
 	SettingsShadowPointLightsStruct* ShadowLightPointSettings;
 };
