@@ -254,10 +254,6 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.AmbientOcclusion.AOData;
 	else if (!strcmp(Name, "TESR_AmbientOcclusionData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.AmbientOcclusion.Data;
-	else if (!strcmp(Name, "TESR_BloodLensParams"))
-		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.BloodLens.Params;
-	else if (!strcmp(Name, "TESR_BloodLensColor"))
-		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.BloodLens.BloodColor;
 	else if (!strcmp(Name, "TESR_BloomData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Bloom.BloomData;
 	else if (!strcmp(Name, "TESR_BloomValues"))
@@ -294,8 +290,6 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.KhajiitRaysSecunda.RayColor;
 	else if (!strcmp(Name, "TESR_SecundaRaysData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.KhajiitRaysSecunda.Data;
-	else if (!strcmp(Name, "TESR_LowHFData"))
-		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.LowHF.Data;
 	else if (!strcmp(Name, "TESR_MotionBlurParams"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.MotionBlur.BlurParams;
 	else if (!strcmp(Name, "TESR_MotionBlurData"))
@@ -688,10 +682,8 @@ ShaderManager::ShaderManager() {
 	CinemaEffect = NULL;
 	BloomEffect = NULL;
 	SnowAccumulationEffect = NULL;
-	BloodLensEffect = NULL;
 	SMAAEffect = NULL;
 	MotionBlurEffect = NULL;
-	LowHFEffect = NULL;
 	WetWorldEffect = NULL;
 	SharpeningEffect = NULL;
 	VolumetricFogEffect = NULL;
@@ -740,14 +732,12 @@ void ShaderManager::CreateEffects() {
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
 
 	if (Effects->AmbientOcclusion) CreateEffect(EffectRecordType_AmbientOcclusion);
-	if (Effects->BloodLens) CreateEffect(EffectRecordType_BloodLens);
 	if (Effects->Bloom) CreateEffect(EffectRecordType_Bloom);
 	if (Effects->Cinema) CreateEffect(EffectRecordType_Cinema);
 	if (Effects->Coloring) CreateEffect(EffectRecordType_Coloring);
 	if (Effects->DepthOfField) CreateEffect(EffectRecordType_DepthOfField);
 	if (Effects->GodRays) CreateEffect(EffectRecordType_GodRays);
 	if (Effects->KhajiitRays) CreateEffect(EffectRecordType_KhajiitRays);
-	if (Effects->LowHF) CreateEffect(EffectRecordType_LowHF);
 	if (Effects->MotionBlur) CreateEffect(EffectRecordType_MotionBlur);
 	if (Effects->Sharpening) CreateEffect(EffectRecordType_Sharpening);
 	if (Effects->SMAA) CreateEffect(EffectRecordType_SMAA);
@@ -768,7 +758,6 @@ void ShaderManager::InitializeConstants() {
 
 	ShaderConst.pWeather = NULL;
 	ShaderConst.WaterLens.Percent = 0.0f;
-	ShaderConst.BloodLens.Percent = 0.0f;
 	ShaderConst.SnowAccumulation.Params.w = 0.0f;
 	ShaderConst.WetWorld.Data.x = 0.0f;
 	GameDay = 0;
@@ -1630,49 +1619,6 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.Coloring.EffectGamma.w = scs->EffectGammaB;
 		}
 
-		if (TheSettingManager->SettingsMain.Effects.BloodLens) {
-			if (ShaderConst.BloodLens.Percent > 0.0f) {
-				ShaderConst.BloodLens.Time.z = TheSettingManager->SettingsBlood.LensTime;
-				if (ShaderConst.BloodLens.Percent == 1.0f) {
-					ShaderConst.BloodLens.Time.w = 0.0f;
-					srand(time(NULL));
-					ShaderConst.BloodLens.Params.x = (double)rand() / (RAND_MAX + 1) * (0.75f - 0.25f) + 0.25f; //from 0.25 to 0.75
-					ShaderConst.BloodLens.Params.y = (double)rand() / (RAND_MAX + 1) * (0.5f + 0.1f) - 0.1f; //from -0.1 to 0.5
-					ShaderConst.BloodLens.Params.z = (double)rand() / (RAND_MAX + 1) * (2.0f + 2.0f) - 2.0f; //from -2 to 2
-					ShaderConst.BloodLens.Params.w = TheSettingManager->SettingsBlood.LensIntensity;
-				}
-				ShaderConst.BloodLens.Time.w += 1.0f;
-				ShaderConst.BloodLens.Percent = 1.0f - ShaderConst.BloodLens.Time.w / ShaderConst.BloodLens.Time.z;
-				if (ShaderConst.BloodLens.Percent < 0.0f)
-					ShaderConst.BloodLens.Percent = 0.0f;
-				ShaderConst.BloodLens.Params.w = TheSettingManager->SettingsBlood.LensIntensity * ShaderConst.BloodLens.Percent;
-				ShaderConst.BloodLens.BloodColor.x = TheSettingManager->SettingsBlood.LensColorR;
-				ShaderConst.BloodLens.BloodColor.y = TheSettingManager->SettingsBlood.LensColorG;
-				ShaderConst.BloodLens.BloodColor.z = TheSettingManager->SettingsBlood.LensColorB;
-			}
-		}
-
-		if (TheSettingManager->SettingsMain.Effects.LowHF) {
-			float PlayerHealthPercent = (float)Player->GetActorValue(Actor::ActorVal::kActorVal_Health) / (float)Player->GetBaseActorValue(Actor::ActorVal::kActorVal_Health);
-			float PlayerFatiguePercent = (float)Player->GetActorValue(Actor::ActorVal::kActorVal_Stamina) / (float)Player->GetBaseActorValue(Actor::ActorVal::kActorVal_Stamina);
-
-			ShaderConst.LowHF.Data.x = 0.0f;
-			ShaderConst.LowHF.Data.y = 0.0f;
-			ShaderConst.LowHF.Data.z = 0.0f;
-			ShaderConst.LowHF.Data.w = 0.0f;
-			if (Player->GetLifeState(1)) {
-				ShaderConst.LowHF.HealthCoeff = 1.0f - PlayerHealthPercent / TheSettingManager->SettingsLowHF.HealthLimit;
-				ShaderConst.LowHF.FatigueCoeff = 1.0f - PlayerFatiguePercent / TheSettingManager->SettingsLowHF.FatigueLimit;
-				if (PlayerHealthPercent < TheSettingManager->SettingsLowHF.HealthLimit) {
-					ShaderConst.LowHF.Data.x = ShaderConst.LowHF.HealthCoeff * TheSettingManager->SettingsLowHF.LumaMultiplier;
-					ShaderConst.LowHF.Data.y = ShaderConst.LowHF.HealthCoeff * 0.01f * TheSettingManager->SettingsLowHF.BlurMultiplier;
-					ShaderConst.LowHF.Data.z = ShaderConst.LowHF.HealthCoeff * 20.0f * TheSettingManager->SettingsLowHF.VignetteMultiplier;
-					ShaderConst.LowHF.Data.w = (1.0f - ShaderConst.LowHF.HealthCoeff) * TheSettingManager->SettingsLowHF.DarknessMultiplier;
-				}
-				if (!ShaderConst.LowHF.Data.x && PlayerFatiguePercent < TheSettingManager->SettingsLowHF.FatigueLimit) ShaderConst.LowHF.Data.x = ShaderConst.LowHF.FatigueCoeff * TheSettingManager->SettingsLowHF.LumaMultiplier;
-			}
-		}
-
 		if (TheSettingManager->SettingsMain.Effects.DepthOfField) {
 			SettingsDepthOfFieldStruct* sds = NULL;
 
@@ -2192,11 +2138,6 @@ void ShaderManager::CreateEffect(EffectRecordType EffectType) {
 			SnowAccumulationEffect = new EffectRecord();
 			TheSettingManager->SettingsMain.Effects.SnowAccumulation = LoadEffect(SnowAccumulationEffect, Filename, NULL);
 			break;
-		case EffectRecordType_BloodLens:
-			strcat(Filename, "Blood\\BloodLens.fx");
-			BloodLensEffect = new EffectRecord();
-			TheSettingManager->SettingsMain.Effects.BloodLens = LoadEffect(BloodLensEffect, Filename, NULL);
-			break;
 		case EffectRecordType_SMAA:
 			strcat(Filename, "SMAA\\SMAA.fx");
 			SMAAEffect = new EffectRecord();
@@ -2206,11 +2147,6 @@ void ShaderManager::CreateEffect(EffectRecordType EffectType) {
 			strcat(Filename, "MotionBlur\\MotionBlur.fx");
 			MotionBlurEffect = new EffectRecord();
 			TheSettingManager->SettingsMain.Effects.MotionBlur = LoadEffect(MotionBlurEffect, Filename, NULL);
-			break;
-		case EffectRecordType_LowHF:
-			strcat(Filename, "LowHF\\LowHF.fx");
-			LowHFEffect = new EffectRecord();
-			TheSettingManager->SettingsMain.Effects.LowHF = LoadEffect(LowHFEffect, Filename, NULL);
 			break;
 		case EffectRecordType_WetWorld:
 			strcat(Filename, "Precipitations\\WetWorld.fx");
@@ -2309,7 +2245,6 @@ bool ShaderManager::LoadEffect(EffectRecord* TheEffect, char* Filename, char* Cu
 void ShaderManager::DisposeEffect(EffectRecord* TheEffect) {
 
 	if (TheEffect == AmbientOcclusionEffect) AmbientOcclusionEffect = NULL;
-	else if (TheEffect == BloodLensEffect) BloodLensEffect = NULL;
 	else if (TheEffect == BloomEffect) BloomEffect = NULL;
 	else if (TheEffect == CinemaEffect) CinemaEffect = NULL;
 	else if (TheEffect == ColoringEffect) ColoringEffect = NULL;
@@ -2317,7 +2252,6 @@ void ShaderManager::DisposeEffect(EffectRecord* TheEffect) {
 	else if (TheEffect == GodRaysEffect) GodRaysEffect = NULL;
 	else if (TheEffect == MasserRaysEffect) MasserRaysEffect = NULL;
 	else if (TheEffect == SecundaRaysEffect) SecundaRaysEffect = NULL;
-	else if (TheEffect == LowHFEffect) LowHFEffect = NULL;
 	else if (TheEffect == MotionBlurEffect) MotionBlurEffect = NULL;
 	else if (TheEffect == SMAAEffect) SMAAEffect = NULL;
 	else if (TheEffect == SnowAccumulationEffect) SnowAccumulationEffect = NULL;
@@ -2388,7 +2322,6 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	}
 	if (Effects->Underwater && ShaderConst.HasWater && TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x + 20.0f) {
 		if (TheRenderManager->CameraPosition.z < ShaderConst.Water.waterSettings.x) {
-			ShaderConst.BloodLens.Percent = 0.0f;
 			if (ShaderConst.WaterLens.Percent > -2.0f) ShaderConst.WaterLens.Percent = ShaderConst.WaterLens.Percent - 1.0f;
 		}
 		UnderwaterEffect->SetCT();
@@ -2438,10 +2371,6 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		DepthOfFieldEffect->SetCT();
 		DepthOfFieldEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->BloodLens && ShaderConst.BloodLens.Percent > 0.0f) {
-		BloodLensEffect->SetCT();
-		BloodLensEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
 	if (Effects->WaterLens && ShaderConst.WaterLens.Percent > 0.0f) {
 		WaterLensEffect->SetCT();
 		WaterLensEffect->Render(Device, RenderTarget, RenderedSurface, false);
@@ -2449,10 +2378,6 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	if (Effects->MotionBlur && (ShaderConst.MotionBlur.Data.x || ShaderConst.MotionBlur.Data.y)) {
 		MotionBlurEffect->SetCT();
 		MotionBlurEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (Effects->LowHF && ShaderConst.LowHF.Data.x) {
-		LowHFEffect->SetCT();
-		LowHFEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (Effects->Sharpening) {
 		SharpeningEffect->SetCT();
@@ -2518,12 +2443,6 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		DisposeShader(Name);
 		if (Value) CreateShader(Name);
 	}
-	else if (!strcmp(Name, "BloodLens")) {
-		Value = !Effects->BloodLens;
-		Effects->BloodLens = Value;
-		DisposeEffect(BloodLensEffect);
-		if (Value) CreateEffect(EffectRecordType_BloodLens);
-	}
 	else if (!strcmp(Name, "Bloom")) {
 		Value = !Effects->Bloom;
 		Effects->Bloom = Value;
@@ -2575,12 +2494,6 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		Shaders->HDR = Value;
 		DisposeShader(Name);
 		if (Value) CreateShader(Name);
-	}
-	else if (!strcmp(Name, "LowHF")) {
-		Value = !Effects->LowHF;
-		Effects->LowHF = Value;
-		DisposeEffect(LowHFEffect);
-		if (Value) CreateEffect(EffectRecordType_LowHF);
 	}
 	else if (!strcmp(Name, "MotionBlur")) {
 		Value = !Effects->MotionBlur;

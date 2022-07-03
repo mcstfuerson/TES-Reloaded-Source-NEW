@@ -178,14 +178,12 @@ struct SettingsMainStruct {
 
 	struct EffectsStruct {
 		bool AmbientOcclusion;
-		bool BloodLens;
 		bool Bloom;
 		bool Cinema;
 		bool Coloring;
 		bool DepthOfField;
 		bool GodRays;
 		bool KhajiitRays;
-		bool LowHF;
 		bool MotionBlur;
 		bool Precipitations;
 		bool Sharpening;
@@ -235,13 +233,6 @@ struct SettingsMainStruct {
 		float	StepValue;
 	};
 
-	struct LowHFSoundStruct {
-		bool	HealthEnabled;
-		bool	FatigueEnabled;
-		float	HealthCoeff;
-		float	FatigueCoeff;
-	};
-
 	struct PurgerStruct {
 		bool	Enabled;
 		bool	PurgeTextures;
@@ -288,7 +279,6 @@ struct SettingsMainStruct {
 	ShadersStruct				Shaders;
 	EffectsStruct				Effects;
 	MenuStruct					Menu;
-	LowHFSoundStruct			LowHFSound;
 	PurgerStruct				Purger;
 	GravityStruct				Gravity;
 	DodgeStruct					Dodge;
@@ -572,30 +562,12 @@ struct SettingsPrecipitationsStruct {
 	SnowAccumulationStruct	SnowAccumulation;
 };
 
-struct SettingsBloodStruct {
-	float LensChance;
-	float LensColorR;
-	float LensColorG;
-	float LensColorB;
-	float LensIntensity;
-	float LensTime;
-};
-
 struct SettingsMotionBlurStruct {
 	bool Enabled;
 	float GaussianWeight;
 	float BlurScale;
 	float BlurOffsetMax;
 	float BlurCutOff;
-};
-
-struct SettingsLowHFStruct {
-	float HealthLimit;
-	float FatigueLimit;
-	float LumaMultiplier;
-	float BlurMultiplier;
-	float VignetteMultiplier;
-	float DarknessMultiplier;
 };
 
 struct SettingsSharpeningStruct {
@@ -677,8 +649,6 @@ public:
 	SettingsKhajiitRaysStruct		SettingsKhajiitRays;
 	SettingsCinemaStruct			SettingsCinema;
 	SettingsPrecipitationsStruct	SettingsPrecipitations;
-	SettingsBloodStruct				SettingsBlood;
-	SettingsLowHFStruct				SettingsLowHF;
 	SettingsSharpeningStruct		SettingsSharpening;
 	SettingsVolumetricFogStruct		SettingsVolumetricFog;
 	SettingsShadowStruct			SettingsShadows;

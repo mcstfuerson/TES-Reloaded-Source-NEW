@@ -44,7 +44,6 @@ extern "C" {
 			CreateRenderHook();
 			CreateFormLoadHook();
 			CreateSettingsHook();
-			CreateGameEventHook();
 			CreateScriptHook();
 			CreateAnimationHook();
 			CreateShadowsHook();

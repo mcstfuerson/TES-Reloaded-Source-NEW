@@ -18,21 +18,6 @@ bool __cdecl TrackLoadForm(TESForm* Form, UInt32 Arg2) {
 	
 	bool r = LoadForm(Form, Arg2);
 	switch (Form->formType) {
-		case TESForm::FormType::kFormType_Sound: {
-			#if defined(OBLIVION)
-				TESSound* Sound = (TESSound*)Form;
-				const char* Name = Sound->soundFile.editorID.m_data;
-				if (Name) {
-					if (!strcmp(Name, "ORBreathingF"))
-						TheScriptManager->LowFSound->BreathingF = Sound;
-					else if (!strcmp(Name, "ORBreathingM"))
-						TheScriptManager->LowFSound->BreathingM = Sound;
-					else if (!strcmp(Name, "ORHeartSlow"))
-						TheScriptManager->LowHSound->HeartSlow = Sound;
-				}
-			#endif
-		}
-		break;
 		case TESForm::FormType::kFormType_Idle:
 			#if defined(OBLIVION)
 			if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) {

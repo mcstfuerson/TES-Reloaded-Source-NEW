@@ -22,74 +22,6 @@ BaseScript::BaseScript() {
 
 }
 
-LowHSoundScript::LowHSoundScript() {
-
-	HeartSlow = NULL;
-	ElapsedTime = -1.0f;
-
-}
-
-void LowHSoundScript::Run() {
-
-	if (MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
-		if (TheShaderManager->ShaderConst.LowHF.Data.x || ElapsedTime != -1.0f) {
-			float HealthCoeff = TheShaderManager->ShaderConst.LowHF.HealthCoeff;
-
-			if (Player->GetLifeState(0)) {
-				if (HealthCoeff) {
-					if (ElapsedTime == -1.0f && HealthCoeff >= 0.5) {
-						Global->GetSound()->Play(HeartSlow);
-						ElapsedTime = 0.0f;
-					}
-					else if (ElapsedTime >= 0.0f) {
-						ElapsedTime += TheFrameRateManager->ElapsedTime;
-						if (ElapsedTime >= 1.5f) ElapsedTime = -1.0f;
-					}
-				}
-			}
-		}
-	}
-
-}
-
-LowFSoundScript::LowFSoundScript() {
-
-	BreathingF = NULL;
-	BreathingM = NULL;
-	ElapsedTime = -1.0f;
-
-}
-
-void LowFSoundScript::Run() {
-
-	if (MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
-		if (TheShaderManager->ShaderConst.LowHF.Data.x || ElapsedTime != -1.0f) {
-			float FatigueCoeff = TheShaderManager->ShaderConst.LowHF.FatigueCoeff;
-
-			if (Player->GetLifeState(0)) {
-				if (FatigueCoeff) {
-					if (ElapsedTime == -1.0f && FatigueCoeff >= 0.5) {
-						if (Player->IsFemale()) {
-							Global->GetSound()->Play(BreathingF);
-							BreathingTime = 8.0f;
-						}
-						else {
-							Global->GetSound()->Play(BreathingM);
-							BreathingTime = 1.0f;
-						}
-						ElapsedTime = 0.0f;
-					}
-					else if (ElapsedTime >= 0.0f) {
-						ElapsedTime += TheFrameRateManager->ElapsedTime;
-						if (ElapsedTime >= BreathingTime) ElapsedTime = -1.0f;
-					}
-				}
-			}
-		}
-	}
-
-}
-
 PurgerScript::PurgerScript() { }
 
 void PurgerScript::Run() {
@@ -262,9 +194,7 @@ ScriptManager::ScriptManager() {
 
 	Logger::Log("Starting the script manager...");
 	TheScriptManager = this;
-	
-	LowHSound = new LowHSoundScript();
-	LowFSound = new LowFSoundScript();
+
 	Purger = new PurgerScript();
 	Gravity = new GravityScript();
 	EquipmentSetup = new EquipmentSetupScript();
@@ -275,10 +205,6 @@ void ScriptManager::Run() {
 
 	if (TheSettingManager->SettingsMain.Purger.Enabled) Purger->Run();
 	if (TheSettingManager->SettingsMain.Gravity.Enabled) Gravity->Run();
-	if (TheSettingManager->SettingsMain.Effects.LowHF) {
-		if (TheSettingManager->SettingsMain.LowHFSound.HealthEnabled) LowHSound->Run();
-		if (TheSettingManager->SettingsMain.LowHFSound.FatigueEnabled) LowFSound->Run();
-	}
 	if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) EquipmentSetup->Run();
 
 }

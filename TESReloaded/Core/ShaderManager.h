@@ -15,10 +15,8 @@ enum EffectRecordType
 	EffectRecordType_Cinema,
 	EffectRecordType_Bloom,
 	EffectRecordType_SnowAccumulation,
-	EffectRecordType_BloodLens,
 	EffectRecordType_SMAA,
 	EffectRecordType_MotionBlur,
-	EffectRecordType_LowHF,
 	EffectRecordType_WetWorld,
 	EffectRecordType_Sharpening,
 	EffectRecordType_VolumetricFog,
@@ -146,12 +144,6 @@ struct ShaderConstants {
 	struct SnowAccumulationStruct {
 		D3DXVECTOR4		Params;
 	};
-	struct BloodLensStruct {
-		D3DXVECTOR4		Params;
-		D3DXVECTOR4		BloodColor;
-		D3DXVECTOR4		Time;
-		float			Percent;
-	};
 	struct MotionBlurStruct {
 		D3DXVECTOR4		BlurParams;
 		D3DXVECTOR4		Data;
@@ -161,11 +153,6 @@ struct ShaderConstants {
 		float			oldAmountY;
 		float			oldoldAmountX;
 		float			oldoldAmountY;
-	};
-	struct LowHFStruct {
-		D3DXVECTOR4		Data;
-		float			HealthCoeff;
-		float			FatigueCoeff;
 	};
 	struct WetWorldStruct {
 		D3DXVECTOR4		Coeffs;
@@ -254,9 +241,7 @@ struct ShaderConstants {
 	CinemaStruct			Cinema;
 	BloomStruct				Bloom;
 	SnowAccumulationStruct	SnowAccumulation;
-	BloodLensStruct			BloodLens;
 	MotionBlurStruct		MotionBlur;
-	LowHFStruct				LowHF;
 	WetWorldStruct			WetWorld;
 	SharpeningStruct		Sharpening;
 	VolumetricFogStruct		VolumetricFog;
@@ -380,10 +365,8 @@ public:
 	EffectRecord*			CinemaEffect;
 	EffectRecord*			BloomEffect;
 	EffectRecord*			SnowAccumulationEffect;
-	EffectRecord*			BloodLensEffect;
 	EffectRecord*			SMAAEffect;
 	EffectRecord*			MotionBlurEffect;
-	EffectRecord*			LowHFEffect;
 	EffectRecord*			WetWorldEffect;
 	EffectRecord*			SharpeningEffect;
 	EffectRecord*			VolumetricFogEffect;

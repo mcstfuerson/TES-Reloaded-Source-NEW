@@ -314,9 +314,7 @@ SettingManager::SettingManager() {
 	SettingsMain.Effects.Cinema = GetPrivateProfileIntA("Effects", "Cinema", 0, Filename);
 	SettingsMain.Effects.Bloom = GetPrivateProfileIntA("Effects", "Bloom", 0, Filename);
 	SettingsMain.Effects.SnowAccumulation = GetPrivateProfileIntA("Effects", "SnowAccumulation", 0, Filename);
-	SettingsMain.Effects.BloodLens = GetPrivateProfileIntA("Effects", "BloodLens", 0, Filename);
 	SettingsMain.Effects.MotionBlur = GetPrivateProfileIntA("Effects", "MotionBlur", 0, Filename);
-	SettingsMain.Effects.LowHF = GetPrivateProfileIntA("Effects", "LowHF", 0, Filename);
 	SettingsMain.Effects.WetWorld = GetPrivateProfileIntA("Effects", "WetWorld", 0, Filename);
 	SettingsMain.Effects.Sharpening = GetPrivateProfileIntA("Effects", "Sharpening", 0, Filename);
 	SettingsMain.Effects.SMAA = GetPrivateProfileIntA("Effects", "SMAA", 0, Filename);
@@ -392,13 +390,6 @@ SettingManager::SettingManager() {
 	strcpy(SettingsMain.Menu.ValueFormat, "%.");
 	strcat(SettingsMain.Menu.ValueFormat, value);
 	strcat(SettingsMain.Menu.ValueFormat, "f");
-
-	SettingsMain.LowHFSound.HealthEnabled = GetPrivateProfileIntA("LowHFSound", "HealthEnabled", 0, Filename);
-	SettingsMain.LowHFSound.FatigueEnabled = GetPrivateProfileIntA("LowHFSound", "FatigueEnabled", 0, Filename);
-	GetPrivateProfileStringA("LowHFSound", "HealthCoeff", "0.5", value, SettingStringBuffer, Filename);
-	SettingsMain.LowHFSound.HealthCoeff = atof(value);
-	GetPrivateProfileStringA("LowHFSound", "FatigueCoeff", "0.5", value, SettingStringBuffer, Filename);
-	SettingsMain.LowHFSound.FatigueCoeff = atof(value);
 
 	SettingsMain.Purger.Enabled = GetPrivateProfileIntA("Purger", "Enabled", 0, Filename);
 	SettingsMain.Purger.Time = GetPrivateProfileIntA("Purger", "Time", 300, Filename);
@@ -968,22 +959,6 @@ void SettingManager::LoadSettings() {
 
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
-	strcat(Filename, "Blood\\Blood.ini");
-	GetPrivateProfileStringA("Default", "LensChance", "10", value, SettingStringBuffer, Filename);
-	SettingsBlood.LensChance = atof(value);
-	GetPrivateProfileStringA("Default", "LensColorR", "0.92", value, SettingStringBuffer, Filename);
-	SettingsBlood.LensColorR = atof(value);
-	GetPrivateProfileStringA("Default", "LensColorG", "0.16", value, SettingStringBuffer, Filename);
-	SettingsBlood.LensColorG = atof(value);
-	GetPrivateProfileStringA("Default", "LensColorB", "0.16", value, SettingStringBuffer, Filename);
-	SettingsBlood.LensColorB = atof(value);
-	GetPrivateProfileStringA("Default", "LensIntensity", "0.8", value, SettingStringBuffer, Filename);
-	SettingsBlood.LensIntensity = atof(value);
-	GetPrivateProfileStringA("Default", "LensTime", "360", value, SettingStringBuffer, Filename);
-	SettingsBlood.LensTime = atof(value);
-
-	strcpy(Filename, CurrentPath);
-	strcat(Filename, SettingsPath);
 	strcat(Filename, "MotionBlur\\MotionBlur.ini");
 	GetPrivateProfileSectionNamesA(Sections, 32767, Filename);
 	pNextSection = Sections;
@@ -1000,22 +975,6 @@ void SettingManager::LoadSettings() {
 		SettingsMotionBlur[std::string(pNextSection)] = SM;
 		pNextSection = pNextSection + strlen(pNextSection) + 1;
 	}
-
-	strcpy(Filename, CurrentPath);
-	strcat(Filename, SettingsPath);
-	strcat(Filename, "LowHF\\LowHF.ini");
-	GetPrivateProfileStringA("Default", "HealthLimit", "0.5", value, SettingStringBuffer, Filename);
-	SettingsLowHF.HealthLimit = atof(value);
-	GetPrivateProfileStringA("Default", "FatigueLimit", "0.4", value, SettingStringBuffer, Filename);
-	SettingsLowHF.FatigueLimit = atof(value);
-	GetPrivateProfileStringA("Default", "LumaMultiplier", "0.1", value, SettingStringBuffer, Filename);
-	SettingsLowHF.LumaMultiplier = atof(value);
-	GetPrivateProfileStringA("Default", "BlurMultiplier", "0.1", value, SettingStringBuffer, Filename);
-	SettingsLowHF.BlurMultiplier = atof(value);
-	GetPrivateProfileStringA("Default", "VignetteMultiplier", "0.1", value, SettingStringBuffer, Filename);
-	SettingsLowHF.VignetteMultiplier = atof(value);
-	GetPrivateProfileStringA("Default", "DarknessMultiplier", "0.1", value, SettingStringBuffer, Filename);
-	SettingsLowHF.DarknessMultiplier = atof(value);
 
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
@@ -1393,16 +1352,6 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 
 				
 		}
-		else if (!strcmp(Definition, "BloodLens")) {
-			WritePrivateProfileStringA("Effects", "BloodLens", ToString(SettingsMain.Effects.BloodLens).c_str(), SettingsMain.Main.MainFile);
-			strcat(Filename, "Blood\\Blood.ini");
-			WritePrivateProfileStringA("Default", "LensChance", ToString(SettingsBlood.LensChance).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "LensColorB", ToString(SettingsBlood.LensColorB).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "LensColorG", ToString(SettingsBlood.LensColorG).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "LensColorR", ToString(SettingsBlood.LensColorR).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "LensIntensity", ToString(SettingsBlood.LensIntensity).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "LensTime", ToString(SettingsBlood.LensTime).c_str(), Filename);
-		}
 		else if (!strcmp(Definition, "Bloom")) {
 			WritePrivateProfileStringA("Effects", "Bloom", ToString(SettingsMain.Effects.Bloom).c_str(), SettingsMain.Main.MainFile);
 			strcat(Filename, "Bloom\\Bloom.ini");
@@ -1553,16 +1502,6 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 			WritePrivateProfileStringA("Default", "ToneMappingBlur", ToString(SettingsHDR.ToneMappingBlur).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "ToneMappingColor", ToString(SettingsHDR.ToneMappingColor).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "Linearization", ToString(SettingsHDR.Linearization).c_str(), Filename);
-		}
-		else if (!strcmp(Definition, "LowHF")) {
-			WritePrivateProfileStringA("Effects", "LowHF", ToString(SettingsMain.Effects.LowHF).c_str(), SettingsMain.Main.MainFile);
-			strcat(Filename, "LowHF\\LowHF.ini");
-			WritePrivateProfileStringA("Default", "BlurMultiplier", ToString(SettingsLowHF.BlurMultiplier).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "DarknessMultiplier", ToString(SettingsLowHF.DarknessMultiplier).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "FatigueLimit", ToString(SettingsLowHF.FatigueLimit).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "HealthLimit", ToString(SettingsLowHF.HealthLimit).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "LumaMultiplier", ToString(SettingsLowHF.LumaMultiplier).c_str(), Filename);
-			WritePrivateProfileStringA("Default", "VignetteMultiplier", ToString(SettingsLowHF.VignetteMultiplier).c_str(), Filename);
 		}
 		else if (!strcmp(Definition, "MotionBlur")) {
 			WritePrivateProfileStringA("Effects", "MotionBlur", ToString(SettingsMain.Effects.MotionBlur).c_str(), SettingsMain.Main.MainFile);
@@ -1774,7 +1713,6 @@ DefinitionsList SettingManager::GetMenuDefinitions(const char* Item) {
 #if defined(OBLIVION)
 		Definitions["Blood"] = "Blood";
 #endif
-		Definitions["BloodLens"] = "Blood on Lens";
 		Definitions["Bloom"] = "Bloom";
 		Definitions["Cinema"] = "Cinema";
 		Definitions["Coloring"] = "Coloring";
@@ -1785,7 +1723,6 @@ DefinitionsList SettingManager::GetMenuDefinitions(const char* Item) {
 		Definitions["Grass"] = "Grass";
 		Definitions["HDR"] = "High Dynamic Range";
 #endif
-		Definitions["LowHF"] = "Low Health and Fatigue";
 		Definitions["MotionBlur"] = "Motion Blur";
 #if defined(OBLIVION)
 		Definitions["POM"] = "Parallax Occlusion Mapping";
@@ -1836,7 +1773,6 @@ SectionsList SettingManager::GetMenuSections(const char* Item, const char* Defin
 			if (SettingsMain.EquipmentMode.Enabled) Sections[2] = "EquipmentMode";
 			Sections[3] = "FrameRate";
 			Sections[4] = "Gravity";
-			Sections[5] = "LowHFSound";
 			if (SettingsMain.MountedCombat.Enabled) Sections[6] = "MountedCombat";
 			Sections[7] = "Purger";
 #endif
@@ -2029,12 +1965,6 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["Enabled"] = SettingsMain.Gravity.Enabled;
 				Settings["Value"] = SettingsMain.Gravity.Value;
 			}
-			else if (!strcmp(Section, "LowHFSound")) {
-				Settings["FatigueEnabled"] = SettingsMain.LowHFSound.FatigueEnabled;
-				Settings["HealthEnabled"] = SettingsMain.LowHFSound.HealthEnabled;
-				Settings["FatigueCoeff"] = SettingsMain.LowHFSound.FatigueCoeff;
-				Settings["HealthCoeff"] = SettingsMain.LowHFSound.HealthCoeff;
-			}
 			else if (!strcmp(Section, "MountedCombat")) {
 				Settings["TwoHandWeaponOnBackPosX"] = SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.x;
 				Settings["TwoHandWeaponOnBackPosY"] = SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.y;
@@ -2084,14 +2014,6 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["RadiusMultiplier"] = sas->RadiusMultiplier;
 			Settings["Range"] = sas->Range;
 			Settings["StrengthMultiplier"] = sas->StrengthMultiplier;
-		}
-		else if (!strcmp(Definition, "BloodLens")) {
-			Settings["LensChance"] = SettingsBlood.LensChance;
-			Settings["LensColorR"] = SettingsBlood.LensColorR;
-			Settings["LensColorG"] = SettingsBlood.LensColorG;
-			Settings["LensColorB"] = SettingsBlood.LensColorB;
-			Settings["LensIntensity"] = SettingsBlood.LensIntensity;
-			Settings["LensTime"] = SettingsBlood.LensTime;
 		}
 		else if (!strcmp(Definition, "Bloom")) {
 			SettingsBloomStruct* sbs = GetSettingsBloom(Section);
@@ -2215,14 +2137,6 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["ToneMappingBlur"] = SettingsHDR.ToneMappingBlur;
 			Settings["ToneMappingColor"] = SettingsHDR.ToneMappingColor;
 			Settings["Linearization"] = SettingsHDR.Linearization;
-		}
-		else if (!strcmp(Definition, "LowHF")) {
-			Settings["BlurMultiplier"] = SettingsLowHF.BlurMultiplier;
-			Settings["DarknessMultiplier"] = SettingsLowHF.DarknessMultiplier;
-			Settings["FatigueLimit"] = SettingsLowHF.FatigueLimit;
-			Settings["HealthLimit"] = SettingsLowHF.HealthLimit;
-			Settings["LumaMultiplier"] = SettingsLowHF.LumaMultiplier;
-			Settings["VignetteMultiplier"] = SettingsLowHF.VignetteMultiplier;
 		}
 		else if (!strcmp(Definition, "MotionBlur")) {
 			SettingsMotionBlurStruct* sms = GetSettingsMotionBlur(Section);
@@ -2582,16 +2496,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				else if (!strcmp(Setting, "Value"))
 					SettingsMain.Gravity.Value = Value;
 			}
-			else if (!strcmp(Section, "LowHFSound")) {
-				if (!strcmp(Setting, "FatigueEnabled"))
-					SettingsMain.LowHFSound.FatigueEnabled = Value;
-				else if (!strcmp(Setting, "HealthEnabled"))
-					SettingsMain.LowHFSound.HealthEnabled = Value;
-				else if (!strcmp(Setting, "FatigueCoeff"))
-					SettingsMain.LowHFSound.FatigueCoeff = Value;
-				else if (!strcmp(Setting, "HealthCoeff"))
-					SettingsMain.LowHFSound.HealthCoeff = Value;
-			}
 			else if (!strcmp(Section, "MountedCombat")) {
 				if (!strcmp(Setting, "TwoHandWeaponOnBackPosX"))
 					SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.x = Value;
@@ -2663,20 +2567,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				sas->Range = Value;
 			else if (!strcmp(Setting, "StrengthMultiplier"))
 				sas->StrengthMultiplier = Value;
-		}
-		else if (!strcmp(Definition, "BloodLens")) {
-			if (!strcmp(Setting, "LensChance"))
-				SettingsBlood.LensChance = Value;
-			else if (!strcmp(Setting, "LensColorR"))
-				SettingsBlood.LensColorR = Value;
-			else if (!strcmp(Setting, "LensColorG"))
-				SettingsBlood.LensColorG = Value;
-			else if (!strcmp(Setting, "LensColorB"))
-				SettingsBlood.LensColorB = Value;
-			else if (!strcmp(Setting, "LensIntensity"))
-				SettingsBlood.LensIntensity = Value;
-			else if (!strcmp(Setting, "LensTime"))
-				SettingsBlood.LensTime = Value;
 		}
 		else if (!strcmp(Definition, "Bloom")) {
 			SettingsBloomStruct* sbs = GetSettingsBloom(Section);
@@ -2895,20 +2785,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				SettingsHDR.ToneMappingColor = Value;
 			else if (!strcmp(Setting, "Linearization"))
 				SettingsHDR.Linearization = Value;
-		}
-		else if (!strcmp(Definition, "LowHF")) {
-			if (!strcmp(Setting, "BlurMultiplier"))
-				SettingsLowHF.BlurMultiplier = Value;
-			else if (!strcmp(Setting, "DarknessMultiplier"))
-				SettingsLowHF.DarknessMultiplier = Value;
-			else if (!strcmp(Setting, "FatigueLimit"))
-				SettingsLowHF.FatigueLimit = Value;
-			else if (!strcmp(Setting, "HealthLimit"))
-				SettingsLowHF.HealthLimit = Value;
-			else if (!strcmp(Setting, "LumaMultiplier"))
-				SettingsLowHF.LumaMultiplier = Value;
-			else if (!strcmp(Setting, "VignetteMultiplier"))
-				SettingsLowHF.VignetteMultiplier = Value;
 		}
 		else if (!strcmp(Definition, "MotionBlur")) {
 			SettingsMotionBlurStruct* sms = GetSettingsMotionBlur(Section);
@@ -3337,8 +3213,6 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name)
 		Value = SettingsMain.Effects.AmbientOcclusion;
 	else if (!strcmp(Name, "Blood"))
 		Value = SettingsMain.Shaders.Blood;
-	else if (!strcmp(Name, "BloodLens"))
-		Value = SettingsMain.Effects.BloodLens;
 	else if (!strcmp(Name, "Bloom"))
 		Value = SettingsMain.Effects.Bloom;
 	else if (!strcmp(Name, "Cinema"))
@@ -3355,8 +3229,6 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name)
 		Value = SettingsMain.Shaders.Grass;
 	else if (!strcmp(Name, "HDR"))
 		Value = SettingsMain.Shaders.HDR;
-	else if (!strcmp(Name, "LowHF"))
-		Value = SettingsMain.Effects.LowHF;
 	else if (!strcmp(Name, "MotionBlur"))
 		Value = SettingsMain.Effects.MotionBlur;
 	else if (!strcmp(Name, "POM"))

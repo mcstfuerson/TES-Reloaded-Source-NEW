@@ -4,7 +4,6 @@ TextureManager*		TheTextureManager = NULL;
 ShaderManager*		TheShaderManager = NULL;
 RenderManager*		TheRenderManager = NULL;
 FrameRateManager*	TheFrameRateManager = NULL;
-GameEventManager*	TheGameEventManager = NULL;
 GameMenuManager*	TheGameMenuManager = NULL;
 KeyboardManager*	TheKeyboardManager = NULL;
 ShadowManager*		TheShadowManager = NULL;
@@ -18,7 +17,6 @@ void InitializeManagers() {
 	new FrameRateManager();
 	new GameMenuManager();
 	new KeyboardManager();
-	new GameEventManager();
 	new ShadowManager();
 	new EquipmentManager();
 	new ScriptManager();
