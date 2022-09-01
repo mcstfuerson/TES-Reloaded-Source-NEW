@@ -183,8 +183,8 @@ struct ShaderConstants {
 	D3DXVECTOR4				ReciprocalResolutionWater;
 	D3DXVECTOR4				DirectionalLight; //currently only used for moon lighting
 	bool					OverrideVanillaDirectionalLight;
-	bool					DisablePostShadow;
 	DayPhase				DayPhase;
+	D3DXVECTOR4				ReflectionLightDir;
 	D3DXVECTOR4				SunDir;
 	D3DXVECTOR4				SunTiming;
 	D3DXVECTOR4				SunAmount;
@@ -329,6 +329,7 @@ public:
 	void					DisposeShader(const char* Name);
 	void					CreateEffect(EffectRecordType EffectType);
 	bool					LoadEffect(EffectRecord* TheEffect, char* Filename, char* CustomEffectName);
+	void					LoadEffectSettings();
 	void					DisposeEffect(EffectRecord* TheEffect);
 	void					RenderEffects(IDirect3DSurface9* RenderTarget);
 	void					SwitchShaderStatus(const char* Name);
@@ -353,6 +354,13 @@ public:
 	bool					RenderedBufferFilled;
 	bool					DepthBufferFilled;
 	bool					isFullyInitialized;
+	bool					UseIntervalUpdate;
+	TESObjectCELL*			previousCell;
+	SettingsWaterStruct*	sws;
+	SettingsAmbientOcclusionStruct* sas;
+	SettingsBloomStruct* sbs;
+	SettingsColoringStruct* scs;
+	ShaderConstants::SimpleLightingStruct	InteriorLighting;
 	IDirect3DVertexBuffer9*	EffectVertex;
 	EffectRecord*			UnderwaterEffect;
 	EffectRecord*			WaterLensEffect;
