@@ -45,13 +45,14 @@ extern "C" {
 			CreateFormLoadHook();
 			CreateSettingsHook();
 			CreateScriptHook();
-			CreateAnimationHook();
 			CreateShadowsHook();
 			CreateWeatherModeHook();
 			if (TheSettingManager->SettingsMain.Main.MemoryManagement) CreateMemoryManagementHook();
 			if (TheSettingManager->SettingsMain.GrassMode.Enabled) CreateGrassHook();
 			if (TheSettingManager->SettingsMain.CameraMode.Enabled) CreateCameraModeHook();
+
 			if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) {
+				CreateAnimationHook();
 				CreateEquipmentHook();
 				if (TheSettingManager->SettingsMain.MountedCombat.Enabled) CreateMountedCombatHook();
 			}
