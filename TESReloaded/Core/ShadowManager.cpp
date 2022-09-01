@@ -1,7 +1,8 @@
 #include <algorithm>
 #include <cmath>
 #include <list>
-#include <string>  
+#include <string>
+#include <thread>
 #if defined(NEWVEGAS)
 #define RenderStateArgs 0, 0
 #define kRockParams 0x01200658
@@ -100,12 +101,6 @@ ShadowManager::ShadowManager() {
 	ShadowCubeMapViewPort = { 0, 0, ShadowCubeMapSize, ShadowCubeMapSize, 0.0f, 1.0f };
 
 	ShadowCubeMapLights[12] = { NULL };
-	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
-	D3DXVECTOR4* ShadowCubeMapBlend2 = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend2;
-	D3DXVECTOR4* ShadowCubeMapBlend3 = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend3;
-	ShadowCubeMapBlend->x =  1.0f; ShadowCubeMapBlend->y = 1.0f; ShadowCubeMapBlend->z = 1.0f; ShadowCubeMapBlend->w = 1.0f;
-	ShadowCubeMapBlend2->x = 1.0f; ShadowCubeMapBlend2->y = 1.0f; ShadowCubeMapBlend2->z = 1.0f; ShadowCubeMapBlend2->w = 1.0f;
-	ShadowCubeMapBlend3->x = 1.0f; ShadowCubeMapBlend3->y = 1.0f; ShadowCubeMapBlend3->z = 1.0f; ShadowCubeMapBlend3->w = 1.0f;
 
 	ResetIntervals();
 
@@ -534,7 +529,9 @@ void ShadowManager::RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex
 							}
 
 							if (Ref->GetNode()->GetDistance(LightPos) - Ref->GetNode()->GetWorldBoundRadius() <= radius) {
-								refMap[L].emplace_back(Ref->GetNode());
+									if (!((TypeID >= TESForm::FormType::kFormType_NPC && TypeID <= TESForm::FormType::kFormType_LeveledCreature) && Player->GetNode()->GetDistance(&Ref->GetNode()->m_worldTransform.pos) > 3000.0f)) {
+										refMap[L].emplace_back(Ref->GetNode());
+									}
 							}
 						}
 					}
@@ -583,7 +580,6 @@ void ShadowManager::RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex
 
 void ShadowManager::RenderShadowCubeMapFakeInt(int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowSettings, D3DXVECTOR4* ShadowData) {
 	D3DXVECTOR3 At, Eye;
-	D3DXVECTOR4* ShadowCubeMapBlend = &TheShaderManager->ShaderConst.ShadowMap.ShadowCubeMapBlend;
 	D3DXVECTOR4* ShadowLightDir = &TheShaderManager->ShaderConst.ShadowMap.ShadowLightDir;
 
 	if (!FakeExtShadowLightDirSet) {
@@ -601,7 +597,6 @@ void ShadowManager::RenderShadowCubeMapFakeInt(int LightIndex, SettingsShadowStr
 	TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[LightIndex].y = Eye.y;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[LightIndex].z = Eye.z;
 	TheShaderManager->ShaderConst.ShadowMap.ShadowCastLightPosition[LightIndex].w = 15000;
-	ShadowCubeMapBlend->x = 0.6f;
 
 	std::map<int, std::vector<NiNode*>> refMap;
 	TList<TESObjectREFR>::Entry* Entry = &Player->parentCell->objectList.First;
@@ -860,13 +855,13 @@ void ShadowManager::RenderInteriorShadows() {
 				ClearShadowCubeMaps(Device, ShadowCastLightIndex, ShadowCubeMapStateEnum::Interior);
 				GeneralPointLightIndex = -1; //not needed for interiors
 			}
-
-			CalculateBlend(ShadowCastLights, ShadowCastLightIndex);
+			ShadowData->y = ShadowSettings->Darkness;
 		}
 		else {
 			ShadowCastLightIndex = 0;
 			RenderShadowCubeMapFakeInt(ShadowCastLightIndex, ShadowSettings, ShadowData);
 			ClearShadowCubeMaps(Device, ShadowCastLightIndex, ShadowCubeMapStateEnum::Interior);
+			ShadowData->y = 2.0f;
 		}
 	}
 	else {
@@ -896,7 +891,6 @@ void ShadowManager::RenderInteriorShadows() {
 	GeneralPointLightCount = GeneralPointLightIndex;
 
 	//ShadowData->x = ShadowSettings->Quality;
-	ShadowData->y = ShadowSettings->Darkness;
 	ShadowData->z = 1.0f / (float)ShadowSettings->ShadowCubeMapSize;
 }
 
@@ -966,7 +960,7 @@ void ShadowManager::ClearShadowCubeLightCullRegister(int From) {
 
 void ShadowManager::ClearGeneralPointLightRegister(int From) {
 
-	int del = (24 - (From + 1)) * 2;
+	int del = (2 - (From + 1)) * 16;
 	memset(TheShaderManager->ShaderConst.PointLights.LightPosition + ((From + 1)), 0, del);
 }
 
@@ -978,13 +972,6 @@ void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From) {
 			Device->SetRenderTarget(0, ShadowCubeMapSurface[L][Face]);
 			Device->Clear(0L, NULL, D3DCLEAR_TARGET, D3DXCOLOR(1.0f, 0.25f, 0.25f, 0.55f), 1.0f, 0L);
 		}
-	}
-}
-
-//TODO: "Blend" code has been removed, keeping code structure until it's removed from shaders
-void ShadowManager::CalculateBlend(NiPointLight** Lights, int LightIndex) {
-	if (memcmp(Lights, ShadowCubeMapLights, 48)) {
-		memcpy(ShadowCubeMapLights, Lights, 48);
 	}
 }
 
