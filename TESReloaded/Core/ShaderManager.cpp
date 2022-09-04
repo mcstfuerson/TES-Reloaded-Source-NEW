@@ -974,7 +974,10 @@ void ShaderManager::UpdateConstants() {
 							ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.MasserDir;
 							ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(ShaderConst.MasserAmount.x, ShaderConst.Shadow.Data.y, 1.0f);
 						}
-						else {							
+						else {
+							//Override the interval update here only to update the shadow map immediately, sometimes the refresh period transitions too late, showing the shadow map rotation
+							TheSettingManager->SettingsShadows.Exteriors.UseIntervalUpdate = false;
+
 							if (!ShaderConst.MorningTransLightDirSet && ShaderConst.MasserAmount.x > -0.1f) {
 								ShaderConst.MorningTransLightDir = D3DXVECTOR4(Tes->niDirectionalLight->m_direction.x, Tes->niDirectionalLight->m_direction.y, Tes->niDirectionalLight->m_direction.z, 1);							
 								if (fabs(ShaderConst.MorningTransLightDir.x) > 1.0f) {
