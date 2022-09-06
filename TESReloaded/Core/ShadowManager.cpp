@@ -800,12 +800,6 @@ void ShadowManager::RenderExteriorShadows() {
 	ShadowData->w = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapFar];
 	OrthoData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapOrtho];
 	ShadowSkinData->z = 1.0f / (float)ShadowsExteriors->ShadowMapSize[MapSkin];
-	if (MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) {
-		ShadowSkinData->x = 1.0f;
-	}
-	else {
-		ShadowSkinData->x = 0.0f;
-	}
 }
 
 //TODO: rename, doesn't apply solely to interiors

@@ -30,6 +30,7 @@
 #define ShallowColorA shallowColorA
 #define TerrainShaders "SLS2001.vso SLS2001.pso SLS2064.vso SLS2068.pso SLS2042.vso SLS2048.pso SLS2043.vso SLS2049.pso"
 #define InteriorShadowShaders "SLS2022.pso SLS2021.pso SLS2016.vso SLS2015.vso SLS2015.pso SLS2012.vso SLS2011.vso SLS2010.pso SLS2008.vso SLS2007.vso SLS2002.vso SLS2002.pso SLS2000.vso SLS2000.pso SLS1006.vso SLS1005.vso SLS1004.pso SLS1S006.vso SLS1S005.vso SLS1003.pso SLS2009.pso SM3002.vso SM3001.vso SM3001.pso SM3000.vso SM3LL001.pso SM3LL000.pso"
+#define ExteriorDialogShaders "SLS2003.pso SLS2018.pso SLS2039.pso SKIN2001.pso SKIN2003.pso SKIN2007.pso"
 #define BloodShaders "GDECALS.vso GDECAL.pso SLS2040.vso SLS2046.pso"
 #elif defined(SKYRIM)
 #define sunGlare general.sunGlare
@@ -333,7 +334,7 @@ ShaderRecord::~ShaderRecord() {
 
 }
 
-bool ShaderRecord::LoadShader(const char* Name) {
+bool ShaderRecord::LoadShader(const char* Name, const char* DirPostFix) {
   
 	char FileName[MAX_PATH];
 	char FileNameBinary[MAX_PATH];
@@ -341,42 +342,45 @@ bool ShaderRecord::LoadShader(const char* Name) {
 	strcpy(FileName, ShadersPath);
 	if (!memcmp(Name, "WATER", 5)) {
 		if (!TheSettingManager->SettingsMain.Shaders.Water) return false;
-		strcat(FileName, "Water\\");
+		strcat(FileName, "Water");
 	}
 	else if (!memcmp(Name, "GRASS", 5)) {
 		if (!TheSettingManager->SettingsMain.Shaders.Grass) return false;
-		strcat(FileName, "Grass\\");
+		strcat(FileName, "Grass");
 	}
 	else if (!memcmp(Name, "HDR", 3)) {
 		if (!TheSettingManager->SettingsMain.Shaders.HDR) return false;
-		strcat(FileName, "HDR\\");
+		strcat(FileName, "HDR");
 	}
 	else if (!memcmp(Name, "PAR", 3)) {
 		if (!TheSettingManager->SettingsMain.Shaders.POM) return false;
-		strcat(FileName, "POM\\");
+		strcat(FileName, "POM");
 	}
 	else if (!memcmp(Name, "SKIN", 4)) {
 		if (!TheSettingManager->SettingsMain.Shaders.Skin) return false;
-		strcat(FileName, "Skin\\");
+		strcat(FileName, "Skin");
 	}
 	else if (strstr(TerrainShaders, Name)) {
 		if (!TheSettingManager->SettingsMain.Shaders.Terrain) return false;
-		strcat(FileName, "Terrain\\");
+		strcat(FileName, "Terrain");
 	}
 	else if (strstr(BloodShaders, Name)) {
 		if (!TheSettingManager->SettingsMain.Shaders.Blood) return false;
-		strcat(FileName, "Blood\\");
+		strcat(FileName, "Blood");
 	}
 	else if (!memcmp(Name, "NIGHTEYE", 8)) {
 		if (!TheSettingManager->SettingsMain.Shaders.NightEye) return false;
-		strcat(FileName, "NightEye\\");
+		strcat(FileName, "NightEye");
 	}
 	else if (!memcmp(Name, "Shadow", 6)) {
-		strcat(FileName, "Shadows\\");
+		strcat(FileName, "Shadows");
 	}	
 	else {
-		strcat(FileName, "ExtraShaders\\");
+		strcat(FileName, "ExtraShaders");
 	}
+
+	strcat(FileName, DirPostFix);
+	strcat(FileName, "\\");
 	strcat(FileName, Name);
 	strcpy(FileNameBinary, FileName);
 	strcat(FileName, ".hlsl");
@@ -389,7 +393,7 @@ bool ShaderRecord::LoadShader(const char* Name) {
 		FileSource.seekg(0, std::ios::beg);
 		FileSource.read(Source, size);
 		std::string s = Source;
-		useFlowControl = s.find("Includes/Shadow") != std::string::npos;
+		useFlowControl = s.find("Includes/ShadowCube") != std::string::npos;
 		FileSource.close();
 		if (strstr(Name, ".vso"))
 			Type = ShaderType_Vertex;
@@ -771,12 +775,27 @@ void ShaderManager::InitializeConstants() {
 	InitFrameTarget = 10;
 }
 
-void ShaderManager::UpdateLocationState() {
+void ShaderManager::UpdateShaderStates() {
+
 	if (Player->GetWorldSpace()) {
 		if (LocationState != CellLocation::Exterior) {
 			LocationState = CellLocation::Exterior;
 			DisposeShader("InteriorShadows");
 		}
+
+		if (MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) {
+			if (!DialogState) {
+				DialogState = true;
+				DisposeShader("ExteriorDialog");
+				CreateShader("ExteriorDialogActive");
+			}
+		}
+		else if (DialogState) {
+			DialogState = false;
+			DisposeShader("ExteriorDialog");
+			CreateShader("ExteriorDialogInactive");
+		}
+
 	}
 	else {
 		if (LocationState != CellLocation::Interior) {
@@ -784,6 +803,7 @@ void ShaderManager::UpdateLocationState() {
 			CreateShader("InteriorShadows");
 		}
 	}
+
 }
 
 void ShaderManager::UpdateConstants() {
@@ -1798,6 +1818,32 @@ void ShaderManager::CreateShader(const char* Name) {
 			}
 		}
 	}
+	else if (!strcmp(Name, "ExteriorDialogActive")) {
+		for (int i = 0; i < 130; i++) {
+			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
+			if (PS && strstr(ExteriorDialogShaders, PS->ShaderName)) {
+				LoadShader(PS,"Dialog");
+			}
+		}
+
+		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
+		for each (NiD3DPixelShader * PS in SS->Pixel) {
+			LoadShader(PS, "Dialog");
+		}
+	}
+	else if (!strcmp(Name, "ExteriorDialogInactive")) {
+		for (int i = 0; i < 130; i++) {
+			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
+			if (PS && strstr(ExteriorDialogShaders, PS->ShaderName)) {
+				LoadShader(PS);
+			}
+		}
+
+		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
+		for each (NiD3DPixelShader * PS in SS->Pixel) {
+			LoadShader(PS);
+		}
+	}
 #elif defined(SKYRIM)
 	if (!strcmp(Name, "Water")) {
 		for each (NiD3DVertexShader* VS in WaterVertexShaders) LoadShader(VS);
@@ -1807,12 +1853,12 @@ void ShaderManager::CreateShader(const char* Name) {
 
 }
 
-void ShaderManager::LoadShader(NiD3DVertexShader* Shader) {
+void ShaderManager::LoadShader(NiD3DVertexShader* Shader, const char* DirPostFix) {
 	
 	ShaderRecord* ShaderProg = new ShaderRecord();
 	NiD3DVertexShaderEx* VertexShader = (NiD3DVertexShaderEx*)Shader;
 
-	if (ShaderProg->LoadShader(VertexShader->ShaderName)) {
+	if (ShaderProg->LoadShader(VertexShader->ShaderName, DirPostFix)) {
 		VertexShader->ShaderProg = ShaderProg;
 		VertexShader->ShaderHandleBackup = VertexShader->ShaderHandle;
 		TheRenderManager->device->CreateVertexShader((const DWORD*)ShaderProg->Function, &VertexShader->ShaderHandle);
@@ -1823,12 +1869,12 @@ void ShaderManager::LoadShader(NiD3DVertexShader* Shader) {
 
 }
 
-void ShaderManager::LoadShader(NiD3DPixelShader* Shader) {
+void ShaderManager::LoadShader(NiD3DPixelShader* Shader, const char* DirPostFix) {
 
 	ShaderRecord* ShaderProg = new ShaderRecord();
 	NiD3DPixelShaderEx* PixelShader = (NiD3DPixelShaderEx*)Shader;
 
-	if (ShaderProg->LoadShader(PixelShader->ShaderName)) {
+	if (ShaderProg->LoadShader(PixelShader->ShaderName, DirPostFix)) {
 		PixelShader->ShaderProg = ShaderProg;
 		PixelShader->ShaderHandleBackup = PixelShader->ShaderHandle;
 		TheRenderManager->device->CreatePixelShader((const DWORD*)ShaderProg->Function, &PixelShader->ShaderHandle);
@@ -2015,6 +2061,23 @@ void ShaderManager::DisposeShader(const char* Name) {
 		for (int i = 0; i < 130; i++) {
 			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
 			if (PS && PS->ShaderProg && strstr(InteriorShadowShaders, PS->ShaderName)) {
+				PS->ShaderHandle = PS->ShaderHandleBackup;
+				delete PS->ShaderProg; PS->ShaderProg = NULL;
+			}
+		}
+	}
+	else if (!strcmp(Name, "ExteriorDialog")) {
+		for (int i = 0; i < 130; i++) {
+			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
+			if (PS && PS->ShaderProg && strstr(ExteriorDialogShaders, PS->ShaderName)) {
+				PS->ShaderHandle = PS->ShaderHandleBackup;
+				delete PS->ShaderProg; PS->ShaderProg = NULL;
+			}
+		}
+
+		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
+		for each (NiD3DPixelShaderEx * PS in SS->Pixel) {
+			if (PS->ShaderProg) {
 				PS->ShaderHandle = PS->ShaderHandleBackup;
 				delete PS->ShaderProg; PS->ShaderProg = NULL;
 			}

@@ -281,7 +281,7 @@ public:
 	void					CreateCT();
 	void					SetCT();
 	void					SetCustomCT();
-	bool					LoadShader(const char* Name);
+	bool					LoadShader(const char* Name, const char* DirPostFix = "");
 	
 	ShaderType				Type;
 	bool					Enabled;
@@ -321,11 +321,11 @@ public:
 	void					CreateEffects();
 	void					InitializeConstants();
 	void					UpdateConstants();
-	void					UpdateLocationState();
+	void					UpdateShaderStates();
 	void					BeginScene();
 	void					CreateShader(const char *Name);
-	void					LoadShader(NiD3DVertexShader* Shader);
-	void					LoadShader(NiD3DPixelShader* Shader);
+	void					LoadShader(NiD3DVertexShader* Shader, const char* DirPostFix = "");
+	void					LoadShader(NiD3DPixelShader* Shader, const char* DirPostFix = "");
 	void					DisposeShader(const char* Name);
 	void					CreateEffect(EffectRecordType EffectType);
 	bool					LoadEffect(EffectRecord* TheEffect, char* Filename, char* CustomEffectName);
@@ -345,6 +345,7 @@ public:
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
 	CellLocation			LocationState;
+	bool					DialogState;
 	IDirect3DTexture9*		SourceTexture;
 	IDirect3DSurface9*		SourceSurface;
 	IDirect3DTexture9* 		RenderedTexture;
