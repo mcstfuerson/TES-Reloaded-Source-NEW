@@ -20,8 +20,8 @@ extern "C" {
 	bool OBSEPlugin_Query(const PluginInterface* Interface, PluginInfo* Info) {
 		
 		Info->InfoVersion = PluginInfo::kInfoVersion;
-		Info->Name = "OblivionReloaded";
-		Info->Version = 8;
+		Info->Name = "OblivionReloaded E3";
+		Info->Version = 301;
 		return true;
 
 	}
@@ -47,12 +47,12 @@ extern "C" {
 			CreateScriptHook();
 			CreateShadowsHook();
 			CreateWeatherModeHook();
+			CreateAnimationHook();
 			if (TheSettingManager->SettingsMain.Main.MemoryManagement) CreateMemoryManagementHook();
 			if (TheSettingManager->SettingsMain.GrassMode.Enabled) CreateGrassHook();
 			if (TheSettingManager->SettingsMain.CameraMode.Enabled) CreateCameraModeHook();
 
 			if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) {
-				CreateAnimationHook();
 				CreateEquipmentHook();
 				if (TheSettingManager->SettingsMain.MountedCombat.Enabled) CreateMountedCombatHook();
 			}
