@@ -376,9 +376,9 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 		}
 		Device->SetIndices(GeoData->IB);
 		if (GeoData->FVF)
-			Device->SetFVF(GeoData->FVF);
+			RenderState->SetFVF(GeoData->FVF, false);
 		else
-			Device->SetVertexDeclaration(GeoData->VertexDeclaration);
+			RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
 		CurrentVertex->SetCT();
 		CurrentPixel->SetCT();
 		for (UInt32 i = 0; i < GeoData->NumArrays; i++) {
@@ -412,9 +412,9 @@ void ShadowManager::Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData) {
 			}
 			Device->SetIndices(GeoData->IB);
 			if (GeoData->FVF)
-				Device->SetFVF(GeoData->FVF);
+				RenderState->SetFVF(GeoData->FVF, false);
 			else
-				Device->SetVertexDeclaration(GeoData->VertexDeclaration);
+				RenderState->SetVertexDeclaration(GeoData->VertexDeclaration, false);
 			CurrentVertex->SetCT();
 			CurrentPixel->SetCT();
 			for (UInt32 i = 0; i < GeoData->NumArrays; i++) {
