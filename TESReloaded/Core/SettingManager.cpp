@@ -847,7 +847,7 @@ void SettingManager::LoadSettings() {
 	GetPrivateProfileSectionNamesA(Sections, 32767, Filename);
 	pNextSection = Sections;
 	while (*pNextSection != NULL) {
-		SSPL.bEnabled = GetPrivateProfileIntA(pNextSection, "Enabled", 1, Filename);
+		SSPL.bEnabled = GetPrivateProfileIntA(pNextSection, "bEnabled", 1, Filename);
 		SSPL.iShadowLightPoints = GetPrivateProfileIntA(pNextSection, "iShadowLightPoints", 12, Filename);
 		SSPL.iShadowCullLightPoints = GetPrivateProfileIntA(pNextSection, "iShadowCullLightPoints", 18, Filename);
 		GetPrivateProfileStringA(pNextSection, "fShadowObjectScanRadius", "1.2", value, SettingStringBuffer, Filename);
@@ -865,6 +865,7 @@ void SettingManager::LoadSettings() {
 		pNextSection = pNextSection + strlen(pNextSection) + 1;
 	}
 
+	SSPL.bEnabled = GetPrivateProfileIntA(CreateProfileString, "bEnabled", 1, Filename);
 	SSPL.iShadowLightPoints = GetPrivateProfileIntA(CreateProfileString, "iShadowLightPoints", 0, Filename);
 	SSPL.iShadowCullLightPoints = GetPrivateProfileIntA(CreateProfileString, "iShadowCullLightPoints", 0, Filename);
 	GetPrivateProfileStringA(CreateProfileString, "fShadowObjectScanRadius", "0.0", value, SettingStringBuffer, Filename);
@@ -1344,6 +1345,7 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 						WritePrivateProfileStringA(v->first.c_str(), "fShadowCullLightRadiusMin", ToString(v->second.fShadowCullLightRadiusMin).c_str(), Filename);
 						WritePrivateProfileStringA(v->first.c_str(), "fShadowCullLightRadiusMax", ToString(v->second.fShadowCullLightRadiusMax).c_str(), Filename);
 						WritePrivateProfileStringA(v->first.c_str(), "fShadowObjectScanRadius", ToString(v->second.fShadowObjectScanRadius).c_str(), Filename);
+						WritePrivateProfileStringA(v->first.c_str(), "bEnabled", ToString(v->second.bEnabled).c_str(), Filename);
 					}
 					v++;
 				}
