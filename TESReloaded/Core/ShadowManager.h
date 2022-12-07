@@ -9,6 +9,7 @@ public:
 		MapNear		= 0,
 		MapFar		= 1,
 		MapOrtho	= 2,
+		MapSkin     = 3,
 	};
 	enum ShadowCubeMapStateEnum {
 		None		   = 0,
@@ -30,13 +31,13 @@ public:
 	bool					InFrustum(ShadowMapTypeEnum ShadowMapType, NiAVObject* Object);
 	TESObjectREFR*			GetRef(TESObjectREFR* Ref, SettingsShadowStruct::FormsStruct* Forms, SettingsShadowStruct::ExcludedFormsList* ExcludedForms);
 	TESObjectREFR*			GetRefO(TESObjectREFR* Ref);
-	void					RenderObject(NiAVObject* Node, D3DXVECTOR4* ShadowData, bool HasWater);
+	void					RenderObject(NiAVObject* Node, D3DXVECTOR4* ShadowData, bool HasWater, float MinRadius);
 	void					RenderObjectPoint(NiAVObject* Node, D3DXVECTOR4* ShadowData, bool HasWater);
 	void					RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType, D3DXVECTOR4* ShadowData);
 	void					Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData);
 	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir, D3DXVECTOR4* ShadowData);
-	void					RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsExteriors, D3DXVECTOR4* ShadowData);
-	void					RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors, D3DXVECTOR4* ShadowData);
+	void					RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex, float radiusLimit, SettingsShadowStruct::InteriorsStruct* ShadowsExteriors, D3DXVECTOR4* ShadowData);
+	void					RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex, float radiusLimit, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors, D3DXVECTOR4* ShadowData);
 	void                    RenderShadowCubeMapFakeInt(int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors, D3DXVECTOR4* ShadowData);
 	void                    RenderShadowCubeMap(int LightIndex, std::map<int, std::vector<NiNode*>>& refMap, D3DXVECTOR4* ShadowData, bool enabled);
 	void					RenderExteriorShadows();
@@ -45,26 +46,33 @@ public:
 	void					ClearShadowMap(IDirect3DDevice9* Device);
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int From, ShadowCubeMapStateEnum NewState);
 	void					ClearShadowCubeMaps(IDirect3DDevice9* Device, int LightIndex);
+	void					ClearShadowCubeLightRegister(int From);
+	void					ClearShadowCubeLightCullRegister(int From);
+	void					ClearGeneralPointLightRegister(int From);
 	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
 	void                    AddSceneLight(NiPointLight* Light, int Key, std::map<int, NiPointLight*>& SceneLights);
-	int                     GetExtSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex);
-	int                     GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** Lights, int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowSettings);
-	void                    SetAllShadowMapLightPos(NiPointLight** Lights, int LightIndex);
-	void                    SetShadowMapLightPos(NiPointLight** Lights, int index);
+	int                     GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** ShadowCastLights, NiPointLight** ShadowCullLights, NiPointLight** GeneralPointLights, int& ShadowCastLightIndex, int& ShadowCullLightIndex, int& GeneralPointLightIndex, SettingsShadowPointLightsStruct* ShadowSettings);
+	void                    SetAllShadowCastLightPos(NiPointLight** Lights, int LightIndex);
+	void                    SetShadowCastLightPos(NiPointLight** Lights, int index);
+	void                    SetAllShadowCullLightPos(NiPointLight** Lights, int LightIndex);
+	void                    SetShadowCullLightPos(NiPointLight** Lights, int index);
+	void					SetAllGeneralLightPos(NiPointLight** Lights, int LightIndex);
+	void					SetGeneralLightPos(NiPointLight** Lights, int index);
 	void                    SetShadowCubeMapRegisters(int index);
 	void					ResetIntervals();
+	void					LoadShadowLightPointSettings();
 
 
 
-	IDirect3DTexture9*		ShadowMapTexture[3];
-	IDirect3DSurface9*		ShadowMapSurface[3];
-	IDirect3DSurface9*		ShadowMapDepthSurface[3];
+	IDirect3DTexture9*		ShadowMapTexture[4];
+	IDirect3DSurface9*		ShadowMapSurface[4];
+	IDirect3DSurface9*		ShadowMapDepthSurface[4];
 	ShaderRecord*			ShadowMapVertex;
 	ShaderRecord*			ShadowMapPixel;
 	IDirect3DVertexShader9* ShadowMapVertexShader;
 	IDirect3DPixelShader9*  ShadowMapPixelShader;
-	D3DVIEWPORT9			ShadowMapViewPort[3];
-	D3DXPLANE				ShadowMapFrustum[3][6];
+	D3DVIEWPORT9			ShadowMapViewPort[4];
+	D3DXPLANE				ShadowMapFrustum[4][6];
 	NiVector4				BillboardRight;
 	NiVector4				BillboardUp;
 	IDirect3DCubeTexture9*	ShadowCubeMapTexture[12];
@@ -82,6 +90,7 @@ public:
 	ShadowCubeMapStateEnum	ShadowCubeMapState;
 	bool					AlphaEnabled;
 	bool					FakeExtShadowLightDirSet;
+	int						FakeExtShadowLightDirCnt;
 	D3DXVECTOR4				FakeExtShadowLightDir;
 	D3DXVECTOR4				ShadowLightDirOld;
 	D3DXVECTOR4				ShadowLightDirNew;
@@ -89,8 +98,10 @@ public:
 	float					UpdateTargetTime;
 	D3DXVECTOR3				LookAtPosition;
 	int                     ShadowCubeLightCount;
-	int						GameHour;
+	int						ShadowCubeCullLightCount;
+	int						GeneralPointLightCount;
 	float					GameTime;
+	SettingsShadowPointLightsStruct* ShadowLightPointSettings;
 };
 
 void CreateShadowsHook();

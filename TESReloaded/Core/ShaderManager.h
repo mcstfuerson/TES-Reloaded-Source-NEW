@@ -15,16 +15,15 @@ enum EffectRecordType
 	EffectRecordType_Cinema,
 	EffectRecordType_Bloom,
 	EffectRecordType_SnowAccumulation,
-	EffectRecordType_BloodLens,
 	EffectRecordType_SMAA,
 	EffectRecordType_MotionBlur,
-	EffectRecordType_LowHF,
 	EffectRecordType_WetWorld,
 	EffectRecordType_Sharpening,
 	EffectRecordType_VolumetricFog,
 	EffectRecordType_Precipitations,
 	EffectRecordType_ShadowsExteriors,
 	EffectRecordType_ShadowsExteriorsPoint,
+	EffectRecordType_ShadowsExteriorsPointDialog,
 	EffectRecordType_ShadowsInteriors,
 	EffectRecordType_Extra,
 };
@@ -45,14 +44,22 @@ enum DayPhase
 	Night
 };
 
+enum CellLocation
+{
+	Interior,
+	Exterior,
+	Fake_Exterior
+};
+
 struct ShaderConstants {
 	
 	struct ShadowMapStruct {
 		D3DXMATRIX	    ShadowWorld;
 		D3DXMATRIX		ShadowViewProj;
-		D3DXMATRIX		ShadowCameraToLight[3];
+		D3DXMATRIX		ShadowCameraToLight[4];
 		D3DXVECTOR4		ShadowCubeMapLightPosition;
-		D3DXVECTOR4		ShadowLightPosition[12];
+		D3DXVECTOR4		ShadowCastLightPosition[12];
+		D3DXVECTOR4		ShadowCullLightPosition[24];
 		D3DXVECTOR4		ShadowCubeMapFarPlanes;
 		D3DXVECTOR4		ShadowCubeMapBlend;
 		D3DXVECTOR4		ShadowCubeMapBlend2;
@@ -61,6 +68,12 @@ struct ShaderConstants {
 		D3DXVECTOR4		ShadowBiasForward;
 		D3DXVECTOR4		ShadowBiasDeferred;
 	};
+
+	struct PointLightStruct {
+		D3DXVECTOR4		LightPosition[2];
+		D3DXVECTOR4		LightColor[2];
+	};
+
 	struct WaterStruct {
 		D3DXVECTOR4		waterCoefficients;
 		D3DXVECTOR4		waveParams;
@@ -88,6 +101,7 @@ struct ShaderConstants {
 	};
 	struct ShadowStruct {
 		D3DXVECTOR4		Data;
+		D3DXVECTOR4		ShadowSkinData;
 		D3DXVECTOR4		OrthoData;
 	};
 	struct PrecipitationsStruct {
@@ -130,12 +144,6 @@ struct ShaderConstants {
 	struct SnowAccumulationStruct {
 		D3DXVECTOR4		Params;
 	};
-	struct BloodLensStruct {
-		D3DXVECTOR4		Params;
-		D3DXVECTOR4		BloodColor;
-		D3DXVECTOR4		Time;
-		float			Percent;
-	};
 	struct MotionBlurStruct {
 		D3DXVECTOR4		BlurParams;
 		D3DXVECTOR4		Data;
@@ -145,11 +153,6 @@ struct ShaderConstants {
 		float			oldAmountY;
 		float			oldoldAmountX;
 		float			oldoldAmountY;
-	};
-	struct LowHFStruct {
-		D3DXVECTOR4		Data;
-		float			HealthCoeff;
-		float			FatigueCoeff;
 	};
 	struct WetWorldStruct {
 		D3DXVECTOR4		Coeffs;
@@ -180,8 +183,8 @@ struct ShaderConstants {
 	D3DXVECTOR4				ReciprocalResolutionWater;
 	D3DXVECTOR4				DirectionalLight; //currently only used for moon lighting
 	bool					OverrideVanillaDirectionalLight;
-	bool					DisablePostShadow;
 	DayPhase				DayPhase;
+	D3DXVECTOR4				ReflectionLightDir;
 	D3DXVECTOR4				SunDir;
 	D3DXVECTOR4				SunTiming;
 	D3DXVECTOR4				SunAmount;
@@ -218,6 +221,7 @@ struct ShaderConstants {
 	float					oldfogEnd;
 	bool					HasWater;
 	ShadowMapStruct			ShadowMap;
+	PointLightStruct		PointLights;
 	WaterStruct				Water;
 	HDRStruct				HDR;
 	GrassStruct				Grass;
@@ -237,9 +241,7 @@ struct ShaderConstants {
 	CinemaStruct			Cinema;
 	BloomStruct				Bloom;
 	SnowAccumulationStruct	SnowAccumulation;
-	BloodLensStruct			BloodLens;
 	MotionBlurStruct		MotionBlur;
-	LowHFStruct				LowHF;
 	WetWorldStruct			WetWorld;
 	SharpeningStruct		Sharpening;
 	VolumetricFogStruct		VolumetricFog;
@@ -279,7 +281,7 @@ public:
 	void					CreateCT();
 	void					SetCT();
 	void					SetCustomCT();
-	bool					LoadShader(const char* Name);
+	bool					LoadShader(const char* Name, const char* DirPostFix = "");
 	
 	ShaderType				Type;
 	bool					Enabled;
@@ -319,16 +321,17 @@ public:
 	void					CreateEffects();
 	void					InitializeConstants();
 	void					UpdateConstants();
+	void					UpdateShaderStates();
 	void					BeginScene();
 	void					CreateShader(const char *Name);
-	void					LoadShader(NiD3DVertexShader* Shader);
-	void					LoadShader(NiD3DPixelShader* Shader);
+	void					LoadShader(NiD3DVertexShader* Shader, const char* DirPostFix = "");
+	void					LoadShader(NiD3DPixelShader* Shader, const char* DirPostFix = "");
 	void					DisposeShader(const char* Name);
 	void					CreateEffect(EffectRecordType EffectType);
 	bool					LoadEffect(EffectRecord* TheEffect, char* Filename, char* CustomEffectName);
+	void					LoadEffectSettings();
 	void					DisposeEffect(EffectRecord* TheEffect);
 	void					RenderEffects(IDirect3DSurface9* RenderTarget);
-	void					RenderShadows(IDirect3DSurface9* RenderTarget);
 	void					SwitchShaderStatus(const char* Name);
 	void					SetCustomConstant(const char* Name, D3DXVECTOR4 Value);
 	void					SetExtraEffectEnabled(const char* Name, bool Value);
@@ -341,6 +344,8 @@ public:
 	struct					EffectQuad { float x, y, z; float u, v; };
 	ShaderConstants			ShaderConst;
 	CustomConstants			CustomConst;
+	CellLocation			LocationState;
+	bool					DialogState;
 	IDirect3DTexture9*		SourceTexture;
 	IDirect3DSurface9*		SourceSurface;
 	IDirect3DTexture9* 		RenderedTexture;
@@ -350,6 +355,13 @@ public:
 	bool					RenderedBufferFilled;
 	bool					DepthBufferFilled;
 	bool					isFullyInitialized;
+	bool					UseIntervalUpdate;
+	TESObjectCELL*			previousCell;
+	SettingsWaterStruct*	sws;
+	SettingsAmbientOcclusionStruct* sas;
+	SettingsBloomStruct* sbs;
+	SettingsColoringStruct* scs;
+	ShaderConstants::SimpleLightingStruct	InteriorLighting;
 	IDirect3DVertexBuffer9*	EffectVertex;
 	EffectRecord*			UnderwaterEffect;
 	EffectRecord*			WaterLensEffect;
@@ -362,10 +374,8 @@ public:
 	EffectRecord*			CinemaEffect;
 	EffectRecord*			BloomEffect;
 	EffectRecord*			SnowAccumulationEffect;
-	EffectRecord*			BloodLensEffect;
 	EffectRecord*			SMAAEffect;
 	EffectRecord*			MotionBlurEffect;
-	EffectRecord*			LowHFEffect;
 	EffectRecord*			WetWorldEffect;
 	EffectRecord*			SharpeningEffect;
 	EffectRecord*			VolumetricFogEffect;
@@ -373,6 +383,7 @@ public:
 	EffectRecord*			SnowEffect;
 	EffectRecord*			ShadowsExteriorsEffect;
 	EffectRecord*           ShadowsExteriorsPointEffect;
+	EffectRecord*			ShadowsExteriorsPointDialogEffect;
 	EffectRecord*			ShadowsInteriorsEffect;
 	ExtraEffectsList		ExtraEffects;
 	NiD3DVertexShader*		WaterHeightMapVertexShader;

@@ -10,28 +10,6 @@ public:
 	float			ElapsedTime;
 };
 
-class LowHSoundScript : public BaseScript // Never disposed
-{
-public:
-	LowHSoundScript();
-
-	void			Run();
-
-	TESSound*		HeartSlow;
-};
-
-class LowFSoundScript : public BaseScript // Never disposed
-{
-public:
-	LowFSoundScript();
-
-	void			Run();
-
-	TESSound*		BreathingF;
-	TESSound*		BreathingM;
-	float			BreathingTime;
-};
-
 class PurgerScript : public BaseScript // Never disposed
 {
 public:
@@ -83,8 +61,6 @@ public:
 
 	void					Run();
 
-	LowHSoundScript*		LowHSound;
-	LowFSoundScript*		LowFSound;
 	PurgerScript*			Purger;
 	GravityScript*			Gravity;
 	EquipmentSetupScript*	EquipmentSetup;

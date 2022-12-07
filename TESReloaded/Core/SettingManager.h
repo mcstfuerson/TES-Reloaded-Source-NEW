@@ -178,14 +178,12 @@ struct SettingsMainStruct {
 
 	struct EffectsStruct {
 		bool AmbientOcclusion;
-		bool BloodLens;
 		bool Bloom;
 		bool Cinema;
 		bool Coloring;
 		bool DepthOfField;
 		bool GodRays;
 		bool KhajiitRays;
-		bool LowHF;
 		bool MotionBlur;
 		bool Precipitations;
 		bool Sharpening;
@@ -235,13 +233,6 @@ struct SettingsMainStruct {
 		float	StepValue;
 	};
 
-	struct LowHFSoundStruct {
-		bool	HealthEnabled;
-		bool	FatigueEnabled;
-		float	HealthCoeff;
-		float	FatigueCoeff;
-	};
-
 	struct PurgerStruct {
 		bool	Enabled;
 		bool	PurgeTextures;
@@ -288,7 +279,6 @@ struct SettingsMainStruct {
 	ShadersStruct				Shaders;
 	EffectsStruct				Effects;
 	MenuStruct					Menu;
-	LowHFSoundStruct			LowHFSound;
 	PurgerStruct				Purger;
 	GravityStruct				Gravity;
 	DodgeStruct					Dodge;
@@ -313,13 +303,12 @@ struct SettingsShadowStruct {
 	};
 
 	struct ExteriorsStruct {
-		FormsStruct			Forms[3];
-		bool				Enabled[3];
-		bool				AlphaEnabled[3];
-		int					Quality;
-		int					ShadowMapSize[3];
+		FormsStruct			Forms[4];
+		bool				Enabled[4];
+		bool				AlphaEnabled[4];
+		int					ShadowMapSize[4];
 		float				Darkness;
-		float				ShadowMapRadius[3];
+		float				ShadowMapRadius[4];
 		float				ShadowMapFarPlane;
 		bool                UsePostProcessing;
 		bool				UseIntervalUpdate;
@@ -340,8 +329,6 @@ struct SettingsShadowStruct {
 		bool				Enabled;
 		bool				AlphaEnabled;
 		bool				TorchesCastShadows;
-		int					LightPoints;
-		int					Quality;
 		int					ShadowCubeMapSize;
 		float				Darkness;
 		bool                UsePostProcessing;
@@ -351,6 +338,17 @@ struct SettingsShadowStruct {
 	ExteriorsStruct		Exteriors;
 	InteriorsStruct		Interiors;
 	InteriorsStruct		ExteriorsPoint;
+};
+
+struct SettingsShadowPointLightsStruct {
+	int		iShadowLightPoints;
+	int		iShadowCullLightPoints;
+	float	fShadowObjectScanRadius;
+	float	fShadowLightRadiusMin;
+	float	fShadowLightRadiusMax;
+	float	fShadowCullLightRadiusMin;
+	float	fShadowCullLightRadiusMax;
+	bool	bEnabled;
 };
 
 struct SettingsWaterStruct {
@@ -564,30 +562,12 @@ struct SettingsPrecipitationsStruct {
 	SnowAccumulationStruct	SnowAccumulation;
 };
 
-struct SettingsBloodStruct {
-	float LensChance;
-	float LensColorR;
-	float LensColorG;
-	float LensColorB;
-	float LensIntensity;
-	float LensTime;
-};
-
 struct SettingsMotionBlurStruct {
 	bool Enabled;
 	float GaussianWeight;
 	float BlurScale;
 	float BlurOffsetMax;
 	float BlurCutOff;
-};
-
-struct SettingsLowHFStruct {
-	float HealthLimit;
-	float FatigueLimit;
-	float LumaMultiplier;
-	float BlurMultiplier;
-	float VignetteMultiplier;
-	float DarknessMultiplier;
 };
 
 struct SettingsSharpeningStruct {
@@ -627,6 +607,7 @@ typedef std::map<std::string, SettingsColoringStruct> SettingsColoringList;
 typedef std::map<std::string, SettingsBloomStruct> SettingsBloomList;
 typedef std::map<std::string, SettingsMotionBlurStruct> SettingsMotionBlurList;
 typedef std::map<std::string, SettingsWeatherStruct> SettingsWeatherList;
+typedef std::map<std::string, SettingsShadowPointLightsStruct> SettingsShadowPointLightsList;
 typedef std::map<std::string, std::string> DefinitionsList;
 typedef std::map<UInt32, std::string> SectionsList;
 typedef std::map<std::string, float> SettingsList;
@@ -636,7 +617,7 @@ public:
 	SettingManager();
 
 	void							LoadSettings();
-	void							SaveSettings(const char* Item, const char* Definition);
+	void							SaveSettings(const char* Item, const char* Definition, const char* Section);
 	DefinitionsList					GetMenuItems();
 	DefinitionsList					GetMenuDefinitions(const char* Item);
 	SectionsList					GetMenuSections(const char* Item, const char* Definition);
@@ -648,13 +629,16 @@ public:
 	SettingsAmbientOcclusionStruct*	GetSettingsAmbientOcclusion(const char* Section);
 	SettingsColoringStruct*			GetSettingsColoring(const char* PlayerLocation);
 	SettingsBloomStruct*			GetSettingsBloom(const char* PlayerLocation);
+	SettingsShadowPointLightsStruct*GetSettingsShadowPointLight(const char* PlayerLocation);
 	SettingsMotionBlurStruct*		GetSettingsMotionBlur(const char* Section);
 	SettingsWeatherStruct*			GetSettingsWeather(const char* WeatherName);
 	void							SetSettingsWeather(TESWeather* Weather);
 	SettingsWeatherStruct*			CreateSettingsWeather(const char* WeatherName);
 
+    const char*                     CreateProfileString = "Create New Profile";
 	char							CurrentPath[MAX_PATH];
 	bool							GameLoading;
+	float							DefaultFov;
 	SettingsMainStruct				SettingsMain;
 	SettingsGrassStruct				SettingsGrass;
 	SettingsHDRStruct				SettingsHDR;
@@ -665,8 +649,6 @@ public:
 	SettingsKhajiitRaysStruct		SettingsKhajiitRays;
 	SettingsCinemaStruct			SettingsCinema;
 	SettingsPrecipitationsStruct	SettingsPrecipitations;
-	SettingsBloodStruct				SettingsBlood;
-	SettingsLowHFStruct				SettingsLowHF;
 	SettingsSharpeningStruct		SettingsSharpening;
 	SettingsVolumetricFogStruct		SettingsVolumetricFog;
 	SettingsShadowStruct			SettingsShadows;
@@ -726,6 +708,7 @@ private:
 	SettingsBloomList				SettingsBloom;
 	SettingsMotionBlurList			SettingsMotionBlur;
 	SettingsWeatherList				SettingsWeather;
+	SettingsShadowPointLightsList   SettingsShadowPointLight;
 
 };
 

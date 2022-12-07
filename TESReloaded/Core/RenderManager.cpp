@@ -147,6 +147,11 @@ void RenderManager::SetupSceneCamera() {
 void RenderManager::SetSceneGraph() {
 
 	float FoV = TheSettingManager->SettingsMain.Main.FoV;
+	float DefaultFov = TheSettingManager->DefaultFov;
+
+	if (Player->worldFoV < FoV && Player->worldFoV != DefaultFov) {
+		FoV = Player->worldFoV;
+	}
 
 	FirstPersonView = !Player->IsThirdPersonView(TheSettingManager->SettingsMain.CameraMode.Enabled, FirstPersonView);
 	Player->SetFoV(WorldSceneGraph, SettingWorldFoV, Setting1stPersonFoV, &FoV, MenuManager->IsActive(Menu::MenuType::kMenuType_None));

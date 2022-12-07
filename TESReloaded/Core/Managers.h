@@ -21,7 +21,6 @@ extern RenderManager*		TheRenderManager;
 extern FrameRateManager*	TheFrameRateManager;
 extern GameMenuManager*		TheGameMenuManager;
 extern KeyboardManager*		TheKeyboardManager;
-extern GameEventManager*	TheGameEventManager;
 extern ShadowManager*		TheShadowManager;
 extern EquipmentManager*	TheEquipmentManager;
 extern ScriptManager*		TheScriptManager;

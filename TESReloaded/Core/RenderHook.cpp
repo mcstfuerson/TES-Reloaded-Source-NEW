@@ -244,6 +244,7 @@ void (__thiscall RenderHook::* Render)(BSRenderedTexture*);
 void (__thiscall RenderHook::* TrackRender)(BSRenderedTexture*);
 void RenderHook::TrackRender(BSRenderedTexture* RenderedTexture) {
 	
+	TheShaderManager->UpdateShaderStates();
 	TheRenderManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
 	if (TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->defaultRTGroup->RenderTargets[1]->data->Surface;
