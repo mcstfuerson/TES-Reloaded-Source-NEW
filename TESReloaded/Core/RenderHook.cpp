@@ -272,7 +272,6 @@ void (__thiscall RenderHook::* HDRRender)(NiScreenElements*, BSRenderedTexture**
 void (__thiscall RenderHook::* TrackHDRRender)(NiScreenElements*, BSRenderedTexture**, BSRenderedTexture**, UInt8);
 void RenderHook::TrackHDRRender(NiScreenElements* ScreenElements, BSRenderedTexture** RenderedTexture1, BSRenderedTexture** RenderedTexture2, UInt8 Arg4) {
 	
-	TheRenderManager->clearColor = D3DCOLOR_ARGB(0, 0, 0, 0);
 	(this->*HDRRender)(ScreenElements, RenderedTexture1, RenderedTexture2, Arg4);
 
 }
