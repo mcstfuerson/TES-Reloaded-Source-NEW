@@ -332,6 +332,7 @@ struct SettingsShadowStruct {
 		int					ShadowCubeMapSize;
 		float				Darkness;
 		bool                UsePostProcessing;
+		bool				EnableSpecularShadow;
 		ExcludedFormsList	ExcludedForms;
 	};
 
@@ -416,6 +417,7 @@ struct SettingsSkinStruct {
 	float CoeffRed;
 	float CoeffGreen;
 	float CoeffBlue;
+	bool UseVanillaShaders;
 };
 
 struct SettingsGodRaysStruct {

@@ -598,6 +598,7 @@ void SettingManager::LoadSettings() {
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
 	strcat(Filename, "Skin\\Skin.ini");
+	SettingsSkin.UseVanillaShaders = GetPrivateProfileIntA("Default", "UseVanillaShaders", 0, Filename);
 	GetPrivateProfileStringA("Default", "Attenuation", "1.0", value, SettingStringBuffer, Filename);
 	SettingsSkin.Attenuation = atof(value);
 	GetPrivateProfileStringA("Default", "SpecularPower", "1.0", value, SettingStringBuffer, Filename);
@@ -1159,6 +1160,7 @@ void SettingManager::LoadSettings() {
 
 	SettingsShadows.Interiors.Enabled = GetPrivateProfileIntA("Interiors", "Enabled", 1, Filename);
 	SettingsShadows.Interiors.UsePostProcessing = GetPrivateProfileIntA("Interiors", "UsePostProcessing", 1, Filename);
+	SettingsShadows.Interiors.EnableSpecularShadow = GetPrivateProfileIntA("Interiors", "EnableSpecularShadow", 1, Filename);
 	SettingsShadows.Interiors.AlphaEnabled = GetPrivateProfileIntA("Interiors", "AlphaEnabled", 1, Filename);
 	SettingsShadows.Interiors.Forms.Activators = GetPrivateProfileIntA("Interiors", "Activators", 1, Filename);
 	SettingsShadows.Interiors.Forms.Actors = GetPrivateProfileIntA("Interiors", "Actors", 1, Filename);
@@ -1527,6 +1529,7 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 		}
 		else if (!strcmp(Definition, "Skin")) {
 			strcat(Filename, "Skin\\Skin.ini");
+			WritePrivateProfileStringA("Default", "UseVanillaShaders", ToString(SettingsSkin.UseVanillaShaders).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "Attenuation", ToString(SettingsSkin.Attenuation).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "CoeffBlue", ToString(SettingsSkin.CoeffBlue).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "CoeffGreen", ToString(SettingsSkin.CoeffGreen).c_str(), Filename);
@@ -1560,6 +1563,7 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 			WritePrivateProfileStringA("ExteriorsPoint", "Darkness", ToString(SettingsShadows.ExteriorsPoint.Darkness).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Enabled", ToString(SettingsShadows.Interiors.Enabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "UsePostProcessing", ToString(SettingsShadows.Interiors.UsePostProcessing).c_str(), Filename);
+			WritePrivateProfileStringA("Interiors", "EnableSpecularShadow", ToString(SettingsShadows.Interiors.EnableSpecularShadow).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "AlphaEnabled", ToString(SettingsShadows.Interiors.AlphaEnabled).c_str(), Filename);
 			WritePrivateProfileStringA("Interiors", "Darkness", ToString(SettingsShadows.Interiors.Darkness).c_str(), Filename);
 		}
@@ -2181,6 +2185,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			else if (!strcmp(Section, "Interiors")) {
 				Settings["Enabled"] = SettingsShadows.Interiors.Enabled;
 				Settings["UsePostProcessing"] = SettingsShadows.Interiors.UsePostProcessing;
+				Settings["EnableSpecularShadow"] = SettingsShadows.Interiors.EnableSpecularShadow;
 				Settings["AlphaEnabled"] = SettingsShadows.Interiors.AlphaEnabled;
 				Settings["Darkness"] = SettingsShadows.Interiors.Darkness;
 			}
@@ -2197,6 +2202,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["Offset"] = SettingsSharpening.Offset;
 		}
 		else if (!strcmp(Definition, "Skin")) {
+			Settings["UseVanillaShaders"] = SettingsSkin.UseVanillaShaders;
 			Settings["Attenuation"] = SettingsSkin.Attenuation;
 			Settings["CoeffRed"] = SettingsSkin.CoeffRed;
 			Settings["CoeffGreen"] = SettingsSkin.CoeffGreen;
@@ -2888,6 +2894,10 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsShadows.Interiors.UsePostProcessing = Value;
 					TheShaderManager->SwitchShaderStatus("ShadowsInteriors");
 				}
+				else if (!strcmp(Setting, "EnableSpecularShadow")) {
+					SettingsShadows.Interiors.EnableSpecularShadow = Value;
+					TheShaderManager->SwitchShaderStatus("InteriorSpecularShadow");
+				}
 			}
 			else if (!strcmp(Section, "ExteriorsPoint")) {
 				if (!strcmp(Setting, "Enabled")) {
@@ -2929,6 +2939,10 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				SettingsSkin.RimScalar = Value;
 			else if (!strcmp(Setting, "SpecularPower"))
 				SettingsSkin.SpecularPower = Value;
+			else if (!strcmp(Setting, "UseVanillaShaders")) {
+				SettingsSkin.UseVanillaShaders = Value;
+				TheShaderManager->SwitchShaderStatus("SkinVanilla");
+			}
 		}
 		else if (!strcmp(Definition, "SnowAccumulation")) {
 			if (!strcmp(Setting, "Increase"))

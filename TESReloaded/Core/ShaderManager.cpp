@@ -29,7 +29,8 @@
 #define ShallowColorB shallowColorB
 #define ShallowColorA shallowColorA
 #define TerrainShaders "SLS2001.vso SLS2001.pso SLS2064.vso SLS2068.pso SLS2042.vso SLS2048.pso SLS2043.vso SLS2049.pso"
-#define InteriorShadowShaders "SLS2022.pso SLS2021.pso SLS2016.vso SLS2015.vso SLS2015.pso SLS2012.vso SLS2011.vso SLS2010.pso SLS2008.vso SLS2007.vso SLS2002.vso SLS2002.pso SLS2000.vso SLS2000.pso SLS1006.vso SLS1005.vso SLS1004.pso SLS1S006.vso SLS1S005.vso SLS1003.pso SLS2009.pso SM3002.vso SM3001.vso SM3001.pso SM3000.vso SM3LL001.pso SM3LL000.pso"
+#define InteriorShadowShaders "SLS2022.pso SLS2021.pso SLS2016.vso SLS2015.vso SLS2015.pso SLS2012.vso SLS2011.vso SLS2010.pso SLS2008.vso SLS2007.vso SLS2002.vso SLS2002.pso SLS2000.vso SLS2000.pso SLS1006.vso SLS1005.vso SLS1004.pso SLS1S006.vso SLS1S005.vso SLS1003.pso SLS2009.pso SLS2035.vso SLS2036.vso SLS2041.pso SM3002.vso SM3001.vso SM3001.pso SM3000.vso SM3LL001.pso SM3LL000.pso"
+#define InteriorSpecularShadowShaders "SLS2021.pso SLS2035.vso SLS2036.vso SLS2041.pso PAR2025.pso PAR2026.pso PAR2034.vso"
 #define ExteriorDialogShaders "SLS2003.pso SLS2018.pso SLS2039.pso SKIN2001.pso SKIN2003.pso SKIN2007.pso"
 #define BloodShaders "GDECALS.vso GDECAL.pso SLS2040.vso SLS2046.pso"
 #elif defined(SKYRIM)
@@ -800,8 +801,20 @@ void ShaderManager::UpdateShaderStates() {
 	else {
 		if (LocationState != CellLocation::Interior) {
 			LocationState = CellLocation::Interior;
+			DisposeShader("InteriorShadows");
 			CreateShader("InteriorShadows");
+
+			//If interior shadow spec is on
+			if (TheSettingManager->SettingsShadows.Interiors.EnableSpecularShadow) {
+				DisposeShader("InteriorSpecularShadow");
+				CreateShader("InteriorSpecularShadowActive");
+			} 
+			else {
+				DisposeShader("InteriorSpecularShadow");
+				CreateShader("InteriorSpecularShadowInactive");
+			}
 		}
+
 	}
 
 }
@@ -1782,8 +1795,14 @@ void ShaderManager::CreateShader(const char* Name) {
 	}
 	else if (!strcmp(Name, "Skin")) {
 		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
-		for each (NiD3DVertexShader* VS in SS->Vertex) LoadShader(VS);
-		for each (NiD3DPixelShader* PS in SS->Pixel) LoadShader(PS);
+		if (TheSettingManager->SettingsSkin.UseVanillaShaders) {
+			for each (NiD3DVertexShader * VS in SS->Vertex) LoadShader(VS, "Vanilla");
+			for each (NiD3DPixelShader * PS in SS->Pixel) LoadShader(PS, "Vanilla");
+		}
+		else {
+			for each (NiD3DVertexShader * VS in SS->Vertex) LoadShader(VS);
+			for each (NiD3DPixelShader * PS in SS->Pixel) LoadShader(PS);
+		}
 	}
 	else if (!strcmp(Name, "Terrain")) {
 		for (int i = 0; i < 130; i++) {
@@ -1827,8 +1846,15 @@ void ShaderManager::CreateShader(const char* Name) {
 		}
 
 		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
-		for each (NiD3DPixelShader * PS in SS->Pixel) {
-			LoadShader(PS, "Dialog");
+		for each (NiD3DPixelShaderEx * PS in SS->Pixel) {
+			if (PS && strstr(ExteriorDialogShaders, PS->ShaderName)) {
+				if (TheSettingManager->SettingsSkin.UseVanillaShaders) {
+					LoadShader(PS, "VanillaDialog");
+				}
+				else {
+					LoadShader(PS, "Dialog");
+				}
+			}
 		}
 	}
 	else if (!strcmp(Name, "ExteriorDialogInactive")) {
@@ -1840,8 +1866,69 @@ void ShaderManager::CreateShader(const char* Name) {
 		}
 
 		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
-		for each (NiD3DPixelShader * PS in SS->Pixel) {
-			LoadShader(PS);
+		for each (NiD3DPixelShaderEx * PS in SS->Pixel) {
+			if (PS && strstr(ExteriorDialogShaders, PS->ShaderName)) {
+				if (TheSettingManager->SettingsSkin.UseVanillaShaders) {
+					LoadShader(PS, "Vanilla");
+				}
+				else {
+					LoadShader(PS);
+				}
+			}
+		}
+	}
+	else if (!strcmp(Name, "InteriorSpecularShadowActive")) {
+		for (int i = 0; i < 130; i++) {
+			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
+			if (PS && strstr(InteriorSpecularShadowShaders, PS->ShaderName)) {
+				LoadShader(PS, "InteriorSpecular");
+			}
+		}
+
+		for (int i = 0; i < 130; i++) {
+			NiD3DVertexShaderEx* VS = ShadowLightVertexShaders[i];
+			if (VS && strstr(InteriorSpecularShadowShaders, VS->ShaderName)) {
+				LoadShader(VS, "InteriorSpecular");
+			}
+		}
+
+		ParallaxShader* PRS = (ParallaxShader*)GetShaderDefinition(15)->Shader;
+		for each (NiD3DVertexShaderEx * VS in PRS->Vertex) {
+			if (VS && strstr(InteriorSpecularShadowShaders, VS->ShaderName)) {
+				LoadShader(VS, "InteriorSpecular");
+			}
+		}
+		for each (NiD3DPixelShaderEx * PS in PRS->Pixel) {
+			if (PS && strstr(InteriorSpecularShadowShaders, PS->ShaderName)) {
+				LoadShader(PS, "InteriorSpecular");
+			}
+		}
+	}
+	else if (!strcmp(Name, "InteriorSpecularShadowInactive")) {
+		for (int i = 0; i < 130; i++) {
+			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
+			if (PS && strstr(InteriorSpecularShadowShaders, PS->ShaderName)) {
+				LoadShader(PS);
+			}
+		}
+
+		for (int i = 0; i < 130; i++) {
+			NiD3DVertexShaderEx* VS = ShadowLightVertexShaders[i];
+			if (VS && strstr(InteriorSpecularShadowShaders, VS->ShaderName)) {
+				LoadShader(VS);
+			}
+		}
+
+		ParallaxShader* PRS = (ParallaxShader*)GetShaderDefinition(15)->Shader;
+		for each (NiD3DVertexShaderEx * VS in PRS->Vertex) {
+			if (VS && strstr(InteriorSpecularShadowShaders, VS->ShaderName)) {
+				LoadShader(VS);
+			}
+		}
+		for each (NiD3DPixelShaderEx * PS in PRS->Pixel) {
+			if (PS && strstr(InteriorSpecularShadowShaders, PS->ShaderName)) {
+				LoadShader(PS);
+			}
 		}
 	}
 #elif defined(SKYRIM)
@@ -2077,7 +2164,24 @@ void ShaderManager::DisposeShader(const char* Name) {
 
 		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
 		for each (NiD3DPixelShaderEx * PS in SS->Pixel) {
-			if (PS->ShaderProg) {
+			if (PS && PS->ShaderProg && strstr(ExteriorDialogShaders, PS->ShaderName)) {
+				PS->ShaderHandle = PS->ShaderHandleBackup;
+				delete PS->ShaderProg; PS->ShaderProg = NULL;
+			}
+		}
+	}
+	else if (!strcmp(Name, "InteriorSpecularShadow")) {
+		for (int i = 0; i < 130; i++) {
+			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
+			if (PS && PS->ShaderProg && strstr(InteriorSpecularShadowShaders, PS->ShaderName)) {
+				PS->ShaderHandle = PS->ShaderHandleBackup;
+				delete PS->ShaderProg; PS->ShaderProg = NULL;
+			}
+		}
+
+		ParallaxShader* PRS = (ParallaxShader*)GetShaderDefinition(15)->Shader;
+		for each (NiD3DPixelShaderEx * PS in PRS->Pixel) {
+			if (PS && PS->ShaderProg && strstr(InteriorSpecularShadowShaders, PS->ShaderName)) {
 				PS->ShaderHandle = PS->ShaderHandleBackup;
 				delete PS->ShaderProg; PS->ShaderProg = NULL;
 			}
@@ -2596,7 +2700,11 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		Value = !Shaders->POM;
 		Shaders->POM = Value;
 		DisposeShader(Name);
-		if (Value) CreateShader(Name);
+		if (Value) {
+			CreateShader(Name);
+			//Have to reload this since it includes PAR shaders
+			SwitchShaderStatus("InteriorSpecularShadow");
+		}
 	}
 	else if (!strcmp(Name, "Precipitations")) {
 		Value = !Effects->Precipitations;
@@ -2610,6 +2718,10 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		Shaders->Skin = Value;
 		DisposeShader(Name);
 		if (Value) CreateShader(Name);
+	}
+	else if (!strcmp(Name, "SkinVanilla")) {
+		DisposeShader("Skin");
+		CreateShader("Skin");
 	}
 	else if (!strcmp(Name, "SMAA")) {
 		Value = !Effects->SMAA;
@@ -2680,6 +2792,19 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 	else if (!strcmp(Name, "ShadowsInteriors")) {
 		DisposeEffect(ShadowsInteriorsEffect);
 		if (TheSettingManager->SettingsShadows.Interiors.UsePostProcessing) CreateEffect(EffectRecordType_ShadowsInteriors);
+	}
+	else if (!strcmp(Name, "InteriorSpecularShadow")) {
+		//edge case is when PAR is turned off, this setting will still enable it's associated PAR shaders
+		//will have to rethink this approach because additional subsets of shaders will become too difficult to maintain
+		if (LocationState == CellLocation::Interior) {
+			DisposeShader(Name);
+			if (TheSettingManager->SettingsShadows.Interiors.EnableSpecularShadow) {
+				CreateShader("InteriorSpecularShadowActive");
+			}
+			else {
+				CreateShader("InteriorSpecularShadowInactive");
+			}
+		}
 	}
 
 }
