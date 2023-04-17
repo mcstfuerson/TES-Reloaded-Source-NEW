@@ -1331,16 +1331,21 @@ int ShadowManager::GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLight
 			if (Process->OnBeltState == HighProcessEx::State::In) CastShadow = false;
 		}
 
-		if (Light->CastShadows && CastShadow) {
+		//Magic effects typically cause problematic shadows, just allow them to cull
+		if (IsLightFromMagic(Light) && shadowCullIndex < (ShadowSettings->iShadowCullLightPoints - 1)) {
+			Light->CanCarry = 1;
+			ShadowCullLights[++shadowCullIndex] = Light;
+		} 
+		else if (Light->CastShadows && CastShadow) {
 
 			if (Light->Spec.r >= ShadowSettings->fShadowLightRadiusMin && Light->Spec.r <= ShadowSettings->fShadowLightRadiusMax && shadowCastIndex < (ShadowSettings->iShadowLightPoints - 1) && Player->GetNode()->GetDistance(&Light->m_worldTransform.pos) < 4000.0f) {
 				ShadowCastLights[++shadowCastIndex] = Light;
 			}
 			else if (Light->Spec.r >= ShadowSettings->fShadowCullLightRadiusMin && Light->Spec.r <= ShadowSettings->fShadowCullLightRadiusMax && shadowCullIndex < (ShadowSettings->iShadowCullLightPoints - 1)) {
 				ShadowCullLights[++shadowCullIndex] = Light;
-			}
-			if ((shadowCastIndex + shadowCullIndex) == (ShadowSettings->iShadowLightPoints + ShadowSettings->iShadowCullLightPoints) - 1) break;
+			}			
 		}
+		if ((shadowCastIndex + shadowCullIndex) == (ShadowSettings->iShadowLightPoints + ShadowSettings->iShadowCullLightPoints) - 1) break;
 		v++;
 	}
 
@@ -1381,8 +1386,8 @@ void ShadowManager::SetAllShadowCullLightPos(NiPointLight** Lights, int LightInd
 void ShadowManager::SetShadowCullLightPos(NiPointLight** Lights, int index) {
 	D3DXVECTOR3 Eye;
 	NiPoint3* LightPos = &Lights[index]->m_worldTransform.pos;
-	float FarPlane = Lights[index]->Spec.r; // Light radius is stored in Spec.r, Spec.g and Spec.b for NiPointLight
-	if (Lights[index]->CanCarry) FarPlane = 257.00f; // Set torch shadow to a fixed value to obtain a better effect
+	float avgDiff = ((Lights[index]->Diff.r + Lights[index]->Diff.g + Lights[index]->Diff.b) / 3.0f);
+	float FarPlane = Lights[index]->Spec.r * avgDiff;
 	Eye.x = LightPos->x - TheRenderManager->CameraPosition.x;
 	Eye.y = LightPos->y - TheRenderManager->CameraPosition.y;
 	Eye.z = LightPos->z - TheRenderManager->CameraPosition.z;
@@ -1438,6 +1443,11 @@ void ShadowManager::LoadShadowLightPointSettings() {
 		ShadowLightPointSettings = TheSettingManager->GetSettingsShadowPointLight(Player->parentCell->GetEditorName());
 		if (!ShadowLightPointSettings) ShadowLightPointSettings = TheSettingManager->GetSettingsShadowPointLight("DefaultInterior");
 	}
+}
+
+bool ShadowManager::IsLightFromMagic(NiPointLight* light) {
+	//TODO: a better way to check this
+	return strstr(light->m_parent->m_pcName, "agic") != NULL;
 }
 
 static __declspec(naked) void RenderShadowMapHook() {

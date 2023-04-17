@@ -63,6 +63,7 @@ public:
 	void                    SetShadowCubeMapRegisters(int index);
 	void					ResetIntervals();
 	void					LoadShadowLightPointSettings();
+	bool					IsLightFromMagic(NiPointLight* Light);
 
 	IDirect3DTexture9*		ShadowMapTexture[4];
 	IDirect3DSurface9*		ShadowMapSurface[4];
