@@ -359,7 +359,13 @@ bool ShaderRecord::LoadShader(const char* Name, const char* DirPostFix) {
 	}
 	else if (!memcmp(Name, "SKIN", 4)) {
 		if (!TheSettingManager->SettingsMain.Shaders.Skin) return false;
-		strcat(FileName, "Skin");
+
+		if (TheSettingManager->SettingsSkin.UseVanillaShaders) {
+			strcat(FileName, "SkinVanilla");
+		}
+		else {
+			strcat(FileName, "Skin");
+		}
 	}
 	else if (strstr(TerrainShaders, Name)) {
 		if (!TheSettingManager->SettingsMain.Shaders.Terrain) return false;
@@ -1795,14 +1801,8 @@ void ShaderManager::CreateShader(const char* Name) {
 	}
 	else if (!strcmp(Name, "Skin")) {
 		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
-		if (TheSettingManager->SettingsSkin.UseVanillaShaders) {
-			for each (NiD3DVertexShader * VS in SS->Vertex) LoadShader(VS, "Vanilla");
-			for each (NiD3DPixelShader * PS in SS->Pixel) LoadShader(PS, "Vanilla");
-		}
-		else {
-			for each (NiD3DVertexShader * VS in SS->Vertex) LoadShader(VS);
-			for each (NiD3DPixelShader * PS in SS->Pixel) LoadShader(PS);
-		}
+		for each (NiD3DVertexShader * VS in SS->Vertex) LoadShader(VS);
+		for each (NiD3DPixelShader * PS in SS->Pixel) LoadShader(PS);
 	}
 	else if (!strcmp(Name, "Terrain")) {
 		for (int i = 0; i < 130; i++) {
@@ -1848,12 +1848,7 @@ void ShaderManager::CreateShader(const char* Name) {
 		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
 		for each (NiD3DPixelShaderEx * PS in SS->Pixel) {
 			if (PS && strstr(ExteriorDialogShaders, PS->ShaderName)) {
-				if (TheSettingManager->SettingsSkin.UseVanillaShaders) {
-					LoadShader(PS, "VanillaDialog");
-				}
-				else {
-					LoadShader(PS, "Dialog");
-				}
+				LoadShader(PS, "Dialog");
 			}
 		}
 	}
@@ -1868,12 +1863,7 @@ void ShaderManager::CreateShader(const char* Name) {
 		SkinShader* SS = (SkinShader*)GetShaderDefinition(14)->Shader;
 		for each (NiD3DPixelShaderEx * PS in SS->Pixel) {
 			if (PS && strstr(ExteriorDialogShaders, PS->ShaderName)) {
-				if (TheSettingManager->SettingsSkin.UseVanillaShaders) {
-					LoadShader(PS, "Vanilla");
-				}
-				else {
-					LoadShader(PS);
-				}
+				LoadShader(PS);
 			}
 		}
 	}
