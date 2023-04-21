@@ -1447,7 +1447,7 @@ void ShadowManager::LoadShadowLightPointSettings() {
 
 bool ShadowManager::IsLightFromMagic(NiPointLight* light) {
 	//TODO: a better way to check this
-	return strstr(light->m_parent->m_pcName, "agic") != NULL;
+	return light->m_parent && strstr(light->m_parent->m_pcName, "agic") != NULL;
 }
 
 static __declspec(naked) void RenderShadowMapHook() {
