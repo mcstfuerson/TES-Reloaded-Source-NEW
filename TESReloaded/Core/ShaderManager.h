@@ -357,6 +357,7 @@ public:
 	bool					isFullyInitialized;
 	bool					UseIntervalUpdate;
 	TESObjectCELL*			previousCell;
+	float					previousBlend;
 	SettingsWaterStruct*	sws;
 	SettingsAmbientOcclusionStruct* sas;
 	SettingsBloomStruct* sbs;

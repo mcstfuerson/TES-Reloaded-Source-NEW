@@ -848,6 +848,11 @@ void ShaderManager::UpdateConstants() {
 		previousCell = currentCell;
 	}
 
+	if (CurrentBlend != previousBlend) {
+		LoadEffectSettings();
+		previousBlend = CurrentBlend;
+	}
+
 	IsThirdPersonView = Player->IsThirdPersonView(TheSettingManager->SettingsMain.CameraMode.Enabled, TheRenderManager->FirstPersonView);
 	TheRenderManager->GetSceneCameraData();
 
