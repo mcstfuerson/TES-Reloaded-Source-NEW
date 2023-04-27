@@ -2061,6 +2061,17 @@ public:
 };
 assert(sizeof(NiPropertyState) == 0x030);
 
+class NiMaterialProperty : public NiProperty {
+public:
+	void*		unk01;
+	NiColor		amb;		
+	NiColor		diff;		
+	NiColor		spec;
+	NiColor		emit;
+	float		shine;
+	float		alpha;
+};
+
 class NiVBChip {
 public:
 	UInt32					Index;      // 00

@@ -4,7 +4,7 @@
 class ShadowManager { // Never disposed
 public:
 	ShadowManager();
-	
+
 	enum ShadowMapTypeEnum {
 		MapNear		= 0,
 		MapFar		= 1,
@@ -27,19 +27,22 @@ public:
 	};
 
 	void					CreateD3DMatrix(D3DMATRIX* Matrix, NiTransform* Transform);
-	void					GetFrustum(ShadowMapTypeEnum ShadowMapType, D3DMATRIX* Matrix);
-	bool					InFrustum(ShadowMapTypeEnum ShadowMapType, NiAVObject* Object);
+	void					GetShadowFrustum(ShadowMapTypeEnum ShadowMapType, D3DMATRIX* Matrix);
+	bool					InShadowFrustum(ShadowMapTypeEnum ShadowMapType, NiAVObject* Object);
 	TESObjectREFR*			GetRef(TESObjectREFR* Ref, SettingsShadowStruct::FormsStruct* Forms, SettingsShadowStruct::ExcludedFormsList* ExcludedForms);
 	TESObjectREFR*			GetRefO(TESObjectREFR* Ref);
 	void					RenderObject(NiAVObject* Node, D3DXVECTOR4* ShadowData, bool HasWater, float MinRadius);
 	void					RenderObjectPoint(NiAVObject* Node, D3DXVECTOR4* ShadowData, bool HasWater);
+	void					RenderObjectPointActor(NiAVObject* Node, D3DXVECTOR4* ShadowData, bool HasWater, int lightIndex);
 	void					RenderTerrain(NiAVObject* Object, ShadowMapTypeEnum ShadowMapType, D3DXVECTOR4* ShadowData);
 	void					Render(NiGeometry* Geo, D3DXVECTOR4* ShadowData);
+	void					RenderActor(NiGeometry* Geo, D3DXVECTOR4* ShadowData, int lightIndex);
 	void					RenderShadowMap(ShadowMapTypeEnum ShadowMapType, SettingsShadowStruct::ExteriorsStruct* ShadowsExteriors, D3DXVECTOR3* At, D3DXVECTOR4* SunDir, D3DXVECTOR4* ShadowData);
 	void					RenderShadowCubeMapExt(NiPointLight** Lights, int LightIndex, float radiusLimit, SettingsShadowStruct::InteriorsStruct* ShadowsExteriors, D3DXVECTOR4* ShadowData);
 	void					RenderShadowCubeMapInt(NiPointLight** Lights, int LightIndex, float radiusLimit, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors, D3DXVECTOR4* ShadowData);
 	void                    RenderShadowCubeMapFakeInt(int LightIndex, SettingsShadowStruct::InteriorsStruct* ShadowsInteriors, D3DXVECTOR4* ShadowData);
 	void                    RenderShadowCubeMap(int LightIndex, std::map<int, std::vector<NiNode*>>& refMap, D3DXVECTOR4* ShadowData, bool enabled);
+	void                    RenderShadowCubeMapActor(int LightIndex, std::map<int, std::vector<NiNode*>>& refMap, D3DXVECTOR4* ShadowData, bool enabled);
 	void					RenderExteriorShadows();
 	void					RenderInteriorShadows();
 	void					RenderShadowMaps();
@@ -49,7 +52,6 @@ public:
 	void					ClearShadowCubeLightRegister(int From);
 	void					ClearShadowCubeLightCullRegister(int From);
 	void					ClearGeneralPointLightRegister(int From);
-	void					CalculateBlend(NiPointLight** Lights, int LightIndex);
 	void                    AddSceneLight(NiPointLight* Light, int Key, std::map<int, NiPointLight*>& SceneLights);
 	int                     GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** ShadowCastLights, NiPointLight** ShadowCullLights, NiPointLight** GeneralPointLights, int& ShadowCastLightIndex, int& ShadowCullLightIndex, int& GeneralPointLightIndex, SettingsShadowPointLightsStruct* ShadowSettings);
 	void                    SetAllShadowCastLightPos(NiPointLight** Lights, int LightIndex);
@@ -61,8 +63,7 @@ public:
 	void                    SetShadowCubeMapRegisters(int index);
 	void					ResetIntervals();
 	void					LoadShadowLightPointSettings();
-
-
+	bool					IsLightFromMagic(NiPointLight* Light);
 
 	IDirect3DTexture9*		ShadowMapTexture[4];
 	IDirect3DSurface9*		ShadowMapSurface[4];
@@ -75,15 +76,37 @@ public:
 	D3DXPLANE				ShadowMapFrustum[4][6];
 	NiVector4				BillboardRight;
 	NiVector4				BillboardUp;
+
+	//-------SHADOW CUBE MAP--------
+
+	//TEXTURES
 	IDirect3DCubeTexture9*	ShadowCubeMapTexture[12];
+
+	//SURFACES
 	IDirect3DSurface9*		ShadowCubeMapSurface[12][6];
-	IDirect3DSurface9*		ShadowCubeMapDepthSurface;
+	IDirect3DSurface9*		ShadowCubeMapDepthSurface[12][6];
+
+	//SHADERS
 	ShaderRecord*			ShadowCubeMapVertex;
 	ShaderRecord*			ShadowCubeMapPixel;
 	IDirect3DVertexShader9* ShadowCubeMapVertexShader;
 	IDirect3DPixelShader9*	ShadowCubeMapPixelShader;
+	ShaderRecord*			ShadowCubeMapExteriorPixel;
+	IDirect3DPixelShader9*	ShadowCubeMapExteriorPixelShader;
+
+	//MISC
 	D3DVIEWPORT9			ShadowCubeMapViewPort;
 	NiPointLight*			ShadowCubeMapLights[12];
+	int                     ShadowCubeLightCount;
+	int						ShadowCubeCullLightCount;
+	double					ShadowCubeMapStaticValue[12];
+	bool					ShadowCubeMapStaticTracker[12];
+	bool					EnableStaticMaps;
+	int						EnableStaticMapsFrameCount;
+	int						EnableStaticMapsFrameThreshold = 30;
+
+	//-------END SHADOW CUBE--------
+
 	ShaderRecord*			CurrentVertex;
 	ShaderRecord*			CurrentPixel;
 	TESObjectCELL*			CurrentCell;
@@ -97,8 +120,6 @@ public:
 	bool					UpdateShadowLightDir;
 	float					UpdateTargetTime;
 	D3DXVECTOR3				LookAtPosition;
-	int                     ShadowCubeLightCount;
-	int						ShadowCubeCullLightCount;
 	int						GeneralPointLightCount;
 	float					GameTime;
 	SettingsShadowPointLightsStruct* ShadowLightPointSettings;

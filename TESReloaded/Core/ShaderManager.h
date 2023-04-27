@@ -46,6 +46,7 @@ enum DayPhase
 
 enum CellLocation
 {
+	Unk,
 	Interior,
 	Exterior,
 	Fake_Exterior
@@ -280,7 +281,6 @@ public:
 
 	void					CreateCT();
 	void					SetCT();
-	void					SetCustomCT();
 	bool					LoadShader(const char* Name, const char* DirPostFix = "");
 	
 	ShaderType				Type;
@@ -357,6 +357,7 @@ public:
 	bool					isFullyInitialized;
 	bool					UseIntervalUpdate;
 	TESObjectCELL*			previousCell;
+	float					previousBlend;
 	SettingsWaterStruct*	sws;
 	SettingsAmbientOcclusionStruct* sas;
 	SettingsBloomStruct* sbs;
