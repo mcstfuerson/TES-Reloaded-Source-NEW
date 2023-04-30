@@ -3,14 +3,7 @@
 #include "RenderHook.h"
 #include "ShaderIOHook.h"
 #include "FormHook.h"
-#include "GrassMode.h"
-#include "MountedCombat.h"
-#include "CameraMode.h"
-#include "SleepingMode.h"
 #include "WeatherMode.h"
-#include "Animation.h"
-#include "Dodge.h"
-#include "FlyCam.h"
 #include "PluginVersion.h"
 #include "MemoryManagement.h"
 #include "D3D9Hook.h"
@@ -47,18 +40,8 @@ extern "C" {
 			CreateScriptHook();
 			CreateShadowsHook();
 			CreateWeatherModeHook();
-			CreateAnimationHook();
 			if (TheSettingManager->SettingsMain.Main.MemoryManagement) CreateMemoryManagementHook();
-			if (TheSettingManager->SettingsMain.GrassMode.Enabled) CreateGrassHook();
-			if (TheSettingManager->SettingsMain.CameraMode.Enabled) CreateCameraModeHook();
 
-			if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) {
-				CreateEquipmentHook();
-				if (TheSettingManager->SettingsMain.MountedCombat.Enabled) CreateMountedCombatHook();
-			}
-			if (TheSettingManager->SettingsMain.SleepingMode.Enabled) CreateSleepingModeHook();
-			if (TheSettingManager->SettingsMain.Dodge.Enabled) CreateDodgeHook();
-			if (TheSettingManager->SettingsMain.FlyCam.Enabled) CreateFlyCamHook();
 			//TODO: Add additonal setting for Moon phase luminance to toggle this
 			//if (TheSettingManager->SettingsMain.WeatherMode.Enabled) CreateWeatherModeHook();
 			if (TheSettingManager->SettingsMain.Develop.LogShaders) CreateD3D9Hook();

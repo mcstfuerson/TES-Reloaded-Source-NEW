@@ -1303,9 +1303,7 @@ void ShadowManager::ClearShadowCubeMaps(IDirect3DDevice9* Device, int From) {
 }
 
 int ShadowManager::GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLights, NiPointLight** ShadowCastLights, NiPointLight** ShadowCullLights, NiPointLight** GeneralPointLights, int& shadowCastLightIndex, int& shadowCullLightIndex, int& GeneralPointLightIndex, SettingsShadowPointLightsStruct* ShadowSettings) {
-	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
 	ShadowSceneNode* SceneNode = *(ShadowSceneNode**)kShadowSceneNode; // ShadowSceneNode array, first element is for gamemode
-	bool TorchOnBeltEnabled = EquipmentModeSettings->Enabled && EquipmentModeSettings->TorchKey != 255;
 
 	int shadowCastIndex = -1;
 	int shadowCullIndex = -1;
@@ -1326,10 +1324,6 @@ int ShadowManager::GetShadowSceneLights(std::map<int, NiPointLight*>& SceneLight
 			GeneralPointLights[++LightIndex] = Light;
 		}
 		bool CastShadow = true;
-		if (TorchOnBeltEnabled && Light->CanCarry == 2) {
-			HighProcessEx* Process = (HighProcessEx*)Player->process;
-			if (Process->OnBeltState == HighProcessEx::State::In) CastShadow = false;
-		}
 
 		//Magic effects typically cause problematic shadows, just allow them to cull
 		if (IsLightFromMagic(Light) && shadowCullIndex < (ShadowSettings->iShadowCullLightPoints - 1)) {
@@ -1466,7 +1460,6 @@ static __declspec(naked) void RenderShadowMapHook() {
 void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* LightPoint) {
 
 	SettingsShadowStruct::InteriorsStruct* ShadowSettings;
-	SettingsMainStruct::EquipmentModeStruct* EquipmentModeSettings = &TheSettingManager->SettingsMain.EquipmentMode;
 
 	if (Player->GetWorldSpace()) {
 		ShadowSettings = &TheSettingManager->SettingsShadows.ExteriorsPoint;
@@ -1478,17 +1471,6 @@ void AddCastShadowFlag(TESObjectREFR* Ref, TESObjectLIGH* Light, NiPointLight* L
 	if (Light->lightFlags & TESObjectLIGH::LightFlags::kLightFlags_CanCarry) {
 		LightPoint->CastShadows = ShadowSettings->TorchesCastShadows;
 		LightPoint->CanCarry = 1;
-		if (EquipmentModeSettings->Enabled) {
-			if (Ref == Player) {
-				if (Player->isThirdPerson) {
-					if (Player->firstPersonSkinInfo->LightForm == Light) LightPoint->CastShadows = 0;
-				}
-				else {
-					if (Player->ActorSkinInfo->LightForm == NULL && Player->firstPersonSkinInfo->LightForm == Light) LightPoint->CastShadows = 0;
-				}
-				LightPoint->CanCarry = 2;
-			}
-		}
 	}
 	else {
 		LightPoint->CastShadows = !(Light->flags & TESForm::FormFlags::kFormFlags_NotCastShadows);

@@ -42,140 +42,6 @@ void PurgerScript::Run() {
 
 }
 
-GravityScript::GravityScript() { }
-
-void GravityScript::Run() {
-
-	bhkWorld* HavokWorld = NULL;
-	TESObjectCELL* CurrentCell = Player->parentCell;
-
-	if (CurrentCell) {
-		ExtraHavok* extraHavok = CellHavok;
-		if (extraHavok) HavokWorld = extraHavok->world;
-	}
-	if (!HavokWorld) HavokWorld = *((bhkWorld**)HavokWorldM);
-	HavokWorld->GetWorld()->gravity.z = -17.0f * TheSettingManager->SettingsMain.Gravity.Value;
-
-}
-
-void EquipmentSetupChoice() {
-
-	TheScriptManager->EquipmentSetup->ConfigStep = (EquipmentSetupScript::StepType)(MenuManager->GetMessageBoxButton() + EquipmentSetupScript::StepType::Normal);
-	if (TheScriptManager->EquipmentSetup->ConfigStep <= EquipmentSetupScript::StepType::Swimming)
-		TheScriptManager->EquipmentSetup->EquipItems(EquipmentSetupScript::StepType::Normal, TheScriptManager->EquipmentSetup->ConfigStep);
-	else
-		TheScriptManager->EquipmentSetup->ConfigStep = EquipmentSetupScript::StepType::None;
-
-}
-
-EquipmentSetupScript::EquipmentSetupScript() {
-
-	ConfigStep = None;
-	GameStep = Normal;
-	CombatState = 0;
-	for (int i = 0; i < 5; i++) LeftWeapon[i] = NULL;
-
-}
-
-void EquipmentSetupScript::Run() {
-
-	if (ConfigStep == None && MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
-		StepType CurrentStep = GetCurrentEquipmentType();
-		if (CurrentStep != GameStep) {
-			if (CurrentStep == Normal || CurrentStep == Combat || (TheSettingManager->SettingsMain.EquipmentMode.SleepingEquipment && CurrentStep == Sleeping) || (TheSettingManager->SettingsMain.EquipmentMode.SwimmingEquipment && CurrentStep == Swimming)) {
-				EquipItems(GameStep, CurrentStep);
-				GameStep = CurrentStep;
-			}
-		}
-	}
-	else if (ConfigStep == Request) {
-		if (GameStep == EquipmentSetupScript::StepType::Normal && !CombatState) {
-			ConfigStep = Choice;
-			MenuManager->ShowMessageBox("Equipment setup", EquipmentSetupChoice, "Combat", "Sleep", "Swim", "Cancel");
-		}
-		else {
-			ConfigStep = EquipmentSetupScript::StepType::None;
-			MenuManager->ShowMessage("You cannot use the equipment menu now.");
-		}
-	}
-	else if (ConfigStep >= Combat && MenuManager->IsActive(Menu::MenuType::kMenuType_None)) {
-		EquipItems(ConfigStep, Normal);
-		ConfigStep = None;
-	}
-
-}
-
-void EquipmentSetupScript::EquipItems(StepType From, StepType To) {
-
-	HighProcessEx* Process = (HighProcessEx*)Player->process;
-	InventoryChanges::Data* InventoryChangesData = Player->extraDataList.GetInventoryChangesData();
-	InventoryChanges::EntryData* Data = NULL;
-	ExtraDataList* DataList = NULL;
-	TList<ExtraDataList>* ExtendData = NULL;
-	bool Loop = true;
-
-	Items[From - Normal].clear();
-	while (Loop) { // InventoryChanges is re-indexed for each unequipping. Extra loop needed.
-		Loop = false;
-		if (InventoryChangesData) {
-			for (TList<InventoryChanges::EntryData>::Iterator ItrE = InventoryChangesData->data->Begin(); !ItrE.End(); ++ItrE) {
-				Data = ItrE.Get();
-				if (Data && (ExtendData = Data->extendData)) {
-					for (TList<ExtraDataList>::Iterator Itr = ExtendData->Begin(); !Itr.End(); ++Itr) {
-						DataList = Itr.Get();
-						if (DataList && DataList->IsWorn()) {
-							TESForm* Form = Data->type;
-							Items[From - Normal].push_back(Form);
-							if (Form->formType == TESForm::FormType::kFormType_Weapon && DataList->IsWorn(1)) LeftWeapon[From - Normal] = (TESObjectWEAP*)Form;
-							Player->UnequipItem(Form, 1, DataList);
-							Loop = true;
-							break;
-						}
-					}
-				}
-				if (Loop) break;
-			}
-		}
-	}
-	for each (TESForm* Form in Items[To - Normal]) {
-		if (LeftWeapon[To - Normal] && Form == LeftWeapon[To - Normal]) {
-			LeftWeapon[To - Normal] = NULL;
-			Process->LeftEquippingState = HighProcessEx::State::In;
-		}
-		Player->EquipItem(Form, 1, NULL);
-		Process->LeftEquippingState = HighProcessEx::State::StateNone;
-	}
-	Player->UpdateInventory();
-
-}
-
-EquipmentSetupScript::StepType EquipmentSetupScript::GetCurrentEquipmentType() {
-
-	UInt8 SitSleepState = Player->GetSitSleepState();
-	StepType CurrentStep = Normal;
-	
-	if (CombatState) CurrentStep = Combat;
-	if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.EquipmentMode.CombatEquipmentKey)) {
-		if (CombatState) CurrentStep = Normal; else CurrentStep = Combat;
-		CombatState = !CombatState;
-	}
-	else if (SitSleepState >= 8 && SitSleepState <= 10) {
-		if (!CombatState) CurrentStep = Sleeping;
-	}
-	else if (IsMoving) {
-		if (!CombatState) {
-			ElapsedTime = 0.0f;
-			CurrentStep = Swimming;
-		}
-	}
-	if (CurrentStep == Normal && GameStep == Swimming && ElapsedTime < 2.0f) {
-		ElapsedTime += TheFrameRateManager->ElapsedTime;
-		CurrentStep = Swimming;
-	}
-	return CurrentStep;
-
-}
-
 class ScriptHook {
 public:
 	void TrackRunScripts();
@@ -196,16 +62,12 @@ ScriptManager::ScriptManager() {
 	TheScriptManager = this;
 
 	Purger = new PurgerScript();
-	Gravity = new GravityScript();
-	EquipmentSetup = new EquipmentSetupScript();
 
 }
 
 void ScriptManager::Run() {
 
 	if (TheSettingManager->SettingsMain.Purger.Enabled) Purger->Run();
-	if (TheSettingManager->SettingsMain.Gravity.Enabled) Gravity->Run();
-	if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) EquipmentSetup->Run();
 
 }
 

@@ -153,22 +153,8 @@ void RenderManager::SetSceneGraph() {
 		FoV = Player->worldFoV;
 	}
 
-	FirstPersonView = !Player->IsThirdPersonView(TheSettingManager->SettingsMain.CameraMode.Enabled, FirstPersonView);
 	Player->SetFoV(WorldSceneGraph, SettingWorldFoV, Setting1stPersonFoV, &FoV, MenuManager->IsActive(Menu::MenuType::kMenuType_None));
 	TheShaderManager->ShaderConst.ReciprocalResolution.w = FoV;
-	if (TheSettingManager->SettingsMain.CameraMode.Enabled) {
-		float FarPlaneDistance = WorldSceneGraph->GetFarPlaneDistance();
-		if (FirstPersonView && *SettingNearDistance != TheSettingManager->SettingsMain.CameraMode.NearDistanceFirst) {
-			*SettingNearDistance = TheSettingManager->SettingsMain.CameraMode.NearDistanceFirst;
-			WorldSceneGraph->camera->Frustum.Near = *SettingNearDistance;
-			WorldSceneGraph->camera->MaxFarNearRatio = FarPlaneDistance / *SettingNearDistance;
-		}
-		else if (!FirstPersonView && *SettingNearDistance != TheSettingManager->SettingsMain.CameraMode.NearDistanceThird) {
-			*SettingNearDistance = TheSettingManager->SettingsMain.CameraMode.NearDistanceThird;
-			WorldSceneGraph->camera->Frustum.Near = *SettingNearDistance;
-			WorldSceneGraph->camera->MaxFarNearRatio = FarPlaneDistance / *SettingNearDistance;
-		}
-	}
 
 }
 

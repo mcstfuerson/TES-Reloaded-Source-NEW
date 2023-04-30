@@ -18,14 +18,6 @@ bool __cdecl TrackLoadForm(TESForm* Form, UInt32 Arg2) {
 	
 	bool r = LoadForm(Form, Arg2);
 	switch (Form->formType) {
-		case TESForm::FormType::kFormType_Idle:
-			#if defined(OBLIVION)
-			if (TheSettingManager->SettingsMain.EquipmentMode.Enabled) {
-				TESIdleForm* Anim = (TESIdleForm*)Form;
-				if (!strcmp(Anim->animModel.nifPath.m_data, "Characters\\_Male\\IdleAnims\\oronbackanim.kf")) TheEquipmentManager->OnBackAnim = Anim;
-			}
-			#endif
-			break;
 		case TESForm::FormType::kFormType_Weather:
 			{ 
 				TESWeatherEx* Weather = (TESWeatherEx*)Form;

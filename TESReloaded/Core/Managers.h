@@ -1,6 +1,5 @@
 #pragma once
 
-#include "EquipmentManager.h"
 #include "ScriptManager.h"
 #include "SettingManager.h"
 #include "CommandManager.h"
@@ -22,7 +21,6 @@ extern FrameRateManager*	TheFrameRateManager;
 extern GameMenuManager*		TheGameMenuManager;
 extern KeyboardManager*		TheKeyboardManager;
 extern ShadowManager*		TheShadowManager;
-extern EquipmentManager*	TheEquipmentManager;
 extern ScriptManager*		TheScriptManager;
 
 void InitializeManagers();

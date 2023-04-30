@@ -7,7 +7,6 @@ FrameRateManager*	TheFrameRateManager = NULL;
 GameMenuManager*	TheGameMenuManager = NULL;
 KeyboardManager*	TheKeyboardManager = NULL;
 ShadowManager*		TheShadowManager = NULL;
-EquipmentManager*	TheEquipmentManager = NULL;
 ScriptManager*		TheScriptManager = NULL;
 
 void InitializeManagers() {
@@ -18,7 +17,6 @@ void InitializeManagers() {
 	new GameMenuManager();
 	new KeyboardManager();
 	new ShadowManager();
-	new EquipmentManager();
 	new ScriptManager();
 
 }

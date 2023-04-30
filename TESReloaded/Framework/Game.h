@@ -6798,7 +6798,7 @@ public:
 							*FoV = worldFoV;
 						}
 					}
-	bool			IsThirdPersonView(bool CameraMode, bool FirstPersonView) { return (!CameraMode ? isThirdPerson : !FirstPersonView); }
+	bool			IsThirdPersonView(){ return isThirdPerson; }
 	bool			IsVanityView() { return *(bool*)0x00B3BB04; }
 	TESWorldSpace*  GetWorldSpace() { return (parentCell != NULL ? parentCell->worldSpace : NULL); }
 	TESRegion*		GetRegion() { return currentRegion; }

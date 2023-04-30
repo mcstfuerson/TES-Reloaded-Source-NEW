@@ -29,7 +29,8 @@
 #define ShallowColorB shallowColorB
 #define ShallowColorA shallowColorA
 #define TerrainShaders "SLS2001.vso SLS2001.pso SLS2064.vso SLS2068.pso SLS2042.vso SLS2048.pso SLS2043.vso SLS2049.pso"
-#define InteriorShadowShaders "SLS2022.pso SLS2021.pso SLS2016.vso SLS2015.vso SLS2015.pso SLS2012.vso SLS2011.vso SLS2010.pso SLS2008.vso SLS2007.vso SLS2002.vso SLS2002.pso SLS2000.vso SLS2000.pso SLS1006.vso SLS1005.vso SLS1004.pso SLS1S006.vso SLS1S005.vso SLS1003.pso SLS2009.pso SLS2035.vso SLS2036.vso SLS2041.pso SM3002.vso SM3001.vso SM3001.pso SM3000.vso SM3LL001.pso SM3LL000.pso"
+#define ExteriorPom "PAR2022.pso"
+#define InteriorShadowShaders "SLS2022.pso SLS2021.pso SLS2016.vso SLS2015.vso SLS2015.pso SLS2012.vso SLS2011.vso SLS2010.pso SLS2008.vso SLS2007.vso SLS2002.vso SLS2002.pso SLS2000.vso SLS2000.pso SLS1006.vso SLS1005.vso SLS1004.pso SLS1S006.vso SLS1S005.vso SLS1003.pso SLS2009.pso SLS2035.vso SLS2036.vso SLS2041.pso SM3002.vso SM3001.vso SM3001.pso SM3000.vso SM3LL001.pso SM3LL000.pso PAR2022.pso"
 #define InteriorSpecularShadowShaders "SLS2021.pso SLS2035.vso SLS2036.vso SLS2041.pso PAR2025.pso PAR2026.pso PAR2034.vso"
 #define ExteriorDialogShaders "SLS2003.pso SLS2018.pso SLS2039.pso SKIN2001.pso SKIN2003.pso SKIN2007.pso"
 #define BloodShaders "GDECALS.vso GDECAL.pso SLS2040.vso SLS2046.pso"
@@ -788,6 +789,7 @@ void ShaderManager::UpdateShaderStates() {
 		if (LocationState != CellLocation::Exterior) {
 			LocationState = CellLocation::Exterior;
 			DisposeShader("InteriorShadows");
+			CreateShader("ExteriorPom");
 		}
 
 		if (MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) {
@@ -853,7 +855,7 @@ void ShaderManager::UpdateConstants() {
 		previousBlend = CurrentBlend;
 	}
 
-	IsThirdPersonView = Player->IsThirdPersonView(TheSettingManager->SettingsMain.CameraMode.Enabled, TheRenderManager->FirstPersonView);
+	IsThirdPersonView = Player->IsThirdPersonView();
 	TheRenderManager->GetSceneCameraData();
 
 	//Is fully init'd after two frame passes due to time calculations with sundir
@@ -1841,6 +1843,21 @@ void ShaderManager::CreateShader(const char* Name) {
 				LoadShader(PS);
 			}
 		}
+
+		ParallaxShader* PRS = (ParallaxShader*)GetShaderDefinition(15)->Shader;
+		for each (NiD3DPixelShaderEx * PS in PRS->Pixel) {
+			if (PS && strstr(InteriorShadowShaders, PS->ShaderName)) {
+				LoadShader(PS);
+			}
+		}
+	}
+	else if (!strcmp(Name, "ExteriorPom")) {
+		ParallaxShader* PRS = (ParallaxShader*)GetShaderDefinition(15)->Shader;
+		for each (NiD3DPixelShaderEx * PS in PRS->Pixel) {
+			if (PS && strstr(ExteriorPom, PS->ShaderName)) {
+				LoadShader(PS, "Exterior");
+			}
+		}
 	}
 	else if (!strcmp(Name, "ExteriorDialogActive")) {
 		for (int i = 0; i < 130; i++) {
@@ -2142,6 +2159,14 @@ void ShaderManager::DisposeShader(const char* Name) {
 		}
 		for (int i = 0; i < 130; i++) {
 			NiD3DPixelShaderEx* PS = ShadowLightPixelShaders[i];
+			if (PS && PS->ShaderProg && strstr(InteriorShadowShaders, PS->ShaderName)) {
+				PS->ShaderHandle = PS->ShaderHandleBackup;
+				delete PS->ShaderProg; PS->ShaderProg = NULL;
+			}
+		}
+
+		ParallaxShader* PRS = (ParallaxShader*)GetShaderDefinition(15)->Shader;
+		for each (NiD3DPixelShaderEx * PS in PRS->Pixel) {
 			if (PS && PS->ShaderProg && strstr(InteriorShadowShaders, PS->ShaderName)) {
 				PS->ShaderHandle = PS->ShaderHandleBackup;
 				delete PS->ShaderProg; PS->ShaderProg = NULL;

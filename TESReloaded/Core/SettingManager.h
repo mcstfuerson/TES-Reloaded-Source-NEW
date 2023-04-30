@@ -100,59 +100,6 @@ struct SettingsMainStruct {
 		float	FoV;
 	};
 	
-	struct CameraModeStruct {
-		bool		Enabled;
-		bool		ChasingFirst;
-		bool		ChasingThird;
-		UInt8		Crosshair;
-		float		NearDistanceFirst;
-		float		NearDistanceThird;
-		NiPoint3	Offset;
-		NiPoint3	DialogOffset;
-	};
-
-	struct EquipmentModeStruct {
-		bool		Enabled;
-		bool		SleepingEquipment;
-		bool		SwimmingEquipment;
-		UInt16		TorchKey;
-		UInt16		CombatEquipmentKey;
-		float		DualBlockDelay;
-		NiPoint3	ShieldOnBackPos;
-		NiPoint3	ShieldOnBackRot;
-		NiPoint3	WeaponOnBackPos;
-		NiPoint3	WeaponOnBackRot;
-		NiPoint3	TwoHandWeaponOnBackPos;
-		NiPoint3	TwoHandWeaponOnBackRot;
-		NiPoint3	BowOnBackPos;
-		NiPoint3	BowOnBackRot;
-		NiPoint3	StaffOnBackPos;
-		NiPoint3	StaffOnBackRot;
-		NiPoint3	TorchOnBeltPos;
-		NiPoint3	TorchOnBeltRot;
-	};
-	
-	struct GrassModeStruct {
-		bool	Enabled;
-	};
-
-	struct MountedCombatStruct {
-		bool		Enabled;
-		NiPoint3	WeaponOnBackPos;
-		NiPoint3	WeaponOnBackRot;
-		NiPoint3	TwoHandWeaponOnBackPos;
-		NiPoint3	TwoHandWeaponOnBackRot;
-		NiPoint3	BowOnBackPos;
-		NiPoint3	BowOnBackRot;
-		NiPoint3	StaffOnBackPos;
-		NiPoint3	StaffOnBackRot;
-	};
-	
-	struct SleepingModeStruct {
-		bool	Enabled;
-		UInt8	Mode;
-	};
-	
 	struct WeatherModeStruct {
 		bool		Enabled;
 		NiPoint3	CoeffNight;
@@ -241,26 +188,6 @@ struct SettingsMainStruct {
 		int		Time;
 	};
 
-	struct GravityStruct {
-		bool	Enabled;
-		float	Value;
-	};
-
-	struct DodgeStruct {
-		bool	Enabled;
-		bool	DoubleTap;
-		UInt8	AcrobaticsLevel;
-		float	DoubleTapTime;
-	};
-	
-	struct FlyCamStruct {
-		bool	Enabled;
-		UInt8	KeyAdd;
-		UInt8	KeySubtract;
-		float	ScrollMultiplier;
-		float	StepValue;
-	};
-
 	struct DevelopStruct {
 		bool	CompileShaders;
 		bool	CompileEffects;
@@ -269,20 +196,12 @@ struct SettingsMainStruct {
 	};
 
 	MainStruct					Main;
-	CameraModeStruct			CameraMode;
-	EquipmentModeStruct			EquipmentMode;
-	GrassModeStruct				GrassMode;
-	MountedCombatStruct			MountedCombat;
-	SleepingModeStruct			SleepingMode;
 	WeatherModeStruct			WeatherMode;
 	ShadowModeStruct			ShadowMode;
 	ShadersStruct				Shaders;
 	EffectsStruct				Effects;
 	MenuStruct					Menu;
 	PurgerStruct				Purger;
-	GravityStruct				Gravity;
-	DodgeStruct					Dodge;
-	FlyCamStruct				FlyCam;
 	DevelopStruct				Develop;
 };
 

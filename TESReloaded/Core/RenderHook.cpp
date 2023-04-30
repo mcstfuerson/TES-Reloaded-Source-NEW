@@ -376,11 +376,9 @@ void __cdecl TrackSetShaderPackage(int Arg1, int Arg2, UInt8 Force1XShaders, int
 
 void (__cdecl * RenderObject)(NiCamera*, NiNode*, NiCullingProcess*, NiVisibleArray*) = (void (__cdecl *)(NiCamera*, NiNode*, NiCullingProcess*, NiVisibleArray*))0x0070C0B0;
 void __cdecl TrackRenderObject(NiCamera* Camera, NiNode* Object, NiCullingProcess* CullingProcess, NiVisibleArray* VisibleArray) {
-	
-	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
 
 	RenderObject(Camera, Object, CullingProcess, VisibleArray);
-	if (Object == WorldSceneGraph && (CameraMode || Player->IsThirdPersonView(CameraMode, TheRenderManager->FirstPersonView))) {
+	if (Object == WorldSceneGraph && Player->IsThirdPersonView()) {
 		TheRenderManager->ResolveDepthBuffer();
 	}
 	else if (Object == Player->firstPersonNiNode) {

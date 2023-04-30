@@ -115,162 +115,6 @@ SettingManager::SettingManager() {
 	SettingsMain.Main.SaveSettings = GetPrivateProfileIntA("Main", "SaveSettings", 1, Filename);
 	SettingsMain.Main.ReplaceIntro = GetPrivateProfileIntA("Main", "ReplaceIntro", 0, Filename);	
 
-	SettingsMain.EquipmentMode.Enabled = GetPrivateProfileIntA("EquipmentMode", "Enabled", 0, Filename);
-	GetPrivateProfileStringA("EquipmentMode", "ShieldOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.ShieldOnBackPos.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "ShieldOnBackPosY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.ShieldOnBackPos.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "ShieldOnBackPosZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.ShieldOnBackPos.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "ShieldOnBackRotX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.ShieldOnBackRot.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "ShieldOnBackRotY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.ShieldOnBackRot.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "ShieldOnBackRotZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.ShieldOnBackRot.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "WeaponOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.WeaponOnBackPos.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "WeaponOnBackPosY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.WeaponOnBackPos.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "WeaponOnBackPosZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.WeaponOnBackPos.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "WeaponOnBackRotX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.WeaponOnBackRot.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "WeaponOnBackRotY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.WeaponOnBackRot.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "WeaponOnBackRotZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.WeaponOnBackRot.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TwoHandWeaponOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TwoHandWeaponOnBackPos.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TwoHandWeaponOnBackPosY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TwoHandWeaponOnBackPos.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TwoHandWeaponOnBackPosZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TwoHandWeaponOnBackPos.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TwoHandWeaponOnBackRotX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TwoHandWeaponOnBackRot.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TwoHandWeaponOnBackRotY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TwoHandWeaponOnBackRot.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TwoHandWeaponOnBackRotZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TwoHandWeaponOnBackRot.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "BowOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.BowOnBackPos.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "BowOnBackPosY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.BowOnBackPos.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "BowOnBackPosZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.BowOnBackPos.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "BowOnBackRotX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.BowOnBackRot.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "BowOnBackRotY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.BowOnBackRot.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "BowOnBackRotZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.BowOnBackRot.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "StaffOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.StaffOnBackPos.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "StaffOnBackPosY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.StaffOnBackPos.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "StaffOnBackPosZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.StaffOnBackPos.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "StaffOnBackRotX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.StaffOnBackRot.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "StaffOnBackRotY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.StaffOnBackRot.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "StaffOnBackRotZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.StaffOnBackRot.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TorchOnBeltPosX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TorchOnBeltPos.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TorchOnBeltPosY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TorchOnBeltPos.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TorchOnBeltPosZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TorchOnBeltPos.z = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TorchOnBeltRotX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TorchOnBeltRot.x = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TorchOnBeltRotY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TorchOnBeltRot.y = atof(value);
-	GetPrivateProfileStringA("EquipmentMode", "TorchOnBeltRotZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.TorchOnBeltRot.z = atof(value);
-	SettingsMain.EquipmentMode.TorchKey = GetPrivateProfileIntA("EquipmentMode", "TorchKey", 21, Filename);
-	SettingsMain.EquipmentMode.SleepingEquipment = GetPrivateProfileIntA("EquipmentMode", "SleepingEquipment", 1, Filename);
-	SettingsMain.EquipmentMode.SwimmingEquipment = GetPrivateProfileIntA("EquipmentMode", "SwimmingEquipment", 1, Filename);
-	SettingsMain.EquipmentMode.CombatEquipmentKey = GetPrivateProfileIntA("EquipmentMode", "CombatEquipmentKey", 259, Filename);
-	GetPrivateProfileStringA("EquipmentMode", "DualBlockDelay", "0.15", value, SettingStringBuffer, Filename);
-	SettingsMain.EquipmentMode.DualBlockDelay = atof(value);
-	
-	SettingsMain.GrassMode.Enabled = GetPrivateProfileIntA("GrassMode", "Enabled", 0, Filename);
-
-	SettingsMain.CameraMode.Enabled = GetPrivateProfileIntA("CameraMode", "Enabled", 0, Filename);
-	SettingsMain.CameraMode.Crosshair = GetPrivateProfileIntA("CameraMode", "Crosshair", 2, Filename);
-	SettingsMain.CameraMode.ChasingFirst = GetPrivateProfileIntA("CameraMode", "ChasingFirst", 0, Filename);
-	SettingsMain.CameraMode.ChasingThird = GetPrivateProfileIntA("CameraMode", "ChasingThird", 0, Filename);
-	GetPrivateProfileStringA("CameraMode", "OffsetX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.CameraMode.Offset.x = atof(value);
-	GetPrivateProfileStringA("CameraMode", "OffsetY", "16.0", value, SettingStringBuffer, Filename);
-	SettingsMain.CameraMode.Offset.y = atof(value);
-	GetPrivateProfileStringA("CameraMode", "OffsetZ", "3.0", value, SettingStringBuffer, Filename);
-	SettingsMain.CameraMode.Offset.z = atof(value);
-	GetPrivateProfileStringA("CameraMode", "DialogOffsetX", "50.0", value, SettingStringBuffer, Filename);
-	SettingsMain.CameraMode.DialogOffset.x = atof(value);
-	GetPrivateProfileStringA("CameraMode", "DialogOffsetY", "-10.0", value, SettingStringBuffer, Filename);
-	SettingsMain.CameraMode.DialogOffset.y = atof(value);
-	GetPrivateProfileStringA("CameraMode", "DialogOffsetZ", "10.0", value, SettingStringBuffer, Filename);
-	SettingsMain.CameraMode.DialogOffset.z = atof(value);
-	GetPrivateProfileStringA("CameraMode", "NearDistanceFirst", "2.0", value, SettingStringBuffer, Filename);
-	SettingsMain.CameraMode.NearDistanceFirst = atof(value);
-	GetPrivateProfileStringA("CameraMode", "NearDistanceThird", "8.0", value, SettingStringBuffer, Filename);
-	SettingsMain.CameraMode.NearDistanceThird = atof(value);
-
-	SettingsMain.MountedCombat.Enabled = GetPrivateProfileIntA("MountedCombat", "Enabled", 0, Filename);
-	GetPrivateProfileStringA("MountedCombat", "WeaponOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.WeaponOnBackPos.x = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "WeaponOnBackPosY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.WeaponOnBackPos.y = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "WeaponOnBackPosZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.WeaponOnBackPos.z = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "WeaponOnBackRotX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.WeaponOnBackRot.x = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "WeaponOnBackRotY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.WeaponOnBackRot.y = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "WeaponOnBackRotZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.WeaponOnBackRot.z = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "TwoHandWeaponOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.x = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "TwoHandWeaponOnBackPosY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.y = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "TwoHandWeaponOnBackPosZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.z = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "TwoHandWeaponOnBackRotX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.TwoHandWeaponOnBackRot.x = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "TwoHandWeaponOnBackRotY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.TwoHandWeaponOnBackRot.y = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "TwoHandWeaponOnBackRotZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.TwoHandWeaponOnBackRot.z = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "BowOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.BowOnBackPos.x = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "BowOnBackPosY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.BowOnBackPos.y = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "BowOnBackPosZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.BowOnBackPos.z = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "BowOnBackRotX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.BowOnBackRot.x = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "BowOnBackRotY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.BowOnBackRot.y = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "BowOnBackRotZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.BowOnBackRot.z = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "StaffOnBackPosX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.StaffOnBackPos.x = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "StaffOnBackPosY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.StaffOnBackPos.y = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "StaffOnBackPosZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.StaffOnBackPos.z = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "StaffOnBackRotX", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.StaffOnBackRot.x = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "StaffOnBackRotY", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.StaffOnBackRot.y = atof(value);
-	GetPrivateProfileStringA("MountedCombat", "StaffOnBackRotZ", "0.0", value, SettingStringBuffer, Filename);
-	SettingsMain.MountedCombat.StaffOnBackRot.z = atof(value);
-
-	SettingsMain.SleepingMode.Enabled = GetPrivateProfileIntA("SleepingMode", "Enabled", 0, Filename);
-	SettingsMain.SleepingMode.Mode = GetPrivateProfileIntA("SleepingMode", "Mode", 3, Filename);
-
 	SettingsMain.WeatherMode.Enabled = GetPrivateProfileIntA("WeatherMode", "Enabled", 0, Filename);
 	GetPrivateProfileStringA("WeatherMode", "CoeffNightR", "1.0", value, SettingStringBuffer, Filename);
 	SettingsMain.WeatherMode.CoeffNight.x = atof(value);
@@ -396,24 +240,6 @@ SettingManager::SettingManager() {
 	SettingsMain.Purger.PurgeTextures = GetPrivateProfileIntA("Purger", "PurgeTextures", 1, Filename);
 	SettingsMain.Purger.PurgeCells = GetPrivateProfileIntA("Purger", "PurgeCells", 1, Filename);
 	SettingsMain.Purger.Key = GetPrivateProfileIntA("Purger", "Key", 88, Filename);
-
-	SettingsMain.Gravity.Enabled = GetPrivateProfileIntA("Gravity", "Enabled", 1, Filename);
-	GetPrivateProfileStringA("Gravity", "Value", "9.8", value, SettingStringBuffer, Filename);
-	SettingsMain.Gravity.Value = atof(value);
-
-	SettingsMain.Dodge.Enabled = GetPrivateProfileIntA("Dodge", "Enabled", 0, Filename);
-	SettingsMain.Dodge.AcrobaticsLevel = GetPrivateProfileIntA("Dodge", "AcrobaticsLevel", 0, Filename);
-	SettingsMain.Dodge.DoubleTap = GetPrivateProfileIntA("Dodge", "DoubleTap", 1, Filename);
-	GetPrivateProfileStringA("Dodge", "DoubleTapTime", "0.5", value, SettingStringBuffer, Filename);
-	SettingsMain.Dodge.DoubleTapTime = atof(value);
-
-	SettingsMain.FlyCam.Enabled = GetPrivateProfileIntA("FlyCam", "Enabled", 0, Filename);
-	GetPrivateProfileStringA("FlyCam", "ScrollMultiplier", "5.0", value, SettingStringBuffer, Filename);
-	SettingsMain.FlyCam.ScrollMultiplier = atof(value);
-	SettingsMain.FlyCam.KeyAdd = GetPrivateProfileIntA("FlyCam", "KeyAdd", 78, Filename);
-	SettingsMain.FlyCam.KeySubtract = GetPrivateProfileIntA("FlyCam", "KeySubtract", 74, Filename);
-	GetPrivateProfileStringA("FlyCam", "StepValue", "1.0", value, SettingStringBuffer, Filename);
-	SettingsMain.FlyCam.StepValue = atof(value);
 
 	SettingsMain.Develop.CompileShaders = GetPrivateProfileIntA("Develop", "CompileShaders", 0, Filename);
 	SettingsMain.Develop.CompileEffects = GetPrivateProfileIntA("Develop", "CompileEffects", 0, Filename);
@@ -1265,15 +1091,9 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 			WritePrivateProfileStringA("Main", "ScreenshotKey", ToString(SettingsMain.Main.ScreenshotKey).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "FPSOverlay", ToString(SettingsMain.Main.FPSOverlay).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "DirectionalLightOverride", ToString(SettingsMain.Main.DirectionalLightOverride).c_str(), SettingsMain.Main.MainFile);
-			WritePrivateProfileStringA("CameraMode", "NearDistanceFirst", ToString(SettingsMain.CameraMode.NearDistanceFirst).c_str(), SettingsMain.Main.MainFile);
-			WritePrivateProfileStringA("CameraMode", "NearDistanceThird", ToString(SettingsMain.CameraMode.NearDistanceThird).c_str(), SettingsMain.Main.MainFile);
-			WritePrivateProfileStringA("CameraMode", "OffsetX", ToString(SettingsMain.CameraMode.Offset.x).c_str(), SettingsMain.Main.MainFile);
-			WritePrivateProfileStringA("CameraMode", "OffsetY", ToString(SettingsMain.CameraMode.Offset.y).c_str(), SettingsMain.Main.MainFile);
-			WritePrivateProfileStringA("CameraMode", "OffsetZ", ToString(SettingsMain.CameraMode.Offset.z).c_str(), SettingsMain.Main.MainFile);
 #if defined(SKYRIM)
 			WritePrivateProfileStringA("ShadowMode", "NearQuality", ToString(SettingsMain.ShadowMode.NearQuality).c_str(), SettingsMain.Main.MainFile);
 #endif
-			WritePrivateProfileStringA("SleepingMode", "Mode", ToString(SettingsMain.SleepingMode.Mode).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Menu", "StepValue", ToString(SettingsMain.Menu.StepValue).c_str(), SettingsMain.Main.MainFile);
 		}
 	}
@@ -1774,15 +1594,8 @@ SectionsList SettingManager::GetMenuSections(const char* Item, const char* Defin
 	if (!strcmp(Item, "Main")) {
 		if (!strcmp(Definition, "Main")) {
 			Sections[0] = "Main";
-			if (SettingsMain.CameraMode.Enabled) Sections[1] = "CameraMode";
-#if defined(OBLIVION)
-			if (SettingsMain.EquipmentMode.Enabled) Sections[2] = "EquipmentMode";
 			Sections[3] = "FrameRate";
-			Sections[4] = "Gravity";
-			if (SettingsMain.MountedCombat.Enabled) Sections[6] = "MountedCombat";
 			Sections[7] = "Purger";
-#endif
-			if (SettingsMain.SleepingMode.Enabled) Sections[8] = "SleepingMode";
 			if (SettingsMain.WeatherMode.Enabled) Sections[9] = "WeatherMode";
 			Sections[10] = "Menu";
 		}
@@ -1924,38 +1737,6 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["MoonPhaseLumFull"] = SettingsMain.Main.MoonPhaseLumFull;
 				Settings["InteriorDimmerCoeff"] = SettingsMain.Main.InteriorDimmerCoeff;				
 			}
-			else if (!strcmp(Section, "CameraMode")) {
-				Settings["NearDistanceFirst"] = SettingsMain.CameraMode.NearDistanceFirst;
-				Settings["NearDistanceThird"] = SettingsMain.CameraMode.NearDistanceThird;
-				Settings["OffsetX"] = SettingsMain.CameraMode.Offset.x;
-				Settings["OffsetY"] = SettingsMain.CameraMode.Offset.y;
-				Settings["OffsetZ"] = SettingsMain.CameraMode.Offset.z;
-			}
-			else if (!strcmp(Section, "EquipmentMode")) {
-				Settings["CombatEquipmentKey"] = SettingsMain.EquipmentMode.CombatEquipmentKey;
-				Settings["DualBlockDelay"] = SettingsMain.EquipmentMode.DualBlockDelay;
-				Settings["ShieldOnBackPosX"] = SettingsMain.EquipmentMode.ShieldOnBackPos.x;
-				Settings["ShieldOnBackPosY"] = SettingsMain.EquipmentMode.ShieldOnBackPos.y;
-				Settings["ShieldOnBackPosZ"] = SettingsMain.EquipmentMode.ShieldOnBackPos.z;
-				Settings["ShieldOnBackRotX"] = SettingsMain.EquipmentMode.ShieldOnBackRot.x;
-				Settings["ShieldOnBackRotY"] = SettingsMain.EquipmentMode.ShieldOnBackRot.y;
-				Settings["ShieldOnBackRotZ"] = SettingsMain.EquipmentMode.ShieldOnBackRot.z;
-				Settings["SleepingEquipment"] = SettingsMain.EquipmentMode.SleepingEquipment;
-				Settings["SwimmingEquipment"] = SettingsMain.EquipmentMode.SwimmingEquipment;
-				Settings["TorchOnBeltPosX"] = SettingsMain.EquipmentMode.TorchOnBeltPos.x;
-				Settings["TorchOnBeltPosY"] = SettingsMain.EquipmentMode.TorchOnBeltPos.y;
-				Settings["TorchOnBeltPosZ"] = SettingsMain.EquipmentMode.TorchOnBeltPos.z;
-				Settings["TorchOnBeltRotX"] = SettingsMain.EquipmentMode.TorchOnBeltRot.x;
-				Settings["TorchOnBeltRotY"] = SettingsMain.EquipmentMode.TorchOnBeltRot.y;
-				Settings["TorchOnBeltRotZ"] = SettingsMain.EquipmentMode.TorchOnBeltRot.z;
-				Settings["TorchKey"] = SettingsMain.EquipmentMode.TorchKey;
-				Settings["WeaponOnBackPosX"] = SettingsMain.EquipmentMode.WeaponOnBackPos.x;
-				Settings["WeaponOnBackPosY"] = SettingsMain.EquipmentMode.WeaponOnBackPos.y;
-				Settings["WeaponOnBackPosZ"] = SettingsMain.EquipmentMode.WeaponOnBackPos.z;
-				Settings["WeaponOnBackRotX"] = SettingsMain.EquipmentMode.WeaponOnBackRot.x;
-				Settings["WeaponOnBackRotY"] = SettingsMain.EquipmentMode.WeaponOnBackRot.y;
-				Settings["WeaponOnBackRotZ"] = SettingsMain.EquipmentMode.WeaponOnBackRot.z;
-			}
 			else if (!strcmp(Section, "WeatherMode")) {
 				Settings["CoeffFogR"] = SettingsMain.WeatherMode.CoeffFog.x;
 				Settings["CoeffFogG"] = SettingsMain.WeatherMode.CoeffFog.y;
@@ -1967,35 +1748,12 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["CoeffSunG"] = SettingsMain.WeatherMode.CoeffSun.y;
 				Settings["CoeffSunB"] = SettingsMain.WeatherMode.CoeffSun.z;
 			}
-			else if (!strcmp(Section, "Gravity")) {
-				Settings["Enabled"] = SettingsMain.Gravity.Enabled;
-				Settings["Value"] = SettingsMain.Gravity.Value;
-			}
-			else if (!strcmp(Section, "MountedCombat")) {
-				Settings["TwoHandWeaponOnBackPosX"] = SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.x;
-				Settings["TwoHandWeaponOnBackPosY"] = SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.y;
-				Settings["TwoHandWeaponOnBackPosZ"] = SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.z;
-				Settings["TwoHandWeaponOnBackRotX"] = SettingsMain.MountedCombat.TwoHandWeaponOnBackRot.x;
-				Settings["TwoHandWeaponOnBackRotY"] = SettingsMain.MountedCombat.TwoHandWeaponOnBackRot.y;
-				Settings["TwoHandWeaponOnBackRotZ"] = SettingsMain.MountedCombat.TwoHandWeaponOnBackRot.z;
-				if (SettingsMain.EquipmentMode.Enabled) {
-					Settings["WeaponOnBackPosX"] = SettingsMain.MountedCombat.WeaponOnBackPos.x;
-					Settings["WeaponOnBackPosY"] = SettingsMain.MountedCombat.WeaponOnBackPos.y;
-					Settings["WeaponOnBackPosZ"] = SettingsMain.MountedCombat.WeaponOnBackPos.z;
-					Settings["WeaponOnBackRotX"] = SettingsMain.MountedCombat.WeaponOnBackRot.x;
-					Settings["WeaponOnBackRotY"] = SettingsMain.MountedCombat.WeaponOnBackRot.y;
-					Settings["WeaponOnBackRotZ"] = SettingsMain.MountedCombat.WeaponOnBackRot.z;
-				}
-			}
 			else if (!strcmp(Section, "Purger")) {
 				Settings["Enabled"] = SettingsMain.Purger.Enabled;
 				Settings["Key"] = SettingsMain.Purger.Key;
 				Settings["PurgeCells"] = SettingsMain.Purger.PurgeCells;
 				Settings["PurgeTextures"] = SettingsMain.Purger.PurgeTextures;
 				Settings["Time"] = SettingsMain.Purger.Time;
-			}
-			else if (!strcmp(Section, "SleepingMode")) {
-				Settings["Mode"] = SettingsMain.SleepingMode.Mode;
 			}
 #if defined(SKYRIM)
 			else if (!strcmp(Section, "ShadowMode")) {
@@ -2408,66 +2166,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				else if (!strcmp(Setting, "InteriorDimmerCoeff"))
 					SettingsMain.Main.InteriorDimmerCoeff = Value;
 			}
-			else if (!strcmp(Section, "CameraMode")) {
-				if (!strcmp(Setting, "NearDistanceFirst"))
-					SettingsMain.CameraMode.NearDistanceFirst = Value;
-				else if (!strcmp(Setting, "NearDistanceThird"))
-					SettingsMain.CameraMode.NearDistanceThird = Value;
-				else if (!strcmp(Setting, "OffsetX"))
-					SettingsMain.CameraMode.Offset.x = Value;
-				else if (!strcmp(Setting, "OffsetY"))
-					SettingsMain.CameraMode.Offset.y = Value;
-				else if (!strcmp(Setting, "OffsetZ"))
-					SettingsMain.CameraMode.Offset.z = Value;
-			}
-			else if (!strcmp(Section, "EquipmentMode")) {
-				if (!strcmp(Setting, "CombatEquipmentKey"))
-					SettingsMain.EquipmentMode.CombatEquipmentKey = Value;
-				else if (!strcmp(Setting, "DualBlockDelay"))
-					SettingsMain.EquipmentMode.DualBlockDelay = Value;
-				else if (!strcmp(Setting, "ShieldOnBackPosX"))
-					SettingsMain.EquipmentMode.ShieldOnBackPos.x = Value;
-				else if (!strcmp(Setting, "ShieldOnBackPosY"))
-					SettingsMain.EquipmentMode.ShieldOnBackPos.y = Value;
-				else if (!strcmp(Setting, "ShieldOnBackPosZ"))
-					SettingsMain.EquipmentMode.ShieldOnBackPos.z = Value;
-				else if (!strcmp(Setting, "ShieldOnBackRotX"))
-					SettingsMain.EquipmentMode.ShieldOnBackRot.x = Value;
-				else if (!strcmp(Setting, "ShieldOnBackRotY"))
-					SettingsMain.EquipmentMode.ShieldOnBackRot.y = Value;
-				else if (!strcmp(Setting, "ShieldOnBackRotZ"))
-					SettingsMain.EquipmentMode.ShieldOnBackRot.z = Value;
-				else if (!strcmp(Setting, "SleepingEquipment"))
-					SettingsMain.EquipmentMode.SleepingEquipment = Value;
-				else if (!strcmp(Setting, "SwimmingEquipment"))
-					SettingsMain.EquipmentMode.SwimmingEquipment = Value;
-				else if (!strcmp(Setting, "TorchOnBeltPosX"))
-					SettingsMain.EquipmentMode.TorchOnBeltPos.x = Value;
-				else if (!strcmp(Setting, "TorchOnBeltPosY"))
-					SettingsMain.EquipmentMode.TorchOnBeltPos.y = Value;
-				else if (!strcmp(Setting, "TorchOnBeltPosZ"))
-					SettingsMain.EquipmentMode.TorchOnBeltPos.z = Value;
-				else if (!strcmp(Setting, "TorchOnBeltRotX"))
-					SettingsMain.EquipmentMode.TorchOnBeltRot.x = Value;
-				else if (!strcmp(Setting, "TorchOnBeltRotY"))
-					SettingsMain.EquipmentMode.TorchOnBeltRot.y = Value;
-				else if (!strcmp(Setting, "TorchOnBeltRotZ"))
-					SettingsMain.EquipmentMode.TorchOnBeltRot.z = Value;
-				else if (!strcmp(Setting, "TorchKey"))
-					SettingsMain.EquipmentMode.TorchKey = Value;
-				else if (!strcmp(Setting, "WeaponOnBackPosX"))
-					SettingsMain.EquipmentMode.WeaponOnBackPos.x = Value;
-				else if (!strcmp(Setting, "WeaponOnBackPosY"))
-					SettingsMain.EquipmentMode.WeaponOnBackPos.y = Value;
-				else if (!strcmp(Setting, "WeaponOnBackPosZ"))
-					SettingsMain.EquipmentMode.WeaponOnBackPos.z = Value;
-				else if (!strcmp(Setting, "WeaponOnBackRotX"))
-					SettingsMain.EquipmentMode.WeaponOnBackRot.x = Value;
-				else if (!strcmp(Setting, "WeaponOnBackRotY"))
-					SettingsMain.EquipmentMode.WeaponOnBackRot.y = Value;
-				else if (!strcmp(Setting, "WeaponOnBackRotZ"))
-					SettingsMain.EquipmentMode.WeaponOnBackRot.z = Value;
-			}
 			else if (!strcmp(Section, "WeatherMode")) {
 				if (!strcmp(Setting, "CoeffNightR"))
 					SettingsMain.WeatherMode.CoeffNight.x = Value;
@@ -2498,38 +2196,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SetSettingsWeather(Weather);
 				}
 			}
-			else if (!strcmp(Section, "Gravity")) {
-				if (!strcmp(Setting, "Enabled"))
-					SettingsMain.Gravity.Enabled = Value;
-				else if (!strcmp(Setting, "Value"))
-					SettingsMain.Gravity.Value = Value;
-			}
-			else if (!strcmp(Section, "MountedCombat")) {
-				if (!strcmp(Setting, "TwoHandWeaponOnBackPosX"))
-					SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.x = Value;
-				else if (!strcmp(Setting, "TwoHandWeaponOnBackPosY"))
-					SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.y = Value;
-				else if (!strcmp(Setting, "TwoHandWeaponOnBackPosZ"))
-					SettingsMain.MountedCombat.TwoHandWeaponOnBackPos.z = Value;
-				else if (!strcmp(Setting, "TwoHandWeaponOnBackRotX"))
-					SettingsMain.MountedCombat.TwoHandWeaponOnBackRot.x = Value;
-				else if (!strcmp(Setting, "TwoHandWeaponOnBackRotY"))
-					SettingsMain.MountedCombat.TwoHandWeaponOnBackRot.y = Value;
-				else if (!strcmp(Setting, "TwoHandWeaponOnBackRotZ"))
-					SettingsMain.MountedCombat.TwoHandWeaponOnBackRot.z = Value;
-				else if (!strcmp(Setting, "WeaponOnBackPosX"))
-					SettingsMain.MountedCombat.WeaponOnBackPos.x = Value;
-				else if (!strcmp(Setting, "WeaponOnBackPosY"))
-					SettingsMain.MountedCombat.WeaponOnBackPos.y = Value;
-				else if (!strcmp(Setting, "WeaponOnBackPosZ"))
-					SettingsMain.MountedCombat.WeaponOnBackPos.z = Value;
-				else if (!strcmp(Setting, "WeaponOnBackRotX"))
-					SettingsMain.MountedCombat.WeaponOnBackRot.x = Value;
-				else if (!strcmp(Setting, "WeaponOnBackRotY"))
-					SettingsMain.MountedCombat.WeaponOnBackRot.y = Value;
-				else if (!strcmp(Setting, "WeaponOnBackRotZ"))
-					SettingsMain.MountedCombat.WeaponOnBackRot.z = Value;
-			}
 			else if (!strcmp(Section, "Purger")) {
 				if (!strcmp(Setting, "Enabled"))
 					SettingsMain.Purger.Enabled = Value;
@@ -2545,9 +2211,6 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 			else if (!strcmp(Section, "ShadowMode")) {
 				if (!strcmp(Setting, "NearQuality"))
 					SettingsMain.ShadowMode.NearQuality = Value;
-			}
-			else if (!strcmp(Section, "SleepingMode")) {
-				SettingsMain.SleepingMode.Mode = Value;
 			}
 			else if (!strcmp(Section, "Menu")) {
 				SettingsMain.Menu.StepValue = Value;
