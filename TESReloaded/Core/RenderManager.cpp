@@ -14,7 +14,7 @@ void RenderManager::GetSceneCameraData() {
 	if (Camera) {
 		NiMatrix33* WorldRotate = &Camera->m_worldTransform.rot;
 		NiPoint3* WorldTranslate = &Camera->m_worldTransform.pos;
-		
+
 		CameraForward.x = WorldRotate->data[0][0];
 		CameraForward.y = WorldRotate->data[1][0];
 		CameraForward.z = WorldRotate->data[2][0];
@@ -224,7 +224,12 @@ void RenderManager::ResolveDepthBuffer() {
 		DWORD dCurrZE;
 		DWORD dCurrZW;
 		DWORD dCurrCW;
+		DWORD dCurrFVF;
+		IDirect3DVertexDeclaration9* pCurrDecl = nullptr;
+
 		D3DXVECTOR3 vDummyPoint(0.0f, 0.0f, 0.0f);
+		device->GetFVF(&dCurrFVF);
+		device->GetVertexDeclaration(&pCurrDecl);
 
 		device->GetTexture(0, &pCurrTX);
 		device->GetVertexShader(&pCurrVS);
@@ -248,11 +253,13 @@ void RenderManager::ResolveDepthBuffer() {
 		device->SetRenderState(D3DRS_POINTSIZE, RESZ_CODE);
 		device->SetRenderState(D3DRS_POINTSIZE, NULL);
 
+		device->SetFVF(dCurrFVF);
+		device->SetVertexDeclaration(pCurrDecl);
 		device->SetTexture(0, pCurrTX);
 		device->SetVertexShader(pCurrVS);
 		device->SetPixelShader(pCurrPS);
 		device->SetStreamSource(0, pCurrVX, dCurrVO, dCurrVS);
-		
+
 		if (pCurrTX) pCurrTX->Release();
 		if (pCurrVX) pCurrVX->Release();
 	}
