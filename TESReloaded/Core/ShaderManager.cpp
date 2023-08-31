@@ -1,6 +1,7 @@
 #include <fstream>
 #include <ctime>
 #include <math.h>
+#include <cmath>
 #include <WeatherMode.h>
 #include <algorithm>
 #include <iostream>
@@ -299,6 +300,14 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SnowAccumulation.Params;
 	else if (!strcmp(Name, "TESR_VolumetricFogData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricFog.Data;
+	else if (!strcmp(Name, "TESR_VolumetricLightAccum"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.accumData;
+	else if (!strcmp(Name, "TESR_VolumetricLightBase"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.baseData;
+	else if (!strcmp(Name, "TESR_VolumetricLightMisc"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.miscData;
+	else if (!strcmp(Name, "TESR_VolumetricLightMisc2"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.miscData2;
 	else if (!strcmp(Name, "TESR_WaterLensData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.WaterLens.Time;
 	else if (!strcmp(Name, "TESR_WetWorldCoeffs"))
@@ -702,6 +711,7 @@ ShaderManager::ShaderManager() {
 	WetWorldEffect = NULL;
 	SharpeningEffect = NULL;
 	VolumetricFogEffect = NULL;
+	VolumetricLightEffect = NULL;
 	RainEffect = NULL;
 	SnowEffect = NULL;
 	ShadowsExteriorsEffect = NULL;
@@ -760,6 +770,7 @@ void ShaderManager::CreateEffects() {
 	if (Effects->SnowAccumulation) CreateEffect(EffectRecordType_SnowAccumulation);
 	if (Effects->Underwater) CreateEffect(EffectRecordType_Underwater);
 	if (Effects->VolumetricFog) CreateEffect(EffectRecordType_VolumetricFog);
+	if (Effects->VolumetricLight) CreateEffect(EffectRecordType_VolumetricLight);
 	if (Effects->WaterLens) CreateEffect(EffectRecordType_WaterLens);
 	if (Effects->WetWorld) CreateEffect(EffectRecordType_WetWorld);
 	if (Effects->Precipitations) CreateEffect(EffectRecordType_Precipitations);
@@ -842,6 +853,7 @@ void ShaderManager::UpdateConstants() {
 	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
 	TESRegion* currentRegion = Player->GetRegion();
 	float weatherPercent = WorldSky->weatherPercent;
+	float dayPercent = 0;
 	float lastGameTime = ShaderConst.GameTime.y;
 	TheSettingManager->SettingsShadows.Exteriors.UseIntervalUpdate = UseIntervalUpdate;
 
@@ -895,7 +907,8 @@ void ShaderManager::UpdateConstants() {
 				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
 			}
 			else if (ShaderConst.GameTime.y < ShaderConst.SunTiming.y && fabs(deltaz) - ShaderConst.SunDir.z > 0.0f) {
-				ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
+				//Will leave this for now, but truly dont know what it does besides making the sun direction incorrect.
+				//ShaderConst.SunDir.z = -ShaderConst.SunDir.z;
 			}
 
 			//TODO: use kClimate_Masser and kClimate_Secunda but not sure what to compare against?
@@ -962,6 +975,7 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.OverrideVanillaDirectionalLight = false;
 					ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 					ShaderConst.DayPhase = Day;
+					dayPercent = 1.0f;
 					ShaderConst.EveningTransLightDirSet = false;
 				}
 				else if ((ShaderConst.GameTime.y >= ShaderConst.SunTiming.w && ShaderConst.GameTime.y <= 23.99) || (ShaderConst.GameTime.y >= 0 && ShaderConst.GameTime.y <= ShaderConst.SunTiming.x)) {
@@ -972,6 +986,7 @@ void ShaderManager::UpdateConstants() {
 					ShaderConst.MasserAmount.x = ShaderConst.MasserFade;
 					ShaderConst.SecundaAmount.x = ShaderConst.SecundaFade;
 					ShaderConst.DayPhase = Night;
+					dayPercent = 0.0f;
 					ShaderConst.EveningTransLightDirSet = false;
 					if (TheSettingManager->SettingsMain.Main.DirectionalLightOverride) {
 						ShaderConst.DirectionalLight.x = TheShaderManager->ShaderConst.MasserDir.x * -1;
@@ -1003,6 +1018,7 @@ void ShaderManager::UpdateConstants() {
 
 						ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(scale, ShaderConst.Shadow.Data.y, 1.0f);
 						ShaderConst.DayPhase = Dawn;
+						dayPercent = ShaderConst.ShadowMap.ShadowLightDir.w;
 						ShaderConst.EveningTransLightDirSet = false;
 
 						if (ShaderConst.MasserAmount.x > 0.0f) {
@@ -1043,6 +1059,7 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 						ShaderConst.DayPhase = Sunrise;
+						dayPercent = 1.0f;
 						ShaderConst.EveningTransLightDirSet = false;
 					}
 				}
@@ -1057,6 +1074,7 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 						ShaderConst.DayPhase = Sunset;
+						dayPercent = 1.0f;
 						ShaderConst.EveningTransLightDirSet = false;
 					}
 					else {
@@ -1069,6 +1087,7 @@ void ShaderManager::UpdateConstants() {
 						ShaderConst.OverrideVanillaDirectionalLight = false;
 						ShaderConst.ShadowMap.ShadowLightDir = ShaderConst.SunDir;
 						ShaderConst.DayPhase = Dusk;
+						dayPercent = 1.0f;
 
 						if (ShaderConst.SunAmount.z < .5) {
 							float start = 0.5f;
@@ -1076,6 +1095,7 @@ void ShaderManager::UpdateConstants() {
 							float diff = start - end;
 							float scale = (ShaderConst.SunAmount.z - end) / diff;
 							ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(scale, ShaderConst.Shadow.Data.y, 1.0f);
+							dayPercent = ShaderConst.ShadowMap.ShadowLightDir.w;
 						}
 						if (ShaderConst.MasserAmount.x > 0.0f) {						
 							ShaderConst.OverrideVanillaDirectionalLight = true;
@@ -1092,6 +1112,7 @@ void ShaderManager::UpdateConstants() {
 							//Override the interval update here only to update the shadow map immediately, sometimes the refresh period transitions too late, showing the shadow map rotation
 							TheSettingManager->SettingsShadows.Exteriors.UseIntervalUpdate = false;
 							ShaderConst.ShadowMap.ShadowLightDir.w = std::clamp(ShaderConst.MasserAmount.x, ShaderConst.Shadow.Data.y, 1.0f);
+							dayPercent = 0.0f;
 						}
 					}
 				}
@@ -1743,6 +1764,142 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.VolumetricFog.Data.w = 1.0f;
 			if (weatherPercent == 1.0f && ShaderConst.fogData.y > TheSettingManager->SettingsVolumetricFog.MaxDistance) ShaderConst.VolumetricFog.Data.w = 0.0f;
 		}
+
+		if (TheSettingManager->SettingsMain.Effects.VolumetricLight) {
+
+			SettingsVolumetricLightStruct* currentSettings = TheSettingManager->GetSettingsVolumetricLight(((TESWeatherEx*)currentWeather)->EditorName);
+			SettingsVolumetricLightStruct* previousSettings;
+
+			ShaderConstants::VolumetricLightStruct currentValues;
+			ShaderConstants::VolumetricLightStruct previousValues;
+			ShaderConstants::VolumetricLightStruct combinedValues;
+
+			if (currentSettings == NULL) {
+				currentSettings = TheSettingManager->GetSettingsVolumetricLight("Default");
+			}
+
+			if (previousWeather == NULL) {
+				previousSettings = TheSettingManager->GetSettingsVolumetricLight(((TESWeatherEx*)currentWeather)->EditorName);
+				modifiersSet = false;
+			}
+			else {
+				//we suspect the weather has changed, here we can determine the random modifier of the next (current) weather
+				//set the random Modifer before first transition
+				//if modifiers not set
+				if (!modifiersSet) {
+					previousModifier = currentModifier;
+					currentModifier = (rand() % (int)currentSettings->randomizer + 1) / currentSettings->randomizer;
+					modifiersSet = true;
+				}
+				previousSettings = TheSettingManager->GetSettingsVolumetricLight(((TESWeatherEx*)previousWeather)->EditorName);
+			}
+
+			if (previousSettings == NULL) {
+				previousSettings = TheSettingManager->GetSettingsVolumetricLight("Default");
+			}
+
+			if (ShaderConst.DayPhase < 2) {
+				//sunrise -> midday
+				currentValues.accumData.x = std::lerp(currentSettings->accumSunriseR, currentSettings->accumMiddayR, ShaderConst.SunAmount.y);
+				currentValues.accumData.y = std::lerp(currentSettings->accumSunriseG, currentSettings->accumMiddayG, ShaderConst.SunAmount.y);
+				currentValues.accumData.z = std::lerp(currentSettings->accumSunriseB, currentSettings->accumMiddayB, ShaderConst.SunAmount.y);
+				currentValues.baseData.x = std::lerp(currentSettings->baseSunriseR, currentSettings->baseMiddayR, ShaderConst.SunAmount.y);
+				currentValues.baseData.y = std::lerp(currentSettings->baseSunriseG, currentSettings->baseMiddayG, ShaderConst.SunAmount.y);
+				currentValues.baseData.z = std::lerp(currentSettings->baseSunriseB, currentSettings->baseMiddayB, ShaderConst.SunAmount.y);
+				currentValues.miscData2.x = currentSettings->baseHeightCutOff;
+				currentValues.miscData2.y = currentSettings->sunIntensityCoeff;
+
+				previousValues.accumData.x = std::lerp(previousSettings->accumSunriseR, previousSettings->accumMiddayR, ShaderConst.SunAmount.y);
+				previousValues.accumData.y = std::lerp(previousSettings->accumSunriseG, previousSettings->accumMiddayG, ShaderConst.SunAmount.y);
+				previousValues.accumData.z = std::lerp(previousSettings->accumSunriseB, previousSettings->accumMiddayB, ShaderConst.SunAmount.y);
+				previousValues.baseData.x = std::lerp(previousSettings->baseSunriseR, previousSettings->baseMiddayR, ShaderConst.SunAmount.y);
+				previousValues.baseData.y = std::lerp(previousSettings->baseSunriseG, previousSettings->baseMiddayG, ShaderConst.SunAmount.y);
+				previousValues.baseData.z = std::lerp(previousSettings->baseSunriseB, previousSettings->baseMiddayB, ShaderConst.SunAmount.y);
+				previousValues.miscData2.x = previousSettings->baseHeightCutOff;
+				previousValues.miscData2.y = previousSettings->sunIntensityCoeff;
+			}
+			else {
+				//midday -> sunset
+				currentValues.accumData.x = std::lerp(currentSettings->accumMiddayR, currentSettings->accumSunsetR, ShaderConst.SunAmount.z);
+				currentValues.accumData.y = std::lerp(currentSettings->accumMiddayG, currentSettings->accumSunsetG, ShaderConst.SunAmount.z);
+				currentValues.accumData.z = std::lerp(currentSettings->accumMiddayB, currentSettings->accumSunsetB, ShaderConst.SunAmount.z);
+				currentValues.baseData.x = std::lerp(currentSettings->baseMiddayR, currentSettings->baseSunsetR, ShaderConst.SunAmount.z);
+				currentValues.baseData.y = std::lerp(currentSettings->baseMiddayG, currentSettings->baseSunsetG, ShaderConst.SunAmount.z);
+				currentValues.baseData.z = std::lerp(currentSettings->baseMiddayB, currentSettings->baseSunsetB, ShaderConst.SunAmount.z);
+				currentValues.miscData2.x = currentSettings->baseHeightCutOff;
+				currentValues.miscData2.y = currentSettings->sunIntensityCoeff;
+
+				previousValues.accumData.x = std::lerp(previousSettings->accumMiddayR, previousSettings->accumSunsetR, ShaderConst.SunAmount.z);
+				previousValues.accumData.y = std::lerp(previousSettings->accumMiddayG, previousSettings->accumSunsetG, ShaderConst.SunAmount.z);
+				previousValues.accumData.z = std::lerp(previousSettings->accumMiddayB, previousSettings->accumSunsetB, ShaderConst.SunAmount.z);
+				previousValues.baseData.x = std::lerp(previousSettings->baseMiddayR, previousSettings->baseSunsetR, ShaderConst.SunAmount.z);
+				previousValues.baseData.y = std::lerp(previousSettings->baseMiddayG, previousSettings->baseSunsetG, ShaderConst.SunAmount.z);
+				previousValues.baseData.z = std::lerp(previousSettings->baseMiddayB, previousSettings->baseSunsetB, ShaderConst.SunAmount.z);
+				previousValues.miscData2.x = previousSettings->baseHeightCutOff;
+				previousValues.miscData2.y = previousSettings->sunIntensityCoeff;
+			}
+
+			if (dayPercent < 1.0f) {
+				float phaseModifier = 1;
+				if (ShaderConst.MoonPhaseCoeff == 0.0f) {
+					phaseModifier = 0;
+				}
+				currentValues.accumData.x = std::lerp(currentSettings->accumNightR * phaseModifier, currentValues.accumData.x, dayPercent);
+				currentValues.accumData.y = std::lerp(currentSettings->accumNightG * phaseModifier, currentValues.accumData.y, dayPercent);
+				currentValues.accumData.z = std::lerp(currentSettings->accumNightB * phaseModifier, currentValues.accumData.z, dayPercent);
+				currentValues.baseData.x = std::lerp(currentSettings->baseNightR, currentValues.baseData.x, dayPercent);
+				currentValues.baseData.y = std::lerp(currentSettings->baseNightG, currentValues.baseData.y, dayPercent);
+				currentValues.baseData.z = std::lerp(currentSettings->baseNightB, currentValues.baseData.z, dayPercent);
+				currentValues.miscData2.x = std::lerp(500000.0f, currentValues.miscData2.x, dayPercent);
+				currentValues.miscData2.y = std::lerp(1.3f * phaseModifier, currentValues.miscData2.y, dayPercent);
+
+				previousValues.accumData.x = std::lerp(previousSettings->accumNightR * phaseModifier, previousValues.accumData.x, dayPercent);
+				previousValues.accumData.y = std::lerp(previousSettings->accumNightG * phaseModifier, previousValues.accumData.y, dayPercent);
+				previousValues.accumData.z = std::lerp(previousSettings->accumNightB * phaseModifier, previousValues.accumData.z, dayPercent);
+				previousValues.baseData.x = std::lerp(previousSettings->baseNightR, previousValues.baseData.x, dayPercent);
+				previousValues.baseData.y = std::lerp(previousSettings->baseNightG, previousValues.baseData.y, dayPercent);
+				previousValues.baseData.z = std::lerp(previousSettings->baseNightB, previousValues.baseData.z, dayPercent);
+				previousValues.miscData2.x = std::lerp(500000.0f, previousValues.miscData2.x, dayPercent);
+				previousValues.miscData2.y = std::lerp(1.3f * phaseModifier, previousValues.miscData2.y, dayPercent);
+			}
+
+			ShaderConst.VolumetricLight.baseData.x = std::lerp(previousValues.baseData.x * previousModifier, currentValues.baseData.x * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.baseData.y = std::lerp(previousValues.baseData.y * previousModifier, currentValues.baseData.y * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.baseData.z = std::lerp(previousValues.baseData.z * previousModifier, currentValues.baseData.z * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.baseData.w = std::lerp(previousSettings->baseDistance, currentSettings->baseDistance, weatherPercent);
+
+			ShaderConst.VolumetricLight.accumData.x = std::lerp(previousValues.accumData.x * previousModifier, currentValues.accumData.x * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.accumData.y = std::lerp(previousValues.accumData.y * previousModifier, currentValues.accumData.y * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.accumData.z = std::lerp(previousValues.accumData.z * previousModifier, currentValues.accumData.z * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.accumData.w = std::lerp(previousSettings->accumDistance, currentSettings->accumDistance, weatherPercent);
+
+			ShaderConst.VolumetricLight.miscData.x = std::lerp(previousValues.miscData.x * previousModifier, currentValues.miscData.x * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.miscData.y = std::lerp(previousSettings->accumCutOff, currentSettings->accumCutOff, weatherPercent);
+			ShaderConst.VolumetricLight.miscData.z = std::lerp(previousSettings->blurDistance * (1.0f/previousModifier), currentSettings->blurDistance * (1.0f/currentModifier), weatherPercent);
+			ShaderConst.VolumetricLight.miscData.w = std::lerp(previousSettings->accumHeightCutOff, currentSettings->accumHeightCutOff, weatherPercent);
+
+			ShaderConst.VolumetricLight.miscData2.x = std::lerp(previousValues.miscData2.x, currentValues.miscData2.x, weatherPercent);
+			ShaderConst.VolumetricLight.miscData2.y = std::lerp(previousValues.miscData2.y, currentValues.miscData2.y, weatherPercent);
+			ShaderConst.VolumetricLight.miscData2.z = TheRenderManager->width;
+			ShaderConst.VolumetricLight.miscData2.w = TheRenderManager->height;
+
+			//SIMPLE CONFIG
+			/*ShaderConst.VolumetricLight.baseData.x = std::lerp(min(ShaderConst.oldsunColor.x, 0.25f), min(ShaderConst.sunColor.x, 0.25f), weatherPercent);
+			ShaderConst.VolumetricLight.baseData.y = std::lerp(min(ShaderConst.oldsunColor.y, 0.25f), min(ShaderConst.sunColor.y, 0.25f), weatherPercent);
+			ShaderConst.VolumetricLight.baseData.z = std::lerp(min(ShaderConst.oldsunColor.z, 0.25f), min(ShaderConst.sunColor.z, 0.25f), weatherPercent);
+			ShaderConst.VolumetricLight.baseData.w = 5000.0f;
+
+			ShaderConst.VolumetricLight.accumData.x = std::lerp(ShaderConst.oldsunColor.x, ShaderConst.sunColor.x, weatherPercent);
+			ShaderConst.VolumetricLight.accumData.y = std::lerp(ShaderConst.oldsunColor.y, ShaderConst.sunColor.y, weatherPercent);
+			ShaderConst.VolumetricLight.accumData.z = std::lerp(ShaderConst.oldsunColor.z, ShaderConst.sunColor.z, weatherPercent);
+			ShaderConst.VolumetricLight.accumData.w = 2000.0f;
+
+			ShaderConst.VolumetricLight.miscData.x = 1.75f;
+			ShaderConst.VolumetricLight.miscData.y = 8500.0f;
+			ShaderConst.VolumetricLight.miscData.z = 20000.0f;
+			ShaderConst.VolumetricLight.miscData.w = 500000.0f;*/
+
+		}
 	}
 }
 
@@ -2313,6 +2470,11 @@ void ShaderManager::CreateEffect(EffectRecordType EffectType) {
 			VolumetricFogEffect = new EffectRecord();
 			TheSettingManager->SettingsMain.Effects.VolumetricFog = LoadEffect(VolumetricFogEffect, Filename, NULL);
 			break;
+		case EffectRecordType_VolumetricLight:
+			strcat(Filename, "VolumetricLight\\VolumetricLight.fx");
+			VolumetricLightEffect = new EffectRecord();
+			TheSettingManager->SettingsMain.Effects.VolumetricLight = LoadEffect(VolumetricLightEffect, Filename, NULL);
+			break;
 		case EffectRecordType_Precipitations:
 			strcat(Filename, "Precipitations\\Rain.fx");
 			RainEffect = new EffectRecord();
@@ -2410,6 +2572,7 @@ void ShaderManager::DisposeEffect(EffectRecord* TheEffect) {
 	else if (TheEffect == WetWorldEffect) WetWorldEffect = NULL;
 	else if (TheEffect == SharpeningEffect) SharpeningEffect = NULL;
 	else if (TheEffect == VolumetricFogEffect) VolumetricFogEffect = NULL;
+	else if (TheEffect == VolumetricLightEffect) VolumetricLightEffect = NULL;
 	else if (TheEffect == RainEffect) RainEffect = NULL;
 	else if (TheEffect == SnowEffect) SnowEffect = NULL;
 	else if (TheEffect == ShadowsExteriorsEffect) ShadowsExteriorsEffect = NULL;
@@ -2512,9 +2675,15 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 			MasserRaysEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
 		if (Effects->VolumetricFog && currentWorldSpace && ShaderConst.VolumetricFog.Data.w) {
+			Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 			VolumetricFogEffect->SetCT();
 			VolumetricFogEffect->Render(Device, RenderTarget, RenderedSurface, false);
 		}
+	}
+	if (Effects->VolumetricLight && currentWorldSpace) {
+		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+		VolumetricLightEffect->SetCT();
+		VolumetricLightEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (Effects->DepthOfField && ShaderConst.DepthOfField.Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
@@ -2796,6 +2965,12 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		Effects->VolumetricFog = Value;
 		DisposeEffect(VolumetricFogEffect);
 		if (Value) CreateEffect(EffectRecordType_VolumetricFog);
+	}
+	else if (!strcmp(Name, "VolumetricLight")) {
+		Value = !Effects->VolumetricLight;
+		Effects->VolumetricLight = Value;
+		DisposeEffect(VolumetricLightEffect);
+		if (Value) CreateEffect(EffectRecordType_VolumetricLight);
 	}
 	else if (!strcmp(Name, "ShadowsExteriors")) {
 		DisposeEffect(ShadowsExteriorsEffect);

@@ -20,6 +20,7 @@ enum EffectRecordType
 	EffectRecordType_WetWorld,
 	EffectRecordType_Sharpening,
 	EffectRecordType_VolumetricFog,
+	EffectRecordType_VolumetricLight,
 	EffectRecordType_Precipitations,
 	EffectRecordType_ShadowsExteriors,
 	EffectRecordType_ShadowsExteriorsPoint,
@@ -165,6 +166,28 @@ struct ShaderConstants {
 	struct VolumetricFogStruct {
 		D3DXVECTOR4		Data;
 	};
+	struct VolumetricLightStruct {
+
+		D3DXVECTOR4 baseData;
+		D3DXVECTOR4 accumData;
+		D3DXVECTOR4 miscData;
+		D3DXVECTOR4 miscData2;
+
+		SettingsVolumetricLightStruct pleasantSettings = { 0.18,	0.15,	0.13,	5000.0,		0.18,	0.15,	0.13,	2000.0,		3.5,	8500.0,		20000.0,	500000.0 };
+		SettingsVolumetricLightStruct rainySettings =    { 0.07,	0.07,	0.07,	5000.0,		0.12,	0.12,	0.09,	2000.0,		0.5,	8500.0,		20000.0,	500000.0 };
+		SettingsVolumetricLightStruct cloudySettings =   { 0.18,	0.15,	0.13,	5000.0,		0.18,	0.15,	0.13,	2000.0,		1.5,	8500.0,		20000.0,	500000.0 };
+		SettingsVolumetricLightStruct nightSettings =    { 0.05,	0.07,	0.1,	5000.0,		0.03,	0.05,	0.08,	2000.0,		0.75,	8500.0,		20000.0,	500000.0 };
+		SettingsVolumetricLightStruct middaySettings =   { 0.10,	0.08,	0.07,	5000.0,		0.13,	0.11,	0.09,	2000.0,		1.25,	8500.0,		20000.0,	500000.0 };
+
+		const std::map<UInt8, SettingsVolumetricLightStruct> weatherTypeMap = {
+			{TESWeather::WeatherType::kType_None,pleasantSettings },
+			{TESWeather::WeatherType::kType_Pleasant,pleasantSettings },
+			{TESWeather::WeatherType::kType_Cloudy,cloudySettings },
+			{TESWeather::WeatherType::kType_Rainy,rainySettings },
+			{TESWeather::WeatherType::kType_Snow,rainySettings }
+		};
+	};
+
 	struct SimpleWeatherStruct {
 		TESWeather::ColorData		colors[10];
 		float			hdrInfo[14];
@@ -246,6 +269,7 @@ struct ShaderConstants {
 	WetWorldStruct			WetWorld;
 	SharpeningStruct		Sharpening;
 	VolumetricFogStruct		VolumetricFog;
+	VolumetricLightStruct	VolumetricLight;
 	bool					EveningTransLightDirSet;
 	D3DXVECTOR4				EveningTransLightDir;
 	bool					MorningTransLightDirSet;
@@ -358,6 +382,11 @@ public:
 	bool					UseIntervalUpdate;
 	TESObjectCELL*			previousCell;
 	float					previousBlend;
+	//Begin Volume Light
+	float					previousModifier = 1.0f;
+	float					currentModifier = 1.0f;
+	bool					modifiersSet = false;
+	//End Volume Light
 	SettingsWaterStruct*	sws;
 	SettingsAmbientOcclusionStruct* sas;
 	SettingsBloomStruct* sbs;
@@ -380,6 +409,7 @@ public:
 	EffectRecord*			WetWorldEffect;
 	EffectRecord*			SharpeningEffect;
 	EffectRecord*			VolumetricFogEffect;
+	EffectRecord*			VolumetricLightEffect;
 	EffectRecord*			RainEffect;
 	EffectRecord*			SnowEffect;
 	EffectRecord*			ShadowsExteriorsEffect;

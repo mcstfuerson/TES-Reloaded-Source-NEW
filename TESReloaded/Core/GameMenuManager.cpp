@@ -31,7 +31,7 @@ static char* TitleMenu = "Skyrim Reloaded - Settings";
 #define InfoColumnSize TheSettingManager->SettingsMain.Menu.InfoColumnSize
 #define RowSpace TheSettingManager->SettingsMain.Menu.RowSpace
 #define RowsPerPage TheSettingManager->SettingsMain.Menu.RowsPerPage
-#define IntValues "ScreenshotKey GrassDensity LightShaftPasses CombatEquipmentKey TorchKey Average Min Critical Gap Delay FadeStep FadeMinObjects FadeMinActors GridStep GridMin TimeKey DayR DayG DayB NightR NightG NightB SunriseR SunriseG SunriseB SunsetR SunsetG SunsetB CloudSpeedLower CloudSpeedUpper SunGlare SunDamage TransDelta WindSpeed Mode Quality LightPoints iShadowLightPoints iShadowCullLightPoints"
+#define IntValues "ScreenshotKey GrassDensity LightShaftPasses CombatEquipmentKey TorchKey Average Min Critical Gap Delay FadeStep FadeMinObjects FadeMinActors GridStep GridMin TimeKey DayR DayG DayB NightR NightG NightB SunriseR SunriseG SunriseB SunsetR SunsetG SunsetB CloudSpeedLower CloudSpeedUpper SunGlare SunDamage TransDelta WindSpeed Mode Quality LightPoints iShadowLightPoints iShadowCullLightPoints Randomizer"
 #define BoolValues "Enabled DistantBlur SunGlareEnabled TimeEnabled FPSOverlay SleepingEquipment SwimmingEquipment PurgeCells PurgeTextures FatigueEnabled HealthEnabled InfoEnabled AlphaEnabled DirectionalLightOverride UsePostProcessing bEnabled EnableSpecularShadow UseVanillaShaders"
 
 GameMenuManager::GameMenuManager() {
@@ -116,6 +116,17 @@ void GameMenuManager::Render() {
 					}
 					if (!memcmp(SelectedItem, "Shader", 6)) {
 						bool ShaderEnabled = TheSettingManager->GetMenuShaderEnabled(SelectedDefinition);
+						if (!memcmp(SelectedDefinition, "VolumetricLight", 16)) {
+							if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Menu.KeyAdd) && SelectedColumn == 2) {
+								for (TList<TESWeather>::Iterator Itr = DataHandler->weathers.Begin(); !Itr.End() && Itr.Get(); ++Itr) {
+									TESWeatherEx* Weather = (TESWeatherEx*)Itr.Get();
+									if (!strcmp(SelectedSection, Weather->EditorName)) {
+										Tes->sky->ForceWeather(Weather);
+										break;
+									}
+								}
+							}
+						}
 						if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Menu.KeyAdd) && !ShaderEnabled && SelectedColumn == 1) TheShaderManager->SwitchShaderStatus(SelectedDefinition);
 						if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Menu.KeySubtract) && ShaderEnabled && SelectedColumn == 1) TheShaderManager->SwitchShaderStatus(SelectedDefinition);
 					}
@@ -136,23 +147,46 @@ void GameMenuManager::Render() {
 							}
 						}
 					}
-					if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Menu.KeyAdd) && SelectedColumn == 3) {
-						if (strstr(BoolValues, SelectedSetting))
-							SelectedValue = !SelectedValue;
-						else if (strstr(IntValues, SelectedSetting))
-							SelectedValue += 1.0f;
-						else
-							SelectedValue += TheSettingManager->SettingsMain.Menu.StepValue;
-						TheSettingManager->SetMenuSetting(SelectedItem, SelectedDefinition, SelectedSection, SelectedSectionKey, SelectedSetting, SelectedValue);
+
+					if (!memcmp(SelectedDefinition, "VolumetricLight", 16)) {
+						if (TheKeyboardManager->OnKeyPressed(TheSettingManager->SettingsMain.Menu.KeyAdd) && SelectedColumn == 3) {
+							if (strstr(BoolValues, SelectedSetting))
+								SelectedValue = !SelectedValue;
+							else if (strstr(IntValues, SelectedSetting))
+								SelectedValue += 1.0f;
+							else
+								SelectedValue += 0.005f;
+							TheSettingManager->SetMenuSetting(SelectedItem, SelectedDefinition, SelectedSection, SelectedSectionKey, SelectedSetting, SelectedValue);
+						}
+						if (TheKeyboardManager->OnKeyPressed(TheSettingManager->SettingsMain.Menu.KeySubtract) && SelectedColumn == 3) {
+							if (strstr(BoolValues, SelectedSetting))
+								SelectedValue = !SelectedValue;
+							else if (strstr(IntValues, SelectedSetting))
+								SelectedValue -= 1.0f;
+							else
+								SelectedValue -= 0.005f;
+							TheSettingManager->SetMenuSetting(SelectedItem, SelectedDefinition, SelectedSection, SelectedSectionKey, SelectedSetting, SelectedValue);
+						}
 					}
-					if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Menu.KeySubtract) && SelectedColumn == 3) {
-						if (strstr(BoolValues, SelectedSetting))
-							SelectedValue = !SelectedValue;
-						else if (strstr(IntValues, SelectedSetting))
-							SelectedValue -= 1.0f;
-						else
-							SelectedValue -= TheSettingManager->SettingsMain.Menu.StepValue;
-						TheSettingManager->SetMenuSetting(SelectedItem, SelectedDefinition, SelectedSection, SelectedSectionKey, SelectedSetting, SelectedValue);
+					else {
+						if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Menu.KeyAdd) && SelectedColumn == 3) {
+							if (strstr(BoolValues, SelectedSetting))
+								SelectedValue = !SelectedValue;
+							else if (strstr(IntValues, SelectedSetting))
+								SelectedValue += 1.0f;
+							else
+								SelectedValue += TheSettingManager->SettingsMain.Menu.StepValue;
+							TheSettingManager->SetMenuSetting(SelectedItem, SelectedDefinition, SelectedSection, SelectedSectionKey, SelectedSetting, SelectedValue);
+						}
+						if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Menu.KeySubtract) && SelectedColumn == 3) {
+							if (strstr(BoolValues, SelectedSetting))
+								SelectedValue = !SelectedValue;
+							else if (strstr(IntValues, SelectedSetting))
+								SelectedValue -= 1.0f;
+							else
+								SelectedValue -= TheSettingManager->SettingsMain.Menu.StepValue;
+							TheSettingManager->SetMenuSetting(SelectedItem, SelectedDefinition, SelectedSection, SelectedSectionKey, SelectedSetting, SelectedValue);
+						}
 					}
 					if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Menu.KeySave)) {
 						TheSettingManager->SaveSettings(SelectedItem, SelectedDefinition, SelectedSection);
@@ -164,29 +198,29 @@ void GameMenuManager::Render() {
 			}
 			else {
 				if (strlen(EditingValue) < 19) {
-					if (TheKeyboardManager->OnKeyDown(82))
+					if (TheKeyboardManager->OnKeyDown(82) || TheKeyboardManager->OnKeyDown(11))
 						strcat(EditingValue, "0");
-					else if (TheKeyboardManager->OnKeyDown(79))
+					else if (TheKeyboardManager->OnKeyDown(79) || TheKeyboardManager->OnKeyDown(2))
 						strcat(EditingValue, "1");
-					else if (TheKeyboardManager->OnKeyDown(80))
+					else if (TheKeyboardManager->OnKeyDown(80) || TheKeyboardManager->OnKeyDown(3))
 						strcat(EditingValue, "2");
-					else if (TheKeyboardManager->OnKeyDown(81))
+					else if (TheKeyboardManager->OnKeyDown(81) || TheKeyboardManager->OnKeyDown(4))
 						strcat(EditingValue, "3");
-					else if (TheKeyboardManager->OnKeyDown(75))
+					else if (TheKeyboardManager->OnKeyDown(75) || TheKeyboardManager->OnKeyDown(5))
 						strcat(EditingValue, "4");
-					else if (TheKeyboardManager->OnKeyDown(76))
+					else if (TheKeyboardManager->OnKeyDown(76) || TheKeyboardManager->OnKeyDown(6))
 						strcat(EditingValue, "5");
-					else if (TheKeyboardManager->OnKeyDown(77))
+					else if (TheKeyboardManager->OnKeyDown(77) || TheKeyboardManager->OnKeyDown(7))
 						strcat(EditingValue, "6");
-					else if (TheKeyboardManager->OnKeyDown(71))
+					else if (TheKeyboardManager->OnKeyDown(71) || TheKeyboardManager->OnKeyDown(8))
 						strcat(EditingValue, "7");
-					else if (TheKeyboardManager->OnKeyDown(72))
+					else if (TheKeyboardManager->OnKeyDown(72) || TheKeyboardManager->OnKeyDown(9))
 						strcat(EditingValue, "8");
-					else if (TheKeyboardManager->OnKeyDown(73))
+					else if (TheKeyboardManager->OnKeyDown(73) || TheKeyboardManager->OnKeyDown(10))
 						strcat(EditingValue, "9");
-					else if (TheKeyboardManager->OnKeyDown(83))
+					else if (TheKeyboardManager->OnKeyDown(83) || TheKeyboardManager->OnKeyDown(52))
 						strcat(EditingValue, ".");
-					else if (TheKeyboardManager->OnKeyDown(74))
+					else if (TheKeyboardManager->OnKeyDown(74) || TheKeyboardManager->OnKeyDown(12))
 						strcat(EditingValue, "-");
 				}
 				if (strlen(EditingValue) > 0 && TheKeyboardManager->OnKeyDown(14)) EditingValue[strlen(EditingValue) - 1] = NULL;
