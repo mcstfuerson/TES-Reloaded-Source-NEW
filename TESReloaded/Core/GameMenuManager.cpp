@@ -122,6 +122,9 @@ void GameMenuManager::Render() {
 									TESWeatherEx* Weather = (TESWeatherEx*)Itr.Get();
 									if (!strcmp(SelectedSection, Weather->EditorName)) {
 										Tes->sky->ForceWeather(Weather);
+										TheShaderManager->currentModifier = 1.0f;
+										TheShaderManager->previousModifier = 1.0f;
+										TheShaderManager->modifiersSet = true;
 										break;
 									}
 								}
