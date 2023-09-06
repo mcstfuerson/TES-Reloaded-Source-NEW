@@ -168,24 +168,30 @@ struct ShaderConstants {
 	};
 	struct VolumetricLightStruct {
 
-		D3DXVECTOR4 baseData;
-		D3DXVECTOR4 accumData;
-		D3DXVECTOR4 miscData;
-		D3DXVECTOR4 miscData2;
+		D3DXVECTOR4 data1;
+		//x = Accum R
+		//y = Accum G
+		//z = Accum B
+		//w = Accum Distance
 
-		SettingsVolumetricLightStruct pleasantSettings = { 0.18,	0.15,	0.13,	5000.0,		0.18,	0.15,	0.13,	2000.0,		3.5,	8500.0,		20000.0,	500000.0 };
-		SettingsVolumetricLightStruct rainySettings =    { 0.07,	0.07,	0.07,	5000.0,		0.12,	0.12,	0.09,	2000.0,		0.5,	8500.0,		20000.0,	500000.0 };
-		SettingsVolumetricLightStruct cloudySettings =   { 0.18,	0.15,	0.13,	5000.0,		0.18,	0.15,	0.13,	2000.0,		1.5,	8500.0,		20000.0,	500000.0 };
-		SettingsVolumetricLightStruct nightSettings =    { 0.05,	0.07,	0.1,	5000.0,		0.03,	0.05,	0.08,	2000.0,		0.75,	8500.0,		20000.0,	500000.0 };
-		SettingsVolumetricLightStruct middaySettings =   { 0.10,	0.08,	0.07,	5000.0,		0.13,	0.11,	0.09,	2000.0,		1.25,	8500.0,		20000.0,	500000.0 };
+		D3DXVECTOR4 data2;
+		//x = Base R
+		//y = Base G
+		//z = Base B
+		//w = Base Distance
 
-		const std::map<UInt8, SettingsVolumetricLightStruct> weatherTypeMap = {
-			{TESWeather::WeatherType::kType_None,pleasantSettings },
-			{TESWeather::WeatherType::kType_Pleasant,pleasantSettings },
-			{TESWeather::WeatherType::kType_Cloudy,cloudySettings },
-			{TESWeather::WeatherType::kType_Rainy,rainySettings },
-			{TESWeather::WeatherType::kType_Snow,rainySettings }
-		};
+		D3DXVECTOR4 data3;
+		//x = UNUSED
+		//y = Accum cutoff
+		//z = Blur
+		//w = Accum height Cutoff
+
+		D3DXVECTOR4 data4;
+		//x = Base height Cutoff
+		//y = Sun coeff
+		//z = Screen Res X
+		//w = Screen Res Y 
+
 	};
 
 	struct SimpleWeatherStruct {

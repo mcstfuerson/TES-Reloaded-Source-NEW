@@ -300,14 +300,14 @@ void ShaderProgram::SetConstantTableValue(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.SnowAccumulation.Params;
 	else if (!strcmp(Name, "TESR_VolumetricFogData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricFog.Data;
-	else if (!strcmp(Name, "TESR_VolumetricLightAccum"))
-		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.accumData;
-	else if (!strcmp(Name, "TESR_VolumetricLightBase"))
-		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.baseData;
-	else if (!strcmp(Name, "TESR_VolumetricLightMisc"))
-		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.miscData;
-	else if (!strcmp(Name, "TESR_VolumetricLightMisc2"))
-		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.miscData2;
+	else if (!strcmp(Name, "TESR_VolumetricLightData1"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.data1;
+	else if (!strcmp(Name, "TESR_VolumetricLightData2"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.data2;
+	else if (!strcmp(Name, "TESR_VolumetricLightData3"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.data3;
+	else if (!strcmp(Name, "TESR_VolumetricLightData4"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.data4;
 	else if (!strcmp(Name, "TESR_WaterLensData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.WaterLens.Time;
 	else if (!strcmp(Name, "TESR_WetWorldCoeffs"))
@@ -1772,7 +1772,6 @@ void ShaderManager::UpdateConstants() {
 
 			ShaderConstants::VolumetricLightStruct currentValues;
 			ShaderConstants::VolumetricLightStruct previousValues;
-			ShaderConstants::VolumetricLightStruct combinedValues;
 
 			if (currentSettings == NULL) {
 				currentSettings = TheSettingManager->GetSettingsVolumetricLight("Default");
@@ -1800,43 +1799,43 @@ void ShaderManager::UpdateConstants() {
 
 			if (ShaderConst.DayPhase < 2) {
 				//sunrise -> midday
-				currentValues.accumData.x = std::lerp(currentSettings->accumSunriseR, currentSettings->accumMiddayR, ShaderConst.SunAmount.y);
-				currentValues.accumData.y = std::lerp(currentSettings->accumSunriseG, currentSettings->accumMiddayG, ShaderConst.SunAmount.y);
-				currentValues.accumData.z = std::lerp(currentSettings->accumSunriseB, currentSettings->accumMiddayB, ShaderConst.SunAmount.y);
-				currentValues.baseData.x = std::lerp(currentSettings->baseSunriseR, currentSettings->baseMiddayR, ShaderConst.SunAmount.y);
-				currentValues.baseData.y = std::lerp(currentSettings->baseSunriseG, currentSettings->baseMiddayG, ShaderConst.SunAmount.y);
-				currentValues.baseData.z = std::lerp(currentSettings->baseSunriseB, currentSettings->baseMiddayB, ShaderConst.SunAmount.y);
-				currentValues.miscData2.x = currentSettings->baseHeightCutOff;
-				currentValues.miscData2.y = currentSettings->sunIntensityCoeff;
+				currentValues.data1.x = std::lerp(currentSettings->accumSunriseR, currentSettings->accumMiddayR, ShaderConst.SunAmount.y);
+				currentValues.data1.y = std::lerp(currentSettings->accumSunriseG, currentSettings->accumMiddayG, ShaderConst.SunAmount.y);
+				currentValues.data1.z = std::lerp(currentSettings->accumSunriseB, currentSettings->accumMiddayB, ShaderConst.SunAmount.y);
+				currentValues.data2.x = std::lerp(currentSettings->baseSunriseR, currentSettings->baseMiddayR, ShaderConst.SunAmount.y);
+				currentValues.data2.y = std::lerp(currentSettings->baseSunriseG, currentSettings->baseMiddayG, ShaderConst.SunAmount.y);
+				currentValues.data2.z = std::lerp(currentSettings->baseSunriseB, currentSettings->baseMiddayB, ShaderConst.SunAmount.y);
+				currentValues.data4.x = currentSettings->baseHeightCutOff;
+				currentValues.data4.y = currentSettings->sunIntensityCoeff;
 
-				previousValues.accumData.x = std::lerp(previousSettings->accumSunriseR, previousSettings->accumMiddayR, ShaderConst.SunAmount.y);
-				previousValues.accumData.y = std::lerp(previousSettings->accumSunriseG, previousSettings->accumMiddayG, ShaderConst.SunAmount.y);
-				previousValues.accumData.z = std::lerp(previousSettings->accumSunriseB, previousSettings->accumMiddayB, ShaderConst.SunAmount.y);
-				previousValues.baseData.x = std::lerp(previousSettings->baseSunriseR, previousSettings->baseMiddayR, ShaderConst.SunAmount.y);
-				previousValues.baseData.y = std::lerp(previousSettings->baseSunriseG, previousSettings->baseMiddayG, ShaderConst.SunAmount.y);
-				previousValues.baseData.z = std::lerp(previousSettings->baseSunriseB, previousSettings->baseMiddayB, ShaderConst.SunAmount.y);
-				previousValues.miscData2.x = previousSettings->baseHeightCutOff;
-				previousValues.miscData2.y = previousSettings->sunIntensityCoeff;
+				previousValues.data1.x = std::lerp(previousSettings->accumSunriseR, previousSettings->accumMiddayR, ShaderConst.SunAmount.y);
+				previousValues.data1.y = std::lerp(previousSettings->accumSunriseG, previousSettings->accumMiddayG, ShaderConst.SunAmount.y);
+				previousValues.data1.z = std::lerp(previousSettings->accumSunriseB, previousSettings->accumMiddayB, ShaderConst.SunAmount.y);
+				previousValues.data2.x = std::lerp(previousSettings->baseSunriseR, previousSettings->baseMiddayR, ShaderConst.SunAmount.y);
+				previousValues.data2.y = std::lerp(previousSettings->baseSunriseG, previousSettings->baseMiddayG, ShaderConst.SunAmount.y);
+				previousValues.data2.z = std::lerp(previousSettings->baseSunriseB, previousSettings->baseMiddayB, ShaderConst.SunAmount.y);
+				previousValues.data4.x = previousSettings->baseHeightCutOff;
+				previousValues.data4.y = previousSettings->sunIntensityCoeff;
 			}
 			else {
 				//midday -> sunset
-				currentValues.accumData.x = std::lerp(currentSettings->accumMiddayR, currentSettings->accumSunsetR, ShaderConst.SunAmount.z);
-				currentValues.accumData.y = std::lerp(currentSettings->accumMiddayG, currentSettings->accumSunsetG, ShaderConst.SunAmount.z);
-				currentValues.accumData.z = std::lerp(currentSettings->accumMiddayB, currentSettings->accumSunsetB, ShaderConst.SunAmount.z);
-				currentValues.baseData.x = std::lerp(currentSettings->baseMiddayR, currentSettings->baseSunsetR, ShaderConst.SunAmount.z);
-				currentValues.baseData.y = std::lerp(currentSettings->baseMiddayG, currentSettings->baseSunsetG, ShaderConst.SunAmount.z);
-				currentValues.baseData.z = std::lerp(currentSettings->baseMiddayB, currentSettings->baseSunsetB, ShaderConst.SunAmount.z);
-				currentValues.miscData2.x = currentSettings->baseHeightCutOff;
-				currentValues.miscData2.y = currentSettings->sunIntensityCoeff;
+				currentValues.data1.x = std::lerp(currentSettings->accumMiddayR, currentSettings->accumSunsetR, ShaderConst.SunAmount.z);
+				currentValues.data1.y = std::lerp(currentSettings->accumMiddayG, currentSettings->accumSunsetG, ShaderConst.SunAmount.z);
+				currentValues.data1.z = std::lerp(currentSettings->accumMiddayB, currentSettings->accumSunsetB, ShaderConst.SunAmount.z);
+				currentValues.data2.x = std::lerp(currentSettings->baseMiddayR, currentSettings->baseSunsetR, ShaderConst.SunAmount.z);
+				currentValues.data2.y = std::lerp(currentSettings->baseMiddayG, currentSettings->baseSunsetG, ShaderConst.SunAmount.z);
+				currentValues.data2.z = std::lerp(currentSettings->baseMiddayB, currentSettings->baseSunsetB, ShaderConst.SunAmount.z);
+				currentValues.data4.x = currentSettings->baseHeightCutOff;
+				currentValues.data4.y = currentSettings->sunIntensityCoeff;
 
-				previousValues.accumData.x = std::lerp(previousSettings->accumMiddayR, previousSettings->accumSunsetR, ShaderConst.SunAmount.z);
-				previousValues.accumData.y = std::lerp(previousSettings->accumMiddayG, previousSettings->accumSunsetG, ShaderConst.SunAmount.z);
-				previousValues.accumData.z = std::lerp(previousSettings->accumMiddayB, previousSettings->accumSunsetB, ShaderConst.SunAmount.z);
-				previousValues.baseData.x = std::lerp(previousSettings->baseMiddayR, previousSettings->baseSunsetR, ShaderConst.SunAmount.z);
-				previousValues.baseData.y = std::lerp(previousSettings->baseMiddayG, previousSettings->baseSunsetG, ShaderConst.SunAmount.z);
-				previousValues.baseData.z = std::lerp(previousSettings->baseMiddayB, previousSettings->baseSunsetB, ShaderConst.SunAmount.z);
-				previousValues.miscData2.x = previousSettings->baseHeightCutOff;
-				previousValues.miscData2.y = previousSettings->sunIntensityCoeff;
+				previousValues.data1.x = std::lerp(previousSettings->accumMiddayR, previousSettings->accumSunsetR, ShaderConst.SunAmount.z);
+				previousValues.data1.y = std::lerp(previousSettings->accumMiddayG, previousSettings->accumSunsetG, ShaderConst.SunAmount.z);
+				previousValues.data1.z = std::lerp(previousSettings->accumMiddayB, previousSettings->accumSunsetB, ShaderConst.SunAmount.z);
+				previousValues.data2.x = std::lerp(previousSettings->baseMiddayR, previousSettings->baseSunsetR, ShaderConst.SunAmount.z);
+				previousValues.data2.y = std::lerp(previousSettings->baseMiddayG, previousSettings->baseSunsetG, ShaderConst.SunAmount.z);
+				previousValues.data2.z = std::lerp(previousSettings->baseMiddayB, previousSettings->baseSunsetB, ShaderConst.SunAmount.z);
+				previousValues.data4.x = previousSettings->baseHeightCutOff;
+				previousValues.data4.y = previousSettings->sunIntensityCoeff;
 			}
 
 			if (dayPercent < 1.0f) {
@@ -1844,60 +1843,59 @@ void ShaderManager::UpdateConstants() {
 				if (ShaderConst.MoonPhaseCoeff == 0.0f) {
 					phaseModifier = 0;
 				}
-				currentValues.accumData.x = std::lerp(currentSettings->accumNightR * phaseModifier, currentValues.accumData.x, dayPercent);
-				currentValues.accumData.y = std::lerp(currentSettings->accumNightG * phaseModifier, currentValues.accumData.y, dayPercent);
-				currentValues.accumData.z = std::lerp(currentSettings->accumNightB * phaseModifier, currentValues.accumData.z, dayPercent);
-				currentValues.baseData.x = std::lerp(currentSettings->baseNightR, currentValues.baseData.x, dayPercent);
-				currentValues.baseData.y = std::lerp(currentSettings->baseNightG, currentValues.baseData.y, dayPercent);
-				currentValues.baseData.z = std::lerp(currentSettings->baseNightB, currentValues.baseData.z, dayPercent);
-				currentValues.miscData2.x = std::lerp(500000.0f, currentValues.miscData2.x, dayPercent);
-				currentValues.miscData2.y = std::lerp(1.3f * phaseModifier, currentValues.miscData2.y, dayPercent);
+				currentValues.data1.x = std::lerp(currentSettings->accumNightR * phaseModifier, currentValues.data1.x, dayPercent);
+				currentValues.data1.y = std::lerp(currentSettings->accumNightG * phaseModifier, currentValues.data1.y, dayPercent);
+				currentValues.data1.z = std::lerp(currentSettings->accumNightB * phaseModifier, currentValues.data1.z, dayPercent);
+				currentValues.data2.x = std::lerp(currentSettings->baseNightR, currentValues.data2.x, dayPercent);
+				currentValues.data2.y = std::lerp(currentSettings->baseNightG, currentValues.data2.y, dayPercent);
+				currentValues.data2.z = std::lerp(currentSettings->baseNightB, currentValues.data2.z, dayPercent);
+				currentValues.data4.x = std::lerp(500000.0f, currentValues.data4.x, dayPercent);
+				currentValues.data4.y = std::lerp(1.3f * phaseModifier, currentValues.data4.y, dayPercent);
 
-				previousValues.accumData.x = std::lerp(previousSettings->accumNightR * phaseModifier, previousValues.accumData.x, dayPercent);
-				previousValues.accumData.y = std::lerp(previousSettings->accumNightG * phaseModifier, previousValues.accumData.y, dayPercent);
-				previousValues.accumData.z = std::lerp(previousSettings->accumNightB * phaseModifier, previousValues.accumData.z, dayPercent);
-				previousValues.baseData.x = std::lerp(previousSettings->baseNightR, previousValues.baseData.x, dayPercent);
-				previousValues.baseData.y = std::lerp(previousSettings->baseNightG, previousValues.baseData.y, dayPercent);
-				previousValues.baseData.z = std::lerp(previousSettings->baseNightB, previousValues.baseData.z, dayPercent);
-				previousValues.miscData2.x = std::lerp(500000.0f, previousValues.miscData2.x, dayPercent);
-				previousValues.miscData2.y = std::lerp(1.3f * phaseModifier, previousValues.miscData2.y, dayPercent);
+				previousValues.data1.x = std::lerp(previousSettings->accumNightR * phaseModifier, previousValues.data1.x, dayPercent);
+				previousValues.data1.y = std::lerp(previousSettings->accumNightG * phaseModifier, previousValues.data1.y, dayPercent);
+				previousValues.data1.z = std::lerp(previousSettings->accumNightB * phaseModifier, previousValues.data1.z, dayPercent);
+				previousValues.data2.x = std::lerp(previousSettings->baseNightR, previousValues.data2.x, dayPercent);
+				previousValues.data2.y = std::lerp(previousSettings->baseNightG, previousValues.data2.y, dayPercent);
+				previousValues.data2.z = std::lerp(previousSettings->baseNightB, previousValues.data2.z, dayPercent);
+				previousValues.data4.x = std::lerp(500000.0f, previousValues.data4.x, dayPercent);
+				previousValues.data4.y = std::lerp(1.3f * phaseModifier, previousValues.data4.y, dayPercent);
 			}
 
-			ShaderConst.VolumetricLight.baseData.x = std::lerp(previousValues.baseData.x * previousModifier, currentValues.baseData.x * currentModifier, weatherPercent);
-			ShaderConst.VolumetricLight.baseData.y = std::lerp(previousValues.baseData.y * previousModifier, currentValues.baseData.y * currentModifier, weatherPercent);
-			ShaderConst.VolumetricLight.baseData.z = std::lerp(previousValues.baseData.z * previousModifier, currentValues.baseData.z * currentModifier, weatherPercent);
-			ShaderConst.VolumetricLight.baseData.w = std::lerp(previousSettings->baseDistance, currentSettings->baseDistance, weatherPercent);
+			ShaderConst.VolumetricLight.data1.x = std::lerp(previousValues.data1.x * previousModifier, currentValues.data1.x * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.data1.y = std::lerp(previousValues.data1.y * previousModifier, currentValues.data1.y * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.data1.z = std::lerp(previousValues.data1.z * previousModifier, currentValues.data1.z * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.data1.w = std::lerp(previousSettings->accumDistance, currentSettings->accumDistance, weatherPercent);
 
-			ShaderConst.VolumetricLight.accumData.x = std::lerp(previousValues.accumData.x * previousModifier, currentValues.accumData.x * currentModifier, weatherPercent);
-			ShaderConst.VolumetricLight.accumData.y = std::lerp(previousValues.accumData.y * previousModifier, currentValues.accumData.y * currentModifier, weatherPercent);
-			ShaderConst.VolumetricLight.accumData.z = std::lerp(previousValues.accumData.z * previousModifier, currentValues.accumData.z * currentModifier, weatherPercent);
-			ShaderConst.VolumetricLight.accumData.w = std::lerp(previousSettings->accumDistance, currentSettings->accumDistance, weatherPercent);
+			ShaderConst.VolumetricLight.data2.x = std::lerp(previousValues.data2.x * previousModifier, currentValues.data2.x * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.data2.y = std::lerp(previousValues.data2.y * previousModifier, currentValues.data2.y * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.data2.z = std::lerp(previousValues.data2.z * previousModifier, currentValues.data2.z * currentModifier, weatherPercent);
+			ShaderConst.VolumetricLight.data2.w = std::lerp(previousSettings->baseDistance, currentSettings->baseDistance, weatherPercent);
 
-			ShaderConst.VolumetricLight.miscData.x = std::lerp(previousValues.miscData.x * previousModifier, currentValues.miscData.x * currentModifier, weatherPercent);
-			ShaderConst.VolumetricLight.miscData.y = std::lerp(previousSettings->accumCutOff, currentSettings->accumCutOff, weatherPercent);
-			ShaderConst.VolumetricLight.miscData.z = std::lerp(previousSettings->blurDistance * (1.0f/previousModifier), currentSettings->blurDistance * (1.0f/currentModifier), weatherPercent);
-			ShaderConst.VolumetricLight.miscData.w = std::lerp(previousSettings->accumHeightCutOff, currentSettings->accumHeightCutOff, weatherPercent);
+			ShaderConst.VolumetricLight.data3.y = std::lerp(previousSettings->accumCutOff, currentSettings->accumCutOff, weatherPercent);
+			ShaderConst.VolumetricLight.data3.z = std::lerp(previousSettings->blurDistance * (1.0f/previousModifier), currentSettings->blurDistance * (1.0f/currentModifier), weatherPercent);
+			ShaderConst.VolumetricLight.data3.w = std::lerp(previousSettings->accumHeightCutOff, currentSettings->accumHeightCutOff, weatherPercent);
 
-			ShaderConst.VolumetricLight.miscData2.x = std::lerp(previousValues.miscData2.x, currentValues.miscData2.x, weatherPercent);
-			ShaderConst.VolumetricLight.miscData2.y = std::lerp(previousValues.miscData2.y, currentValues.miscData2.y, weatherPercent);
-			ShaderConst.VolumetricLight.miscData2.z = TheRenderManager->width;
-			ShaderConst.VolumetricLight.miscData2.w = TheRenderManager->height;
+			ShaderConst.VolumetricLight.data4.x = std::lerp(previousValues.data4.x, currentValues.data4.x, weatherPercent);
+			ShaderConst.VolumetricLight.data4.y = std::lerp(previousValues.data4.y, currentValues.data4.y, weatherPercent);
+			ShaderConst.VolumetricLight.data4.z = TheRenderManager->width;
+			ShaderConst.VolumetricLight.data4.w = TheRenderManager->height;
 
 			//SIMPLE CONFIG
-			/*ShaderConst.VolumetricLight.baseData.x = std::lerp(min(ShaderConst.oldsunColor.x, 0.25f), min(ShaderConst.sunColor.x, 0.25f), weatherPercent);
-			ShaderConst.VolumetricLight.baseData.y = std::lerp(min(ShaderConst.oldsunColor.y, 0.25f), min(ShaderConst.sunColor.y, 0.25f), weatherPercent);
-			ShaderConst.VolumetricLight.baseData.z = std::lerp(min(ShaderConst.oldsunColor.z, 0.25f), min(ShaderConst.sunColor.z, 0.25f), weatherPercent);
-			ShaderConst.VolumetricLight.baseData.w = 5000.0f;
+			/*ShaderConst.VolumetricLight.data2.x = std::lerp(min(ShaderConst.oldsunColor.x, 0.25f), min(ShaderConst.sunColor.x, 0.25f), weatherPercent);
+			ShaderConst.VolumetricLight.data2.y = std::lerp(min(ShaderConst.oldsunColor.y, 0.25f), min(ShaderConst.sunColor.y, 0.25f), weatherPercent);
+			ShaderConst.VolumetricLight.data2.z = std::lerp(min(ShaderConst.oldsunColor.z, 0.25f), min(ShaderConst.sunColor.z, 0.25f), weatherPercent);
+			ShaderConst.VolumetricLight.data2.w = 5000.0f;
 
-			ShaderConst.VolumetricLight.accumData.x = std::lerp(ShaderConst.oldsunColor.x, ShaderConst.sunColor.x, weatherPercent);
-			ShaderConst.VolumetricLight.accumData.y = std::lerp(ShaderConst.oldsunColor.y, ShaderConst.sunColor.y, weatherPercent);
-			ShaderConst.VolumetricLight.accumData.z = std::lerp(ShaderConst.oldsunColor.z, ShaderConst.sunColor.z, weatherPercent);
-			ShaderConst.VolumetricLight.accumData.w = 2000.0f;
+			ShaderConst.VolumetricLight.data1.x = std::lerp(ShaderConst.oldsunColor.x, ShaderConst.sunColor.x, weatherPercent);
+			ShaderConst.VolumetricLight.data1.y = std::lerp(ShaderConst.oldsunColor.y, ShaderConst.sunColor.y, weatherPercent);
+			ShaderConst.VolumetricLight.data1.z = std::lerp(ShaderConst.oldsunColor.z, ShaderConst.sunColor.z, weatherPercent);
+			ShaderConst.VolumetricLight.data1.w = 2000.0f;
 
-			ShaderConst.VolumetricLight.miscData.x = 1.75f;
-			ShaderConst.VolumetricLight.miscData.y = 8500.0f;
-			ShaderConst.VolumetricLight.miscData.z = 20000.0f;
-			ShaderConst.VolumetricLight.miscData.w = 500000.0f;*/
+			ShaderConst.VolumetricLight.data3.x = 1.75f;
+			ShaderConst.VolumetricLight.data3.y = 8500.0f;
+			ShaderConst.VolumetricLight.data3.z = 20000.0f;
+			ShaderConst.VolumetricLight.data3.w = 500000.0f;*/
 
 		}
 	}
