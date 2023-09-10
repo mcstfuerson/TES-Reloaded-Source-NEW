@@ -319,6 +319,7 @@ SettingManager::SettingManager() {
 	SettingsMain.Effects.Sharpening = GetPrivateProfileIntA("Effects", "Sharpening", 0, Filename);
 	SettingsMain.Effects.SMAA = GetPrivateProfileIntA("Effects", "SMAA", 0, Filename);
 	SettingsMain.Effects.VolumetricFog = GetPrivateProfileIntA("Effects", "VolumetricFog", 0, Filename);
+	SettingsMain.Effects.VolumetricLight = GetPrivateProfileIntA("Effects", "VolumetricLight", 0, Filename);
 	SettingsMain.Effects.Precipitations = GetPrivateProfileIntA("Effects", "Precipitations", 0, Filename);
 	SettingsMain.Effects.Extra = GetPrivateProfileIntA("Effects", "Extra", 0, Filename);
 
@@ -439,6 +440,7 @@ void SettingManager::LoadSettings() {
 	SettingsMotionBlurStruct SM;
 	SettingsWeatherStruct SE;
 	SettingsShadowPointLightsStruct SSPL;
+	SettingsVolumetricLightStruct SVL;
 	
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
@@ -999,6 +1001,82 @@ void SettingManager::LoadSettings() {
 	SettingsVolumetricFog.Amount = atof(value);
 	GetPrivateProfileStringA("Default", "MaxDistance", "100000.0", value, SettingStringBuffer, Filename);
 	SettingsVolumetricFog.MaxDistance = atof(value);
+
+	strcpy(Filename, CurrentPath);
+	strcat(Filename, SettingsPath);
+	strcat(Filename, "VolumetricLight\\VolumetricLight.ini");
+	GetPrivateProfileSectionNamesA(Sections, 32767, Filename);
+	pNextSection = Sections;
+	while (*pNextSection != NULL) {
+		GetPrivateProfileStringA(pNextSection, "BaseSunriseR", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseSunriseR = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseSunriseG", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseSunriseG = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseSunriseB", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseSunriseB = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseMiddayR", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseMiddayR = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseMiddayG", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseMiddayG = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseMiddayB", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseMiddayB = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseSunsetR", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseSunsetR = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseSunsetG", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseSunsetG = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseSunsetB", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseSunsetB = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseNightR", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseNightR = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseNightG", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseNightG = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseNightB", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseNightB = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseDistance", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseDistance = atof(value);
+
+		GetPrivateProfileStringA(pNextSection, "AccumSunriseR", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumSunriseR = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumSunriseG", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumSunriseG = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumSunriseB", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumSunriseB = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumMiddayR", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumMiddayR = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumMiddayG", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumMiddayG = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumMiddayB", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumMiddayB = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumSunsetR", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumSunsetR = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumSunsetG", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumSunsetG = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumSunsetB", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumSunsetB = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumNightR", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumNightR = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumNightG", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumNightG = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumNightB", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumNightB = atof(value);
+
+		GetPrivateProfileStringA(pNextSection, "AccumDistance", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumDistance = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumCutOff", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumCutOff = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BlurDistance", "1.0", value, SettingStringBuffer, Filename);
+		SVL.blurDistance = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumHeightCutOff", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumHeightCutOff = atof(value);
+		GetPrivateProfileStringA(pNextSection, "BaseHeightCutOff", "1.0", value, SettingStringBuffer, Filename);
+		SVL.baseHeightCutOff = atof(value);
+		GetPrivateProfileStringA(pNextSection, "Randomizer", "1.0", value, SettingStringBuffer, Filename);
+		SVL.randomizer = atof(value);
+		GetPrivateProfileStringA(pNextSection, "SunIntensityCoeff", "1.0", value, SettingStringBuffer, Filename);
+		SVL.sunIntensityCoeff = atof(value);
+		SettingsVolumetricLight[std::string(pNextSection)] = SVL;
+		pNextSection = pNextSection + strlen(pNextSection) + 1;
+	}
 
 	typedef std::vector<std::string> ValueList;
 	strcpy(Filename, SettingsMain.Main.WeatherFile);
@@ -1601,6 +1679,47 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 			WritePrivateProfileStringA("Default", "ColorCoeff", ToString(SettingsVolumetricFog.ColorCoeff).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "Exponent", ToString(SettingsVolumetricFog.Exponent).c_str(), Filename);
 		}
+		else if (!strcmp(Definition, "VolumetricLight")) {
+			WritePrivateProfileStringA("Effects", "VolumetricLight", ToString(SettingsMain.Effects.VolumetricLight).c_str(), SettingsMain.Main.MainFile);
+			strcat(Filename, "VolumetricLight\\VolumetricLight.ini");
+			SettingsVolumetricLightList::iterator v = SettingsVolumetricLight.begin();
+			while (v != SettingsVolumetricLight.end()) {
+				WritePrivateProfileStringA(v->first.c_str(), "BaseSunriseR", ToString(v->second.baseSunriseR).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseSunriseG", ToString(v->second.baseSunriseG).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseSunriseB", ToString(v->second.baseSunriseB).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseMiddayR", ToString(v->second.baseMiddayR).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseMiddayG", ToString(v->second.baseMiddayG).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseMiddayB", ToString(v->second.baseMiddayB).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseSunsetR", ToString(v->second.baseSunsetR).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseSunsetG", ToString(v->second.baseSunsetG).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseSunsetB", ToString(v->second.baseSunsetB).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseNightR", ToString(v->second.baseNightR).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseNightG", ToString(v->second.baseNightG).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseNightB", ToString(v->second.baseNightB).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseDistance", ToString(v->second.baseDistance).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumSunriseR", ToString(v->second.accumSunriseR).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumSunriseG", ToString(v->second.accumSunriseG).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumSunriseB", ToString(v->second.accumSunriseB).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumMiddayR", ToString(v->second.accumMiddayR).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumMiddayG", ToString(v->second.accumMiddayG).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumMiddayB", ToString(v->second.accumMiddayB).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumSunsetR", ToString(v->second.accumSunsetR).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumSunsetG", ToString(v->second.accumSunsetG).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumSunsetB", ToString(v->second.accumSunsetB).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumNightR", ToString(v->second.accumNightR).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumNightG", ToString(v->second.accumNightG).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumNightB", ToString(v->second.accumNightB).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumDistance", ToString(v->second.accumDistance).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumCutOff", ToString(v->second.accumCutOff).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BlurDistance", ToString(v->second.blurDistance).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumHeightCutOff", ToString(v->second.accumHeightCutOff).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "BaseHeightCutOff", ToString(v->second.baseHeightCutOff).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "Randomizer", ToString(v->second.randomizer).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "SunIntensityCoeff", ToString(v->second.sunIntensityCoeff).c_str(), Filename);
+				v++;
+			}
+
+		}
 		else if (!strcmp(Definition, "Underwater")) {
 			WritePrivateProfileStringA("Effects", "Underwater", ToString(SettingsMain.Effects.Underwater).c_str(), SettingsMain.Main.MainFile);
 		}
@@ -1746,6 +1865,7 @@ DefinitionsList SettingManager::GetMenuDefinitions(const char* Item) {
 		Definitions["Terrain"] = "Terrain";
 #endif
 		Definitions["VolumetricFog"] = "Volumetric Fog";
+		Definitions["VolumetricLight"] = "VolumetricLight";
 		Definitions["Underwater"] = "Underwater";
 		Definitions["Water"] = "Water";
 		Definitions["WaterLens"] = "Water on Lens";
@@ -1874,6 +1994,14 @@ SectionsList SettingManager::GetMenuSections(const char* Item, const char* Defin
 			Sections[2] = "ExteriorsFar";
 			Sections[3] = "ExteriorsPoint";
 			Sections[4] = "Interiors";
+		}
+		else if (!strcmp(Definition, "VolumetricLight")) {
+			int index = 0;
+			for (TList<TESWeather>::Iterator Itr = DataHandler->weathers.Begin(); !Itr.End() && Itr.Get(); ++Itr) {
+				TESWeatherEx* Weather = (TESWeatherEx*)Itr.Get();
+				Sections[index] = Weather->EditorName;
+				index++;
+			}
 		}
 		else if (!strcmp(Definition, "Water")) {
 			SettingsWaterList::iterator v = SettingsWater.begin();
@@ -2230,6 +2358,84 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["ColorCoeff"] = SettingsVolumetricFog.ColorCoeff;
 			Settings["Exponent"] = SettingsVolumetricFog.Exponent;
 		}
+		else if (!strcmp(Definition, "VolumetricLight")) {
+			SettingsVolumetricLightStruct* svls = GetSettingsVolumetricLight(Section);
+			if (svls) {
+				Settings["BaseSunriseR"] = svls->baseSunriseR;
+				Settings["BaseSunriseG"] = svls->baseSunriseG;
+				Settings["BaseSunriseB"] = svls->baseSunriseB;
+				Settings["BaseMiddayR"] = svls->baseMiddayR;
+				Settings["BaseMiddayG"] = svls->baseMiddayG;
+				Settings["BaseMiddayB"] = svls->baseMiddayB;
+				Settings["BaseSunsetR"] = svls->baseSunsetR;
+				Settings["BaseSunsetG"] = svls->baseSunsetG;
+				Settings["BaseSunsetB"] = svls->baseSunsetB;
+				Settings["BaseNightR"] = svls->baseNightR;
+				Settings["BaseNightG"] = svls->baseNightG;
+				Settings["BaseNightB"] = svls->baseNightB;
+				Settings["BaseDistance"] = svls->baseDistance;
+				Settings["AccumSunriseR"] = svls->accumSunriseR;
+				Settings["AccumSunriseG"] = svls->accumSunriseG;
+				Settings["AccumSunriseB"] = svls->accumSunriseB;
+				Settings["AccumMiddayR"] = svls->accumMiddayR;
+				Settings["AccumMiddayG"] = svls->accumMiddayG;
+				Settings["AccumMiddayB"] = svls->accumMiddayB;
+				Settings["AccumSunsetR"] = svls->accumSunsetR;
+				Settings["AccumSunsetG"] = svls->accumSunsetG;
+				Settings["AccumSunsetB"] = svls->accumSunsetB;
+				Settings["AccumNightR"] = svls->accumNightR;
+				Settings["AccumNightG"] = svls->accumNightG;
+				Settings["AccumNightB"] = svls->accumNightB;
+				Settings["AccumDistance"] = svls->accumDistance;
+				Settings["AccumCutOff"] = svls->accumCutOff;
+				Settings["BlurDistance"] = svls->blurDistance;
+				Settings["AccumHeightCutOff"] = svls->accumHeightCutOff;
+				Settings["BaseHeightCutOff"] = svls->baseHeightCutOff;
+				Settings["Randomizer"] = svls->randomizer;
+				Settings["SunIntensityCoeff"] = svls->sunIntensityCoeff;
+			}
+			else				
+				for (TList<TESWeather>::Iterator Itr = DataHandler->weathers.Begin(); !Itr.End() && Itr.Get(); ++Itr) {
+					TESWeatherEx* Weather = (TESWeatherEx*)Itr.Get();
+					SettingsVolumetricLightStruct s;
+					if (!strcmp(Section, Weather->EditorName)) {
+						Settings["BaseSunriseR"] = s.baseSunriseR = 0.00f;
+						Settings["BaseSunriseG"] = s.baseSunriseG = 0.00f;
+						Settings["BaseSunriseB"] = s.baseSunriseB = 0.00f;
+						Settings["BaseMiddayR"] = s.baseMiddayR = 0.00f;
+						Settings["BaseMiddayG"] = s.baseMiddayG = 0.00f;
+						Settings["BaseMiddayB"] = s.baseMiddayB = 0.00f;
+						Settings["BaseSunsetR"] = s.baseSunsetR = 0.00f;
+						Settings["BaseSunsetG"] = s.baseSunsetG = 0.00f;
+						Settings["BaseSunsetB"] = s.baseSunsetB = 0.00f;
+						Settings["BaseNightR"] = s.baseNightR = 0.00f;
+						Settings["BaseNightG"] = s.baseNightG = 0.00f;
+						Settings["BaseNightB"] = s.baseNightB = 0.00f;
+						Settings["BaseDistance"] = s.baseDistance = 5000.0f;
+						Settings["AccumSunriseR"] = s.accumSunriseR = 0.00f;
+						Settings["AccumSunriseG"] = s.accumSunriseG = 0.00f;
+						Settings["AccumSunriseB"] = s.accumSunriseB = 0.00f;
+						Settings["AccumMiddayR"] = s.accumMiddayR = 0.00f;
+						Settings["AccumMiddayG"] = s.accumMiddayG = 0.00f;
+						Settings["AccumMiddayB"] = s.accumMiddayB = 0.00f;
+						Settings["AccumSunsetR"] = s.accumSunsetR = 0.00f;
+						Settings["AccumSunsetG"] = s.accumSunsetG = 0.00f;
+						Settings["AccumSunsetB"] = s.accumSunsetB = 0.00f;
+						Settings["AccumNightR"] = s.accumNightR = 0.00f;
+						Settings["AccumNightG"] = s.accumNightG = 0.00f;
+						Settings["AccumNightB"] = s.accumNightB = 0.00f;
+						Settings["AccumDistance"] = s.accumDistance = 2000.0f;
+						Settings["AccumCutOff"] = s.accumCutOff = 8500.0f;
+						Settings["BlurDistance"] = s.blurDistance = 999999.0f;
+						Settings["AccumHeightCutOff"] = s.accumHeightCutOff = 500000.0f;
+						Settings["BaseHeightCutOff"] = s.baseHeightCutOff = 100000.0f;
+						Settings["Randomizer"] = s.randomizer = 1.0f;
+						Settings["SunIntensityCoeff"] = s.sunIntensityCoeff = 1.0f;
+						SettingsVolumetricLight.insert(std::pair<std::string, SettingsVolumetricLightStruct>(Weather->EditorName, s));
+						break;
+					};
+				}
+			}
 		else if (!strcmp(Definition, "Water") || !strcmp(Definition, "Underwater")) {
 			SettingsWaterStruct* sws = GetSettingsWater(Section);
 			Settings["causticsStrength"] = sws->causticsStrength;
@@ -2976,6 +3182,73 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 			else if (!strcmp(Setting, "Exponent"))
 				SettingsVolumetricFog.Exponent = Value;
 		}
+		else if (!strcmp(Definition, "VolumetricLight")) {
+			SettingsVolumetricLightStruct* svls = GetSettingsVolumetricLight(Section);
+			if (!strcmp(Setting, "BaseSunriseR"))
+				svls->baseSunriseR = Value;
+			else if (!strcmp(Setting, "BaseSunriseG"))
+				svls->baseSunriseG = Value;
+			else if (!strcmp(Setting, "BaseSunriseB"))
+				svls->baseSunriseB = Value;
+			else if (!strcmp(Setting, "BaseMiddayR"))
+				svls->baseMiddayR = Value;
+			else if (!strcmp(Setting, "BaseMiddayG"))
+				svls->baseMiddayG = Value;
+			else if (!strcmp(Setting, "BaseMiddayB"))
+				svls->baseMiddayB = Value;
+			else if (!strcmp(Setting, "BaseSunsetR"))
+				svls->baseSunsetR = Value;
+			else if (!strcmp(Setting, "BaseSunsetG"))
+				svls->baseSunsetG = Value;
+			else if (!strcmp(Setting, "BaseSunsetB"))
+				svls->baseSunsetB = Value;
+			else if (!strcmp(Setting, "BaseNightR"))
+				svls->baseNightR = Value;
+			else if (!strcmp(Setting, "BaseNightG"))
+				svls->baseNightG = Value;
+			else if (!strcmp(Setting, "BaseNightB"))
+				svls->baseNightB = Value;
+			else if (!strcmp(Setting, "BaseDistance"))
+				svls->baseDistance = Value;
+			else if (!strcmp(Setting, "AccumSunriseR"))
+				svls->accumSunriseR = Value;
+			else if (!strcmp(Setting, "AccumSunriseG"))
+				svls->accumSunriseG = Value;
+			else if (!strcmp(Setting, "AccumSunriseB"))
+				svls->accumSunriseB = Value;
+			else if (!strcmp(Setting, "AccumMiddayR"))
+				svls->accumMiddayR = Value;
+			else if (!strcmp(Setting, "AccumMiddayG"))
+				svls->accumMiddayG = Value;
+			else if (!strcmp(Setting, "AccumMiddayB"))
+				svls->accumMiddayB = Value;
+			else if (!strcmp(Setting, "AccumSunsetR"))
+				svls->accumSunsetR = Value;
+			else if (!strcmp(Setting, "AccumSunsetG"))
+				svls->accumSunsetG = Value;
+			else if (!strcmp(Setting, "AccumSunsetB"))
+				svls->accumSunsetB = Value;
+			else if (!strcmp(Setting, "AccumNightR"))
+				svls->accumNightR = Value;
+			else if (!strcmp(Setting, "AccumNightG"))
+				svls->accumNightG = Value;
+			else if (!strcmp(Setting, "AccumNightB"))
+				svls->accumNightB = Value;
+			else if (!strcmp(Setting, "AccumDistance"))
+				svls->accumDistance = Value;
+			else if (!strcmp(Setting, "AccumCutOff"))
+				svls->accumCutOff = Value;
+			else if (!strcmp(Setting, "BlurDistance"))
+				svls->blurDistance = Value;
+			else if (!strcmp(Setting, "AccumHeightCutOff"))
+				svls->accumHeightCutOff = Value;
+			else if (!strcmp(Setting, "BaseHeightCutOff"))
+				svls->baseHeightCutOff = Value;
+			else if (!strcmp(Setting, "Randomizer"))
+				svls->randomizer = Value;
+			else if (!strcmp(Setting, "SunIntensityCoeff"))
+				svls->sunIntensityCoeff = Value;
+		}
 		else if (!strcmp(Definition, "Water") || !strcmp(Definition, "Underwater")) {
 			SettingsWaterStruct* sws = GetSettingsWater(Section);
 			if (!strcmp(Setting, "causticsStrength"))
@@ -3267,6 +3540,8 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name)
 		Value = SettingsMain.Effects.Underwater;
 	else if (!strcmp(Name, "VolumetricFog"))
 		Value = SettingsMain.Effects.VolumetricFog;
+	else if (!strcmp(Name, "VolumetricLight"))
+		Value = SettingsMain.Effects.VolumetricLight;
 	else if (!strcmp(Name, "Water"))
 		Value = SettingsMain.Shaders.Water;
 	else if (!strcmp(Name, "WaterLens"))
@@ -3351,6 +3626,17 @@ SettingsWeatherStruct* SettingManager::GetSettingsWeather(const char* WeatherNam
 
 	SettingsWeatherList::iterator v = SettingsWeather.find(std::string(WeatherName));
 	if (v == SettingsWeather.end())
+		return NULL;
+	else
+		return &v->second;
+
+}
+
+
+SettingsVolumetricLightStruct* SettingManager::GetSettingsVolumetricLight(const char* WeatherName) {
+
+	SettingsVolumetricLightList::iterator v = SettingsVolumetricLight.find(std::string(WeatherName));
+	if (v == SettingsVolumetricLight.end())
 		return NULL;
 	else
 		return &v->second;
@@ -3443,12 +3729,12 @@ void MainMenuMusicFix(char* DestinationBuffer, size_t Size, char* SourceBuffer) 
 }
 
 #elif defined(OBLIVION)
-bool (__thiscall Settings::* LoadGame)(BSFile*, char*, UInt8);
-bool (__thiscall Settings::* TrackLoadGame)(BSFile*, char*, UInt8);
+bool(__thiscall Settings::* LoadGame)(BSFile*, char*, UInt8);
+bool(__thiscall Settings::* TrackLoadGame)(BSFile*, char*, UInt8);
 bool Settings::TrackLoadGame(BSFile* GameFile, char* FileName, UInt8 Arg3) {
 
 	bool r;
-	
+
 	TheSettingManager->GameLoading = true;
 	r = (this->*LoadGame)(GameFile, FileName, Arg3);
 	TheSettingManager->GameLoading = false;
@@ -3460,8 +3746,8 @@ bool Settings::TrackLoadGame(BSFile* GameFile, char* FileName, UInt8 Arg3) {
 
 }
 #elif defined(SKYRIM)
-bool (__thiscall Settings::* LoadGame)(char*, UInt8);
-bool (__thiscall Settings::* TrackLoadGame)(char*, UInt8);
+bool(__thiscall Settings::* LoadGame)(char*, UInt8);
+bool(__thiscall Settings::* TrackLoadGame)(char*, UInt8);
 bool Settings::TrackLoadGame(char* FileName, UInt8 Arg2) {
 
 	bool r;
@@ -3477,18 +3763,18 @@ bool Settings::TrackLoadGame(char* FileName, UInt8 Arg2) {
 
 void CreateSettingsHook() {
 
-	*((int *)&ReadSetting)		= kReadSetting;
-	TrackReadSetting			= &Settings::TrackReadSetting;
-	*((int *)&LoadGame)			= kLoadGame;
-	TrackLoadGame				= &Settings::TrackLoadGame;
-	*((int *)&SaveSettings)		= kSaveSettings;
-	TrackSaveSettings			= &Settings::TrackSaveSettings;
+	*((int*)&ReadSetting) = kReadSetting;
+	TrackReadSetting = &Settings::TrackReadSetting;
+	*((int*)&LoadGame) = kLoadGame;
+	TrackLoadGame = &Settings::TrackLoadGame;
+	*((int*)&SaveSettings) = kSaveSettings;
+	TrackSaveSettings = &Settings::TrackSaveSettings;
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&(PVOID&)ReadSetting,		*((PVOID *)&TrackReadSetting));
-	DetourAttach(&(PVOID&)LoadGame,			*((PVOID *)&TrackLoadGame));
-	DetourAttach(&(PVOID&)SaveSettings,		*((PVOID *)&TrackSaveSettings));
+	DetourAttach(&(PVOID&)ReadSetting, *((PVOID*)&TrackReadSetting));
+	DetourAttach(&(PVOID&)LoadGame, *((PVOID*)&TrackLoadGame));
+	DetourAttach(&(PVOID&)SaveSettings, *((PVOID*)&TrackSaveSettings));
 	DetourTransactionCommit();
 
 #if defined(NEWVEGAS)

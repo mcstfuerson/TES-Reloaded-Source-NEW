@@ -20,6 +20,7 @@ enum EffectRecordType
 	EffectRecordType_WetWorld,
 	EffectRecordType_Sharpening,
 	EffectRecordType_VolumetricFog,
+	EffectRecordType_VolumetricLight,
 	EffectRecordType_Precipitations,
 	EffectRecordType_ShadowsExteriors,
 	EffectRecordType_ShadowsExteriorsPoint,
@@ -165,6 +166,34 @@ struct ShaderConstants {
 	struct VolumetricFogStruct {
 		D3DXVECTOR4		Data;
 	};
+	struct VolumetricLightStruct {
+
+		D3DXVECTOR4 data1;
+		//x = Accum R
+		//y = Accum G
+		//z = Accum B
+		//w = Accum Distance
+
+		D3DXVECTOR4 data2;
+		//x = Base R
+		//y = Base G
+		//z = Base B
+		//w = Base Distance
+
+		D3DXVECTOR4 data3;
+		//x = UNUSED
+		//y = Accum cutoff
+		//z = Blur
+		//w = Accum height Cutoff
+
+		D3DXVECTOR4 data4;
+		//x = Base height Cutoff
+		//y = Sun coeff
+		//z = Screen Res X
+		//w = Screen Res Y 
+
+	};
+
 	struct SimpleWeatherStruct {
 		TESWeather::ColorData		colors[10];
 		float			hdrInfo[14];
@@ -246,6 +275,7 @@ struct ShaderConstants {
 	WetWorldStruct			WetWorld;
 	SharpeningStruct		Sharpening;
 	VolumetricFogStruct		VolumetricFog;
+	VolumetricLightStruct	VolumetricLight;
 	bool					EveningTransLightDirSet;
 	D3DXVECTOR4				EveningTransLightDir;
 	bool					MorningTransLightDirSet;
@@ -358,6 +388,11 @@ public:
 	bool					UseIntervalUpdate;
 	TESObjectCELL*			previousCell;
 	float					previousBlend;
+	//Begin Volume Light
+	float					previousModifier = 1.0f;
+	float					currentModifier = 1.0f;
+	bool					modifiersSet = false;
+	//End Volume Light
 	SettingsWaterStruct*	sws;
 	SettingsAmbientOcclusionStruct* sas;
 	SettingsBloomStruct* sbs;
@@ -380,6 +415,7 @@ public:
 	EffectRecord*			WetWorldEffect;
 	EffectRecord*			SharpeningEffect;
 	EffectRecord*			VolumetricFogEffect;
+	EffectRecord*			VolumetricLightEffect;
 	EffectRecord*			RainEffect;
 	EffectRecord*			SnowEffect;
 	EffectRecord*			ShadowsExteriorsEffect;

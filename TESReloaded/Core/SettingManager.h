@@ -193,6 +193,7 @@ struct SettingsMainStruct {
 		bool WaterLens;
 		bool WetWorld;
 		bool VolumetricFog;
+		bool VolumetricLight;
 		bool Extra;
 	};
 
@@ -585,6 +586,43 @@ struct SettingsVolumetricFogStruct {
 	float MaxDistance;
 };
 
+struct SettingsVolumetricLightStruct {
+	float baseSunriseR;
+	float baseSunriseG;
+	float baseSunriseB;
+	float baseMiddayR;
+	float baseMiddayG;
+	float baseMiddayB;
+	float baseSunsetR;
+	float baseSunsetG;
+	float baseSunsetB;
+	float baseNightR;
+	float baseNightG;
+	float baseNightB;
+	float baseDistance;
+	float baseHeightCutOff;
+
+	float accumSunriseR;
+	float accumSunriseG;
+	float accumSunriseB;
+	float accumMiddayR;
+	float accumMiddayG;
+	float accumMiddayB;
+	float accumSunsetR;
+	float accumSunsetG;
+	float accumSunsetB;
+	float accumNightR;
+	float accumNightG;
+	float accumNightB;
+	float accumDistance;
+	float accumHeightCutOff;
+	float accumCutOff;
+
+	float blurDistance;
+	float randomizer;
+	float sunIntensityCoeff;
+};
+
 struct SettingsWeatherStruct {
 	char					LowerLayer[80];
 	char					UpperLayer[80];
@@ -610,6 +648,7 @@ typedef std::map<std::string, SettingsBloomStruct> SettingsBloomList;
 typedef std::map<std::string, SettingsMotionBlurStruct> SettingsMotionBlurList;
 typedef std::map<std::string, SettingsWeatherStruct> SettingsWeatherList;
 typedef std::map<std::string, SettingsShadowPointLightsStruct> SettingsShadowPointLightsList;
+typedef std::map<std::string, SettingsVolumetricLightStruct> SettingsVolumetricLightList;
 typedef std::map<std::string, std::string> DefinitionsList;
 typedef std::map<UInt32, std::string> SectionsList;
 typedef std::map<std::string, float> SettingsList;
@@ -634,6 +673,7 @@ public:
 	SettingsShadowPointLightsStruct*GetSettingsShadowPointLight(const char* PlayerLocation);
 	SettingsMotionBlurStruct*		GetSettingsMotionBlur(const char* Section);
 	SettingsWeatherStruct*			GetSettingsWeather(const char* WeatherName);
+	SettingsVolumetricLightStruct*  GetSettingsVolumetricLight(const char* WeatherName);
 	void							SetSettingsWeather(TESWeather* Weather);
 	SettingsWeatherStruct*			CreateSettingsWeather(const char* WeatherName);
 
@@ -711,6 +751,7 @@ private:
 	SettingsMotionBlurList			SettingsMotionBlur;
 	SettingsWeatherList				SettingsWeather;
 	SettingsShadowPointLightsList   SettingsShadowPointLight;
+	SettingsVolumetricLightList		SettingsVolumetricLight;
 
 };
 
