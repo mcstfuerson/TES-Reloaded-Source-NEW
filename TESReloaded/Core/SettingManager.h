@@ -600,7 +600,6 @@ struct SettingsVolumetricLightStruct {
 	float baseNightG;
 	float baseNightB;
 	float baseDistance;
-	float baseHeightCutOff;
 
 	float accumSunriseR;
 	float accumSunriseG;
@@ -615,12 +614,18 @@ struct SettingsVolumetricLightStruct {
 	float accumNightG;
 	float accumNightB;
 	float accumDistance;
-	float accumHeightCutOff;
+	float accumHeightMax;
+	float accumHeightMin;
 	float accumCutOff;
+
+	float fogPower;
+	float sunScatterR;
+	float sunScatterB;
+	float sunScatterG;
 
 	float blurDistance;
 	float randomizer;
-	float sunIntensityCoeff;
+	float animatedFogToggle;
 };
 
 struct SettingsWeatherStruct {
