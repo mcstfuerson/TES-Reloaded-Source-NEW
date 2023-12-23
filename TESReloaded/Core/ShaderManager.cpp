@@ -1798,9 +1798,7 @@ void ShaderManager::UpdateConstants() {
 				SetVolumetricLightModifiers(currentSettings);
 				modifiersInitialzed = true;
 			}
-			/*Logger::Log("Current Modifier: %f", currentModifier);
-			Logger::Log("Current Randomizer: %f", currentSettings->randomizer);
-			Logger::Log("Current Fog Height: %f", currentFogHeight);*/
+
 			if (currentSettings == NULL) {
 				currentSettings = TheSettingManager->GetSettingsVolumetricLight("Default");
 			}
