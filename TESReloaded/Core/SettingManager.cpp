@@ -2443,12 +2443,12 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 						Settings["AccumNightB"] = s.accumNightB = 0.00f;
 						Settings["AccumDistance"] = s.accumDistance = 2000.0f;
 						Settings["AccumCutOff"] = s.accumCutOff = 8500.0f;
-						Settings["AccumHeightMax"] = s.accumHeightMax = 500000.0f;
-						Settings["AccumHeightMin"] = s.accumHeightMin = 100000.0f;
+						Settings["AccumHeightMax"] = s.accumHeightMax = 80000.0f;
+						Settings["AccumHeightMin"] = s.accumHeightMin = 2500.0f;
 						Settings["SunScatterR"] = s.sunScatterR = 0.0f;
 						Settings["SunScatterG"] = s.sunScatterG = 0.0f;
 						Settings["SunScatterB"] = s.sunScatterB = 0.0f;
-						Settings["FogPower"] = s.fogPower = 0.00f;
+						Settings["FogPower"] = s.fogPower = 1.00f;
 						Settings["BlurDistance"] = s.blurDistance = 999999.0f;
 						Settings["Randomizer"] = s.randomizer = 1.0f;
 						Settings["AnimatedFog"] = s.animatedFogToggle = 1.0f;
