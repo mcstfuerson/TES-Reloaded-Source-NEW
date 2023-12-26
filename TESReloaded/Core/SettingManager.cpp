@@ -1063,8 +1063,10 @@ void SettingManager::LoadSettings() {
 		SVL.accumHeightMax = atof(value);
 		GetPrivateProfileStringA(pNextSection, "AccumHeightMin", "1.0", value, SettingStringBuffer, Filename);
 		SVL.accumHeightMin = atof(value);
-		GetPrivateProfileStringA(pNextSection, "AccumDistance", "1.0", value, SettingStringBuffer, Filename);
-		SVL.accumDistance = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumDistanceMax", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumDistanceMax = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumDistanceMin", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumDistanceMin = atof(value);
 		GetPrivateProfileStringA(pNextSection, "AccumCutOff", "1.0", value, SettingStringBuffer, Filename);
 		SVL.accumCutOff = atof(value);
 
@@ -1718,7 +1720,8 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 				WritePrivateProfileStringA(v->first.c_str(), "AccumNightR", ToString(v->second.accumNightR).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "AccumNightG", ToString(v->second.accumNightG).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "AccumNightB", ToString(v->second.accumNightB).c_str(), Filename);
-				WritePrivateProfileStringA(v->first.c_str(), "AccumDistance", ToString(v->second.accumDistance).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumDistanceMax", ToString(v->second.accumDistanceMax).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumDistanceMin", ToString(v->second.accumDistanceMin).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "AccumCutOff", ToString(v->second.accumCutOff).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "AccumHeightMax", ToString(v->second.accumHeightMax).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "AccumHeightMin", ToString(v->second.accumHeightMin).c_str(), Filename);
@@ -2399,7 +2402,8 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["AccumNightR"] = svls->accumNightR;
 				Settings["AccumNightG"] = svls->accumNightG;
 				Settings["AccumNightB"] = svls->accumNightB;
-				Settings["AccumDistance"] = svls->accumDistance;
+				Settings["AccumDistanceMax"] = svls->accumDistanceMax;
+				Settings["AccumDistanceMin"] = svls->accumDistanceMin;
 				Settings["AccumCutOff"] = svls->accumCutOff;				
 				Settings["AccumHeightMax"] = svls->accumHeightMax;
 				Settings["AccumHeightMin"] = svls->accumHeightMin;
@@ -2441,7 +2445,8 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 						Settings["AccumNightR"] = s.accumNightR = 0.00f;
 						Settings["AccumNightG"] = s.accumNightG = 0.00f;
 						Settings["AccumNightB"] = s.accumNightB = 0.00f;
-						Settings["AccumDistance"] = s.accumDistance = 2000.0f;
+						Settings["AccumDistanceMax"] = s.accumDistanceMax = 2001.0f;
+						Settings["AccumDistanceMin"] = s.accumDistanceMin = 2000.0f;
 						Settings["AccumCutOff"] = s.accumCutOff = 8500.0f;
 						Settings["AccumHeightMax"] = s.accumHeightMax = 80000.0f;
 						Settings["AccumHeightMin"] = s.accumHeightMin = 2500.0f;
@@ -3255,8 +3260,10 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				svls->accumNightG = Value;
 			else if (!strcmp(Setting, "AccumNightB"))
 				svls->accumNightB = Value;
-			else if (!strcmp(Setting, "AccumDistance"))
-				svls->accumDistance = Value;
+			else if (!strcmp(Setting, "AccumDistanceMax"))
+				svls->accumDistanceMax = Value;
+			else if (!strcmp(Setting, "AccumDistanceMin"))
+				svls->accumDistanceMin = Value;
 			else if (!strcmp(Setting, "AccumCutOff"))
 				svls->accumCutOff = Value;
 			else if (!strcmp(Setting, "AccumHeightMax"))

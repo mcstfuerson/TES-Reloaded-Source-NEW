@@ -410,6 +410,8 @@ public:
 	D3DXVECTOR3				previousWind = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	float					currentFogHeight;
 	float					previousFogHeight;
+	float					currentAccumDistance;
+	float					previousAccumDistance;
 	bool					modifiersSet = false;
 	bool					modifiersInitialzed = false;
 	//End Volume Light

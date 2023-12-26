@@ -127,6 +127,8 @@ void GameMenuManager::Render() {
 										TheShaderManager->previousModifier = 1.0f;
 										TheShaderManager->currentFogHeight = currentSettings->accumHeightMax;
 										TheShaderManager->previousFogHeight = currentSettings->accumHeightMax;
+										TheShaderManager->currentAccumDistance = currentSettings->accumDistanceMax;
+										TheShaderManager->previousAccumDistance = currentSettings->accumDistanceMax;
 										TheShaderManager->modifiersSet = true;
 										break;
 									}

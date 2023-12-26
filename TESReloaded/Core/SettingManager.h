@@ -613,7 +613,8 @@ struct SettingsVolumetricLightStruct {
 	float accumNightR;
 	float accumNightG;
 	float accumNightB;
-	float accumDistance;
+	float accumDistanceMax;
+	float accumDistanceMin;
 	float accumHeightMax;
 	float accumHeightMin;
 	float accumCutOff;

@@ -1895,7 +1895,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.VolumetricLight.data1.x = std::lerp(previousValues.data1.x * previousModifier, currentValues.data1.x * currentModifier, weatherPercent);
 			ShaderConst.VolumetricLight.data1.y = std::lerp(previousValues.data1.y * previousModifier, currentValues.data1.y * currentModifier, weatherPercent);
 			ShaderConst.VolumetricLight.data1.z = std::lerp(previousValues.data1.z * previousModifier, currentValues.data1.z * currentModifier, weatherPercent);
-			ShaderConst.VolumetricLight.data1.w = std::lerp(previousSettings->accumDistance, currentSettings->accumDistance, weatherPercent);
+			ShaderConst.VolumetricLight.data1.w = std::lerp(previousAccumDistance, currentAccumDistance, weatherPercent);
 
 			ShaderConst.VolumetricLight.data2.x = std::lerp(previousValues.data2.x * previousModifier, currentValues.data2.x * currentModifier, weatherPercent);
 			ShaderConst.VolumetricLight.data2.y = std::lerp(previousValues.data2.y * previousModifier, currentValues.data2.y * currentModifier, weatherPercent);
@@ -1943,6 +1943,10 @@ void ShaderManager::SetVolumetricLightModifiers(SettingsVolumetricLightStruct* c
 	previousFogHeight = currentFogHeight;
 	int minHeight = (int)currentSettings->accumHeightMin;
 	currentFogHeight = (rand() + rand() + rand()) % ((int)currentSettings->accumHeightMax - minHeight) + minHeight;
+
+	previousAccumDistance = currentAccumDistance;
+	int minDistance = (int)currentSettings->accumDistanceMin;
+	currentAccumDistance = (rand() * ((rand() % 10 + 1))) % ((int)currentSettings->accumDistanceMax - minDistance) + minDistance;
 
 	modifiersSet = true;
 }
