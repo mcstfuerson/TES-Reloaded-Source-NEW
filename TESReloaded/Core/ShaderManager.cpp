@@ -1796,6 +1796,9 @@ void ShaderManager::UpdateConstants() {
 
 			if (!modifiersInitialzed) {
 				SetVolumetricLightModifiers(currentSettings);
+				previousModifier = currentModifier;
+				previousFogHeight = currentFogHeight;
+				previousAccumDistance = currentAccumDistance;
 				modifiersInitialzed = true;
 			}
 
