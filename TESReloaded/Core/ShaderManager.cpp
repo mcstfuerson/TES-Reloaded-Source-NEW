@@ -1794,16 +1794,16 @@ void ShaderManager::UpdateConstants() {
 			ShaderConstants::VolumetricLightStruct currentValues;
 			ShaderConstants::VolumetricLightStruct previousValues;
 
+			if (currentSettings == NULL) {
+				currentSettings = TheSettingManager->GetSettingsVolumetricLight("Default");
+			}
+
 			if (!modifiersInitialzed) {
 				SetVolumetricLightModifiers(currentSettings);
 				previousModifier = currentModifier;
 				previousFogHeight = currentFogHeight;
 				previousAccumDistance = currentAccumDistance;
 				modifiersInitialzed = true;
-			}
-
-			if (currentSettings == NULL) {
-				currentSettings = TheSettingManager->GetSettingsVolumetricLight("Default");
 			}
 
 			if (previousWeather == NULL) {
@@ -2675,10 +2675,6 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		ShadowsInteriorsEffect->SetCT();
 		ShadowsInteriorsEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
-	if (Effects->Coloring) {
-		ColoringEffect->SetCT();
-		ColoringEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
 	if (Effects->Bloom) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		BloomEffect->SetCT();
@@ -2752,6 +2748,10 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	if (Effects->Sharpening) {
 		SharpeningEffect->SetCT();
 		SharpeningEffect->Render(Device, RenderTarget, RenderedSurface, false);
+	}
+	if (Effects->Coloring) {
+		ColoringEffect->SetCT();
+		ColoringEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
 	if (Effects->Extra) {
 		for (ExtraEffectsList::iterator iter = ExtraEffects.begin(); iter != ExtraEffects.end(); ++iter) {
