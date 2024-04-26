@@ -84,6 +84,7 @@ SettingManager::SettingManager() {
 	SettingsMain.Main.RemoveUnderwater = GetPrivateProfileIntA("Main", "RemoveUnderwater", 1, Filename);
 	SettingsMain.Main.RemovePrecipitations = GetPrivateProfileIntA("Main", "RemovePrecipitations", 0, Filename);
 	SettingsMain.Main.MemoryManagement = GetPrivateProfileIntA("Main", "MemoryManagement", 0, Filename);
+	SettingsMain.Main.ShadowManagement = GetPrivateProfileIntA("Main", "ShadowManagement", 1, Filename);
 	SettingsMain.Main.AnisotropicFilter = GetPrivateProfileIntA("Main", "AnisotropicFilter", 0, Filename);
 	GetPrivateProfileStringA("Main", "FarPlaneDistance", "0.0", value, SettingStringBuffer, Filename);
 	SettingsMain.Main.FarPlaneDistance = atof(value);

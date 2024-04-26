@@ -45,7 +45,7 @@ extern "C" {
 			CreateFormLoadHook();
 			CreateSettingsHook();
 			CreateScriptHook();
-			CreateShadowsHook();
+			if (TheSettingManager->SettingsMain.Main.ShadowManagement) CreateShadowsHook();
 			CreateWeatherModeHook();
 			CreateAnimationHook();
 			if (TheSettingManager->SettingsMain.Main.MemoryManagement) CreateMemoryManagementHook();

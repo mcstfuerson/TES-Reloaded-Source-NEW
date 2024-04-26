@@ -82,6 +82,7 @@ struct SettingsMainStruct {
 		bool	RemoveUnderwater;
 		bool	RemovePrecipitations;
 		bool	MemoryManagement;
+		bool	ShadowManagement;
 		bool	FPSOverlay;
 		bool	SaveSettings;
 		bool	ReplaceIntro;

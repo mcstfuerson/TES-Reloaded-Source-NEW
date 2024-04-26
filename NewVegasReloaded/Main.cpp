@@ -40,7 +40,7 @@ extern "C" {
 			CreateRenderHook();
 			CreateFormLoadHook();
 			CreateSettingsHook();
-			CreateShadowsHook();
+			if (TheSettingManager->SettingsMain.Main.ShadowManagement) CreateShadowsHook();
 			if (TheSettingManager->SettingsMain.Main.MemoryManagement) CreateMemoryManagementHook();
 			if (TheSettingManager->SettingsMain.CameraMode.Enabled) CreateCameraModeHook();
 			if (TheSettingManager->SettingsMain.SleepingMode.Enabled) CreateSleepingModeHook();
