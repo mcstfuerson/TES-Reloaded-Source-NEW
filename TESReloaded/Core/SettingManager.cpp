@@ -100,6 +100,7 @@ SettingManager::SettingManager() {
 	SettingsMain.Main.ScreenshotKey = GetPrivateProfileIntA("Main", "ScreenshotKey", 87, Filename);
 	SettingsMain.Main.FPSOverlay = GetPrivateProfileIntA("Main", "FPSOverlay", 0, Filename);
 	SettingsMain.Main.DirectionalLightOverride = GetPrivateProfileIntA("Main", "DirectionalLightOverride", 0, Filename);
+	SettingsMain.Main.RenderEffectsBeforeHdr = GetPrivateProfileIntA("Main", "RenderEffectsBeforeHdr", 0, Filename);
 	GetPrivateProfileStringA("Main", "MoonPhaseLumNew", "0.0", value, SettingStringBuffer, Filename);
 	SettingsMain.Main.MoonPhaseLumNew = atof(value);
 	GetPrivateProfileStringA("Main", "MoonPhaseLumQtr", "0.25", value, SettingStringBuffer, Filename);
@@ -1354,6 +1355,7 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 			WritePrivateProfileStringA("Main", "ScreenshotKey", ToString(SettingsMain.Main.ScreenshotKey).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "FPSOverlay", ToString(SettingsMain.Main.FPSOverlay).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("Main", "DirectionalLightOverride", ToString(SettingsMain.Main.DirectionalLightOverride).c_str(), SettingsMain.Main.MainFile);
+			//WritePrivateProfileStringA("Main", "RenderEffectsBeforeHdr", ToString(SettingsMain.Main.RenderEffectsBeforeHdr).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("CameraMode", "NearDistanceFirst", ToString(SettingsMain.CameraMode.NearDistanceFirst).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("CameraMode", "NearDistanceThird", ToString(SettingsMain.CameraMode.NearDistanceThird).c_str(), SettingsMain.Main.MainFile);
 			WritePrivateProfileStringA("CameraMode", "OffsetX", ToString(SettingsMain.CameraMode.Offset.x).c_str(), SettingsMain.Main.MainFile);
@@ -2061,6 +2063,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["ScreenshotKey"] = SettingsMain.Main.ScreenshotKey;
 				Settings["FPSOverlay"] = SettingsMain.Main.FPSOverlay;
 				Settings["DirectionalLightOverride"] = SettingsMain.Main.DirectionalLightOverride;
+				//Settings["RenderEffectsBeforeHdr"] = SettingsMain.Main.RenderEffectsBeforeHdr;
 				Settings["MoonPhaseLumNew"] = SettingsMain.Main.MoonPhaseLumNew;
 				Settings["MoonPhaseLumQtr"] = SettingsMain.Main.MoonPhaseLumQtr;
 				Settings["MoonPhaseLumHalf"] = SettingsMain.Main.MoonPhaseLumHalf;
@@ -2627,6 +2630,8 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 					SettingsMain.Main.FPSOverlay = Value;
 				else if (!strcmp(Setting, "DirectionalLightOverride"))
 					SettingsMain.Main.DirectionalLightOverride = Value;
+				/*else if (!strcmp(Setting, "RenderEffectsBeforeHdr"))
+					SettingsMain.Main.RenderEffectsBeforeHdr = Value;*/
 				else if (!strcmp(Setting, "MoonPhaseLumNew"))
 					SettingsMain.Main.MoonPhaseLumNew = Value;
 				else if (!strcmp(Setting, "MoonPhaseLumQtr"))

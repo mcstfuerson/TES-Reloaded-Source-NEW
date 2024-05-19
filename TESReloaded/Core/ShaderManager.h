@@ -376,6 +376,8 @@ public:
 	bool					LoadEffect(EffectRecord* TheEffect, char* Filename, char* CustomEffectName);
 	void					LoadEffectSettings();
 	void					DisposeEffect(EffectRecord* TheEffect);
+	void					RenderEffectsPreHdr(IDirect3DSurface9* RenderTarget);
+	void					RenderEffectsPostHdr(IDirect3DSurface9* RenderTarget);
 	void					RenderEffects(IDirect3DSurface9* RenderTarget);
 	void					SwitchShaderStatus(const char* Name);
 	void					SetCustomConstant(const char* Name, D3DXVECTOR4 Value);
@@ -397,6 +399,8 @@ public:
 	IDirect3DSurface9*		RenderedSurface;
 	IDirect3DTexture9*		RenderTextureSMAA;
 	IDirect3DSurface9*		RenderSurfaceSMAA;
+	IDirect3DTexture9*		EffectTexture;
+	IDirect3DSurface9*		EffectSurface;
 	bool					RenderedBufferFilled;
 	bool					DepthBufferFilled;
 	bool					isFullyInitialized;
