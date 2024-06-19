@@ -29,8 +29,6 @@ bool __cdecl TrackLoadForm(TESForm* Form, UInt32 Arg2) {
 		case TESForm::FormType::kFormType_Weather:
 			{ 
 				TESWeatherEx* Weather = (TESWeatherEx*)Form;
-				//Weather->hdrInfo[TESWeather::eHDR_BlurPasses] = 3;
-				//Weather->hdrInfo[TESWeather::eHDR_BlurRadius] = 8;
 				memcpy(Weather->colorsb, Weather->colors, WeatherColorsSize);
 				if (TheSettingManager->SettingsMain.WeatherMode.Enabled) {				
 					TheSettingManager->SetSettingsWeather(Weather);
