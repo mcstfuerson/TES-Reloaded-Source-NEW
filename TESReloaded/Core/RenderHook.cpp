@@ -397,7 +397,7 @@ void __cdecl TrackRenderObject(NiCamera* Camera, NiNode* Object, NiCullingProces
 	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
 
 	RenderObject(Camera, Object, CullingProcess, VisibleArray);
-	if (Object == WorldSceneGraph && (CameraMode || Player->IsThirdPersonView(CameraMode, TheRenderManager->FirstPersonView))) {
+	if (Object == WorldSceneGraph) {
 		TheRenderManager->ResolveDepthBuffer();
 	}
 	else if (Object == Player->firstPersonNiNode) {
