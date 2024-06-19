@@ -206,11 +206,6 @@ struct ShaderConstants {
 
 	};
 
-	struct SimpleWeatherStruct {
-		TESWeather::ColorData		colors[10];
-		float			hdrInfo[14];
-	};
-
 	struct SimpleLightingStruct {
 		UInt8	r;
 		UInt8	g;
@@ -218,7 +213,6 @@ struct ShaderConstants {
 		UInt8	a;
 	};
 
-	typedef std::map<std::string, SimpleWeatherStruct> WeatherMap;
 	typedef std::map<std::string, SimpleLightingStruct> InteriorLightingMap;
 
 	D3DXVECTOR4				ReciprocalResolution;
@@ -237,7 +231,6 @@ struct ShaderConstants {
 	D3DXVECTOR4				SecundaAmount;
 	float					SecundaFade;
 	bool					MoonsExist;
-	WeatherMap				OrigWeathers;
 	InteriorLightingMap		InteriorLighting;
 	float					MoonPhaseCoeff;
 	D3DXVECTOR4				RaysPhaseCoeff;

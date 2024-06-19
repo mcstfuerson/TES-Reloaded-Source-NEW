@@ -2595,18 +2595,18 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 						#endif
 					}
 					else {
-						Settings["DayR"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Day].r;
-						Settings["DayG"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Day].g;
-						Settings["DayB"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Day].b;
-						Settings["NightR"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Night].r;
-						Settings["NightG"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Night].g;
-						Settings["NightB"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Night].b;
-						Settings["SunriseR"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Sunrise].r;
-						Settings["SunriseG"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Sunrise].g;
-						Settings["SunriseB"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Sunrise].b;
-						Settings["SunsetR"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Sunset].r;
-						Settings["SunsetG"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Sunset].g;
-						Settings["SunsetB"] = Weather->colors[SelectedSectionKey].colors[TESWeather::eTime_Sunset].b;
+						Settings["DayR"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Day].r;
+						Settings["DayG"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Day].g;
+						Settings["DayB"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Day].b;
+						Settings["NightR"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Night].r;
+						Settings["NightG"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Night].g;
+						Settings["NightB"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Night].b;
+						Settings["SunriseR"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Sunrise].r;
+						Settings["SunriseG"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Sunrise].g;
+						Settings["SunriseB"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Sunrise].b;
+						Settings["SunsetR"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Sunset].r;
+						Settings["SunsetG"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Sunset].g;
+						Settings["SunsetB"] = Weather->colorsb[SelectedSectionKey].colors[TESWeather::eTime_Sunset].b;
 					}
 					break;
 				};
@@ -3526,7 +3526,7 @@ SettingsWeatherStruct* SettingManager::CreateSettingsWeather(const char* Weather
 			SE.SunGlare = Weather->sunGlare;
 			SE.TransDelta = Weather->transDelta;
 			SE.WindSpeed = Weather->windSpeed;
-			memcpy(SE.Colors, Weather->colors, WeatherColorsSize);
+			memcpy(SE.Colors, Weather->colorsb, WeatherColorsSize);
 			break;
 		};
 	}

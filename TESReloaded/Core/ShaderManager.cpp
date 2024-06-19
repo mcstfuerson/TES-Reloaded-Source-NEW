@@ -1156,13 +1156,13 @@ void ShaderManager::UpdateConstants() {
 					}
 				}
 
-				ShaderConstants::SimpleWeatherStruct sws = ShaderConst.OrigWeathers[((TESWeatherEx*)currentWeather)->EditorName];
-				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].r = sws.colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].r * ShaderConst.MoonPhaseCoeff;
-				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].g = sws.colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].g * ShaderConst.MoonPhaseCoeff;
-				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].b = sws.colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].b * ShaderConst.MoonPhaseCoeff;
-				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].r = sws.colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].r * ShaderConst.MoonPhaseCoeff;
-				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].g = sws.colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].g * ShaderConst.MoonPhaseCoeff;
-				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].b = sws.colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].b * ShaderConst.MoonPhaseCoeff;
+				TESWeatherEx* currentWeatherEx = ((TESWeatherEx*)currentWeather);
+				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].r = currentWeatherEx->colorsb[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].r * ShaderConst.MoonPhaseCoeff;
+				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].g = currentWeatherEx->colorsb[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].g * ShaderConst.MoonPhaseCoeff;
+				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].b = currentWeatherEx->colorsb[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].b * ShaderConst.MoonPhaseCoeff;
+				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].r = currentWeatherEx->colorsb[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].r * ShaderConst.MoonPhaseCoeff;
+				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].g = currentWeatherEx->colorsb[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].g * ShaderConst.MoonPhaseCoeff;
+				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].b = currentWeatherEx->colorsb[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].b * ShaderConst.MoonPhaseCoeff;
 
 				if (ShaderConst.pWeather == NULL) ShaderConst.pWeather = currentWeather;
 
