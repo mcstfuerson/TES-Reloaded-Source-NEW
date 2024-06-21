@@ -1,4 +1,4 @@
-char	Logger::MessageBuffer[1024];
+char	Logger::MessageBuffer[2048];
 FILE*	Logger::LogFile;
 
 void Logger::CreateLog(char* FileName) {

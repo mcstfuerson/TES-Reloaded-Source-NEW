@@ -1059,21 +1059,32 @@ void SettingManager::LoadSettings() {
 		SVL.accumNightG = atof(value);
 		GetPrivateProfileStringA(pNextSection, "AccumNightB", "1.0", value, SettingStringBuffer, Filename);
 		SVL.accumNightB = atof(value);
-
-		GetPrivateProfileStringA(pNextSection, "AccumDistance", "1.0", value, SettingStringBuffer, Filename);
-		SVL.accumDistance = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumHeightMax", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumHeightMax = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumHeightMin", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumHeightMin = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumDistanceMax", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumDistanceMax = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AccumDistanceMin", "1.0", value, SettingStringBuffer, Filename);
+		SVL.accumDistanceMin = atof(value);
 		GetPrivateProfileStringA(pNextSection, "AccumCutOff", "1.0", value, SettingStringBuffer, Filename);
 		SVL.accumCutOff = atof(value);
+
+		GetPrivateProfileStringA(pNextSection, "SunScatterR", "1.0", value, SettingStringBuffer, Filename);
+		SVL.sunScatterR = atof(value);
+		GetPrivateProfileStringA(pNextSection, "SunScatterG", "1.0", value, SettingStringBuffer, Filename);
+		SVL.sunScatterG = atof(value);
+		GetPrivateProfileStringA(pNextSection, "SunScatterB", "1.0", value, SettingStringBuffer, Filename);
+		SVL.sunScatterB = atof(value);
+		GetPrivateProfileStringA(pNextSection, "FogPower", "1.0", value, SettingStringBuffer, Filename);
+		SVL.fogPower = atof(value);
+
 		GetPrivateProfileStringA(pNextSection, "BlurDistance", "1.0", value, SettingStringBuffer, Filename);
 		SVL.blurDistance = atof(value);
-		GetPrivateProfileStringA(pNextSection, "AccumHeightCutOff", "1.0", value, SettingStringBuffer, Filename);
-		SVL.accumHeightCutOff = atof(value);
-		GetPrivateProfileStringA(pNextSection, "BaseHeightCutOff", "1.0", value, SettingStringBuffer, Filename);
-		SVL.baseHeightCutOff = atof(value);
 		GetPrivateProfileStringA(pNextSection, "Randomizer", "1.0", value, SettingStringBuffer, Filename);
 		SVL.randomizer = atof(value);
-		GetPrivateProfileStringA(pNextSection, "SunIntensityCoeff", "1.0", value, SettingStringBuffer, Filename);
-		SVL.sunIntensityCoeff = atof(value);
+		GetPrivateProfileStringA(pNextSection, "AnimatedFog", "1.0", value, SettingStringBuffer, Filename);
+		SVL.animatedFogToggle = atof(value);
 		SettingsVolumetricLight[std::string(pNextSection)] = SVL;
 		pNextSection = pNextSection + strlen(pNextSection) + 1;
 	}
@@ -1709,13 +1720,18 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 				WritePrivateProfileStringA(v->first.c_str(), "AccumNightR", ToString(v->second.accumNightR).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "AccumNightG", ToString(v->second.accumNightG).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "AccumNightB", ToString(v->second.accumNightB).c_str(), Filename);
-				WritePrivateProfileStringA(v->first.c_str(), "AccumDistance", ToString(v->second.accumDistance).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumDistanceMax", ToString(v->second.accumDistanceMax).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumDistanceMin", ToString(v->second.accumDistanceMin).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "AccumCutOff", ToString(v->second.accumCutOff).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumHeightMax", ToString(v->second.accumHeightMax).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AccumHeightMin", ToString(v->second.accumHeightMin).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "SunScatterR", ToString(v->second.sunScatterR).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "SunScatterG", ToString(v->second.sunScatterG).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "SunScatterB", ToString(v->second.sunScatterB).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "FogPower", ToString(v->second.fogPower).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "BlurDistance", ToString(v->second.blurDistance).c_str(), Filename);
-				WritePrivateProfileStringA(v->first.c_str(), "AccumHeightCutOff", ToString(v->second.accumHeightCutOff).c_str(), Filename);
-				WritePrivateProfileStringA(v->first.c_str(), "BaseHeightCutOff", ToString(v->second.baseHeightCutOff).c_str(), Filename);
 				WritePrivateProfileStringA(v->first.c_str(), "Randomizer", ToString(v->second.randomizer).c_str(), Filename);
-				WritePrivateProfileStringA(v->first.c_str(), "SunIntensityCoeff", ToString(v->second.sunIntensityCoeff).c_str(), Filename);
+				WritePrivateProfileStringA(v->first.c_str(), "AnimatedFog", ToString(v->second.animatedFogToggle).c_str(), Filename);
 				v++;
 			}
 
@@ -2386,13 +2402,18 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 				Settings["AccumNightR"] = svls->accumNightR;
 				Settings["AccumNightG"] = svls->accumNightG;
 				Settings["AccumNightB"] = svls->accumNightB;
-				Settings["AccumDistance"] = svls->accumDistance;
-				Settings["AccumCutOff"] = svls->accumCutOff;
+				Settings["AccumDistanceMax"] = svls->accumDistanceMax;
+				Settings["AccumDistanceMin"] = svls->accumDistanceMin;
+				Settings["AccumCutOff"] = svls->accumCutOff;				
+				Settings["AccumHeightMax"] = svls->accumHeightMax;
+				Settings["AccumHeightMin"] = svls->accumHeightMin;
+				Settings["SunScatterR"] = svls->sunScatterR;
+				Settings["SunScatterG"] = svls->sunScatterG;
+				Settings["SunScatterB"] = svls->sunScatterB;
+				Settings["FogPower"] = svls->fogPower;
 				Settings["BlurDistance"] = svls->blurDistance;
-				Settings["AccumHeightCutOff"] = svls->accumHeightCutOff;
-				Settings["BaseHeightCutOff"] = svls->baseHeightCutOff;
 				Settings["Randomizer"] = svls->randomizer;
-				Settings["SunIntensityCoeff"] = svls->sunIntensityCoeff;
+				Settings["AnimatedFog"] = svls->animatedFogToggle;
 			}
 			else				
 				for (TList<TESWeather>::Iterator Itr = DataHandler->weathers.Begin(); !Itr.End() && Itr.Get(); ++Itr) {
@@ -2424,13 +2445,18 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 						Settings["AccumNightR"] = s.accumNightR = 0.00f;
 						Settings["AccumNightG"] = s.accumNightG = 0.00f;
 						Settings["AccumNightB"] = s.accumNightB = 0.00f;
-						Settings["AccumDistance"] = s.accumDistance = 2000.0f;
+						Settings["AccumDistanceMax"] = s.accumDistanceMax = 2001.0f;
+						Settings["AccumDistanceMin"] = s.accumDistanceMin = 2000.0f;
 						Settings["AccumCutOff"] = s.accumCutOff = 8500.0f;
+						Settings["AccumHeightMax"] = s.accumHeightMax = 80000.0f;
+						Settings["AccumHeightMin"] = s.accumHeightMin = 2500.0f;
+						Settings["SunScatterR"] = s.sunScatterR = 0.0f;
+						Settings["SunScatterG"] = s.sunScatterG = 0.0f;
+						Settings["SunScatterB"] = s.sunScatterB = 0.0f;
+						Settings["FogPower"] = s.fogPower = 1.00f;
 						Settings["BlurDistance"] = s.blurDistance = 999999.0f;
-						Settings["AccumHeightCutOff"] = s.accumHeightCutOff = 500000.0f;
-						Settings["BaseHeightCutOff"] = s.baseHeightCutOff = 100000.0f;
 						Settings["Randomizer"] = s.randomizer = 1.0f;
-						Settings["SunIntensityCoeff"] = s.sunIntensityCoeff = 1.0f;
+						Settings["AnimatedFog"] = s.animatedFogToggle = 1.0f;
 						SettingsVolumetricLight.insert(std::pair<std::string, SettingsVolumetricLightStruct>(Weather->EditorName, s));
 						break;
 					};
@@ -3234,20 +3260,30 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				svls->accumNightG = Value;
 			else if (!strcmp(Setting, "AccumNightB"))
 				svls->accumNightB = Value;
-			else if (!strcmp(Setting, "AccumDistance"))
-				svls->accumDistance = Value;
+			else if (!strcmp(Setting, "AccumDistanceMax"))
+				svls->accumDistanceMax = Value;
+			else if (!strcmp(Setting, "AccumDistanceMin"))
+				svls->accumDistanceMin = Value;
 			else if (!strcmp(Setting, "AccumCutOff"))
 				svls->accumCutOff = Value;
+			else if (!strcmp(Setting, "AccumHeightMax"))
+				svls->accumHeightMax = Value;
+			else if (!strcmp(Setting, "AccumHeightMin"))
+				svls->accumHeightMin = Value;
+			else if (!strcmp(Setting, "SunScatterR"))
+				svls->sunScatterR = Value;
+			else if (!strcmp(Setting, "SunScatterG"))
+				svls->sunScatterG = Value;
+			else if (!strcmp(Setting, "SunScatterB"))
+				svls->sunScatterB = Value;
+			else if (!strcmp(Setting, "FogPower"))
+				svls->fogPower = Value;
 			else if (!strcmp(Setting, "BlurDistance"))
 				svls->blurDistance = Value;
-			else if (!strcmp(Setting, "AccumHeightCutOff"))
-				svls->accumHeightCutOff = Value;
-			else if (!strcmp(Setting, "BaseHeightCutOff"))
-				svls->baseHeightCutOff = Value;
 			else if (!strcmp(Setting, "Randomizer"))
 				svls->randomizer = Value;
-			else if (!strcmp(Setting, "SunIntensityCoeff"))
-				svls->sunIntensityCoeff = Value;
+			else if (!strcmp(Setting, "AnimatedFog"))
+				svls->animatedFogToggle = Value;
 		}
 		else if (!strcmp(Definition, "Water") || !strcmp(Definition, "Underwater")) {
 			SettingsWaterStruct* sws = GetSettingsWater(Section);

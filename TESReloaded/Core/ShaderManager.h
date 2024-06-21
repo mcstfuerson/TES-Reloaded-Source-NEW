@@ -187,10 +187,22 @@ struct ShaderConstants {
 		//w = Accum height Cutoff
 
 		D3DXVECTOR4 data4;
-		//x = Base height Cutoff
-		//y = Sun coeff
+		//x = UNUSED
+		//y = Animated fog toggle
 		//z = Screen Res X
 		//w = Screen Res Y 
+
+		D3DXVECTOR4 data5;
+		//x = Fog Direction x
+		//y = Fog Direction y
+		//z = Fog Direction z
+		//w = Fog Power
+
+		D3DXVECTOR4 data6;
+		//x = Sun Scatter R
+		//y = Sun Scatter G
+		//z = Sun Scatter B
+		//w = UNUSED
 
 	};
 
@@ -296,7 +308,9 @@ public:
 	ShaderProgram();
 	~ShaderProgram();
 
-	void					SetConstantTableValue(LPCSTR Name, UInt32 Index);
+	bool					SetConstantTableValue1(LPCSTR Name, UInt32 Index);
+	bool					SetConstantTableValue2(LPCSTR Name, UInt32 Index);
+	void					SetConstantTableCustom(LPCSTR Name, UInt32 Index);
 
 	ShaderValue*			FloatShaderValues;
 	UInt32					FloatShaderValuesCount;
@@ -353,6 +367,7 @@ public:
 	void					UpdateConstants();
 	void					UpdateShaderStates();
 	void					BeginScene();
+	void					SetVolumetricLightModifiers(SettingsVolumetricLightStruct* currentSettings);
 	void					CreateShader(const char *Name);
 	void					LoadShader(NiD3DVertexShader* Shader, const char* DirPostFix = "");
 	void					LoadShader(NiD3DPixelShader* Shader, const char* DirPostFix = "");
@@ -391,7 +406,14 @@ public:
 	//Begin Volume Light
 	float					previousModifier = 1.0f;
 	float					currentModifier = 1.0f;
+	D3DXVECTOR3				currentWind = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	D3DXVECTOR3				previousWind = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	float					currentFogHeight;
+	float					previousFogHeight;
+	float					currentAccumDistance;
+	float					previousAccumDistance;
 	bool					modifiersSet = false;
+	bool					modifiersInitialzed = false;
 	//End Volume Light
 	SettingsWaterStruct*	sws;
 	SettingsAmbientOcclusionStruct* sas;
