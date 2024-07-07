@@ -79,6 +79,7 @@ struct SettingsMainStruct {
 		char	MainFile[MAX_PATH];
 		char	WeatherFile[MAX_PATH];
 		char	ScreenshotPath[MAX_PATH];
+		bool	RenderEffectsBeforeHdr;
 		bool	RemoveUnderwater;
 		bool	RemovePrecipitations;
 		bool	MemoryManagement;

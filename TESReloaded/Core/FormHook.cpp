@@ -29,18 +29,13 @@ bool __cdecl TrackLoadForm(TESForm* Form, UInt32 Arg2) {
 		case TESForm::FormType::kFormType_Weather:
 			{ 
 				TESWeatherEx* Weather = (TESWeatherEx*)Form;
-				if (TheSettingManager->SettingsMain.WeatherMode.Enabled) {
-					memcpy(Weather->colorsb, Weather->colors, WeatherColorsSize);
+				memcpy(Weather->colorsb, Weather->colors, WeatherColorsSize);
+				if (TheSettingManager->SettingsMain.WeatherMode.Enabled) {				
 					TheSettingManager->SetSettingsWeather(Weather);
 				}
 
 				//TODO: Add additonal setting for Moon phase luminance to toggle this
 				Logger::Log("Loaded weather: %s", Weather->EditorName);
-				ShaderConstants::SimpleWeatherStruct sws;
-				std::copy(std::begin(Weather->colors), std::end(Weather->colors), std::begin(sws.colors));
-				std::copy(std::begin(Weather->hdrInfo), std::end(Weather->hdrInfo), std::begin(sws.hdrInfo));
-				//allow value overwrites to load the weathers from other plugins 
-				TheShaderManager->ShaderConst.OrigWeathers.insert_or_assign(Weather->EditorName, sws);
 			}
 			break;
 		case TESForm::FormType::kFormType_Water:

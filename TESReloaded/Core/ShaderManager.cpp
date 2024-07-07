@@ -31,7 +31,8 @@
 #define ShallowColorA shallowColorA
 #define TerrainShaders "SLS2001.vso SLS2001.pso SLS2064.vso SLS2068.pso SLS2042.vso SLS2048.pso SLS2043.vso SLS2049.pso"
 #define ExteriorPom "PAR2022.pso"
-#define InteriorShadowShaders "SLS2022.pso SLS2021.pso SLS2016.vso SLS2015.vso SLS2015.pso SLS2012.vso SLS2011.vso SLS2010.pso SLS2008.vso SLS2007.vso SLS2002.vso SLS2002.pso SLS2000.vso SLS2000.pso SLS1006.vso SLS1005.vso SLS1004.pso SLS1S006.vso SLS1S005.vso SLS1003.pso SLS2009.pso SLS2035.vso SLS2036.vso SLS2041.pso SM3002.vso SM3001.vso SM3001.pso SM3000.vso SM3LL001.pso SM3LL000.pso PAR2022.pso"
+#define ExteriorExtraShaders "SM3LL003.pso SM3002.vso"
+#define InteriorShadowShaders "SLS2022.pso SLS2021.pso SLS2016.vso SLS2015.vso SLS2015.pso SLS2012.vso SLS2011.vso SLS2010.pso SLS2008.vso SLS2007.vso SLS2002.vso SLS2002.pso SLS2000.vso SLS2000.pso SLS1006.vso SLS1005.vso SLS1004.pso SLS1S006.vso SLS1S005.vso SLS1003.pso SLS2009.pso SLS2035.vso SLS2036.vso SLS2041.pso SM3002.vso SM3001.vso SM3001.pso SM3000.vso SM3LL003.pso SM3LL001.pso SM3LL000.pso PAR2022.pso"
 #define InteriorSpecularShadowShaders "SLS2021.pso SLS2035.vso SLS2036.vso SLS2041.pso PAR2025.pso PAR2026.pso PAR2034.vso"
 #define ExteriorDialogShaders "SLS2003.pso SLS2018.pso SLS2039.pso SKIN2001.pso SKIN2003.pso SKIN2007.pso"
 #define BloodShaders "GDECALS.vso GDECAL.pso SLS2040.vso SLS2046.pso"
@@ -380,6 +381,9 @@ bool ShaderRecord::LoadShader(const char* Name, const char* DirPostFix) {
 		if (!TheSettingManager->SettingsMain.Shaders.HDR) return false;
 		strcat(FileName, "HDR");
 	}
+	else if (!memcmp(Name, "PART", 4)) {
+		strcat(FileName, "ExtraShaders");
+	}
 	else if (!memcmp(Name, "PAR", 3)) {
 		if (!TheSettingManager->SettingsMain.Shaders.POM) return false;
 		strcat(FileName, "POM");
@@ -409,6 +413,15 @@ bool ShaderRecord::LoadShader(const char* Name, const char* DirPostFix) {
 	else if (!memcmp(Name, "Shadow", 6)) {
 		strcat(FileName, "Shadows");
 	}	
+	else if (!memcmp(Name, "ISHIT", 5)) {
+		if (!TheSettingManager->SettingsMain.Main.RenderEffectsBeforeHdr)
+		{
+			strcat(FileName, "ExtraShaders");
+		}
+		else {
+			strcat(FileName, "PreHdrEffectPatches");
+		}
+	}
 	else {
 		strcat(FileName, "ExtraShaders");
 	}
@@ -713,6 +726,8 @@ ShaderManager::ShaderManager() {
 	RenderedSurface = NULL;
 	RenderTextureSMAA = NULL;
 	RenderSurfaceSMAA = NULL;
+	EffectTexture = NULL;
+	EffectSurface = NULL;
 	RenderedBufferFilled = false;
 	DepthBufferFilled = false;
 	EffectVertex = NULL;
@@ -764,12 +779,14 @@ ShaderManager::ShaderManager() {
 	EffectVertex->Lock(0, 0, &VertexPointer, 0);
 	CopyMemory(VertexPointer, ShaderVertices, sizeof(ShaderVertices));
 	EffectVertex->Unlock();
-	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &SourceTexture, NULL);
-	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &RenderedTexture, NULL);
-	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &RenderTextureSMAA, NULL);
+	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A16B16G16R16F, D3DPOOL_DEFAULT, &SourceTexture, NULL);
+	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A16B16G16R16F, D3DPOOL_DEFAULT, &RenderedTexture, NULL);
+	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A16B16G16R16F, D3DPOOL_DEFAULT, &RenderTextureSMAA, NULL);
+	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A16B16G16R16F, D3DPOOL_DEFAULT, &EffectTexture, NULL);
 	SourceTexture->GetSurfaceLevel(0, &SourceSurface);
 	RenderedTexture->GetSurfaceLevel(0, &RenderedSurface);
 	RenderTextureSMAA->GetSurfaceLevel(0, &RenderSurfaceSMAA);
+	EffectTexture->GetSurfaceLevel(0, &EffectSurface);
 	UseIntervalUpdate = TheSettingManager->SettingsShadows.Exteriors.UseIntervalUpdate;
 
 }
@@ -821,7 +838,8 @@ void ShaderManager::UpdateShaderStates() {
 		if (LocationState != CellLocation::Exterior) {
 			LocationState = CellLocation::Exterior;
 			DisposeShader("InteriorShadows");
-			CreateShader("ExteriorPom");
+			CreateShader("ExteriorPom"); //no disposal needed since they are disposed as part of "InteriorShadows"
+			CreateShader("ExteriorExtraShaders");//no disposal needed since they are disposed as part of "InteriorShadows"
 		}
 
 		if (MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) {
@@ -1138,13 +1156,13 @@ void ShaderManager::UpdateConstants() {
 					}
 				}
 
-				ShaderConstants::SimpleWeatherStruct sws = ShaderConst.OrigWeathers[((TESWeatherEx*)currentWeather)->EditorName];
-				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].r = sws.colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].r * ShaderConst.MoonPhaseCoeff;
-				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].g = sws.colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].g * ShaderConst.MoonPhaseCoeff;
-				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].b = sws.colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].b * ShaderConst.MoonPhaseCoeff;
-				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].r = sws.colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].r * ShaderConst.MoonPhaseCoeff;
-				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].g = sws.colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].g * ShaderConst.MoonPhaseCoeff;
-				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].b = sws.colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].b * ShaderConst.MoonPhaseCoeff;
+				TESWeatherEx* currentWeatherEx = ((TESWeatherEx*)currentWeather);
+				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].r = currentWeatherEx->colorsb[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].r * ShaderConst.MoonPhaseCoeff;
+				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].g = currentWeatherEx->colorsb[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].g * ShaderConst.MoonPhaseCoeff;
+				currentWeather->colors[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].b = currentWeatherEx->colorsb[TESWeather::eColor_Sunlight].colors[TESWeather::eTime_Night].b * ShaderConst.MoonPhaseCoeff;
+				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].r = currentWeatherEx->colorsb[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].r * ShaderConst.MoonPhaseCoeff;
+				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].g = currentWeatherEx->colorsb[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].g * ShaderConst.MoonPhaseCoeff;
+				currentWeather->colors[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].b = currentWeatherEx->colorsb[TESWeather::eColor_Ambient].colors[TESWeather::eTime_Night].b * ShaderConst.MoonPhaseCoeff;
 
 				if (ShaderConst.pWeather == NULL) ShaderConst.pWeather = currentWeather;
 
@@ -1983,6 +2001,9 @@ void ShaderManager::CreateShader(const char* Name) {
 	NiD3DPixelShaderEx** PrecipitationPixelShaders = (NiD3DPixelShaderEx**)0x00B46708;
 	NiD3DVertexShaderEx** ShadowLightVertexShaders = (NiD3DVertexShaderEx**)0x00B4528C;
 	NiD3DPixelShaderEx** ShadowLightPixelShaders = (NiD3DPixelShaderEx**)0x00B45088;
+	NiD3DPixelShaderEx** SM3PixelShaders = (NiD3DPixelShaderEx**)0x00B46ED8;
+	NiD3DPixelShaderEx** SM3LLPixelShaders = (NiD3DPixelShaderEx**)0x00B46C20;
+	NiD3DVertexShaderEx** SM3VertexShaders = (NiD3DVertexShaderEx**)0x00B47288;
 
 	if (!strcmp(Name, "Water")) {
 		WaterShader* WS = (WaterShader*)GetShaderDefinition(17)->Shader;
@@ -2052,10 +2073,45 @@ void ShaderManager::CreateShader(const char* Name) {
 			}
 		}
 
+		for (int i = 0; i < 39; i++) {
+			NiD3DPixelShaderEx* PS = SM3PixelShaders[i];
+			if (PS && strstr(InteriorShadowShaders, PS->ShaderName)) {
+				LoadShader(PS);
+			}
+		}
+
+		for (int i = 0; i < 20; i++) {
+			NiD3DPixelShaderEx* PS = SM3LLPixelShaders[i];
+			if (PS && strstr(InteriorShadowShaders, PS->ShaderName)) {
+				LoadShader(PS);
+			}
+		}
+
+		for (int i = 0; i < 32; i++) {
+			NiD3DVertexShaderEx* VS = SM3VertexShaders[i];
+			if (VS && strstr(InteriorShadowShaders, VS->ShaderName)) {
+				LoadShader(VS);
+			}
+		}
+
 		ParallaxShader* PRS = (ParallaxShader*)GetShaderDefinition(15)->Shader;
 		for each (NiD3DPixelShaderEx * PS in PRS->Pixel) {
 			if (PS && strstr(InteriorShadowShaders, PS->ShaderName)) {
 				LoadShader(PS);
+			}
+		}
+	}
+	else if (!strcmp(Name, "ExteriorExtraShaders")) {
+		for (int i = 0; i < 20; i++) {
+			NiD3DPixelShaderEx* PS = SM3LLPixelShaders[i];
+			if (PS && strstr(InteriorShadowShaders, PS->ShaderName)) {
+				LoadShader(PS, "Exterior");
+			}
+		}
+		for (int i = 0; i < 32; i++) {
+			NiD3DVertexShaderEx* VS = SM3VertexShaders[i];
+			if (VS && strstr(InteriorShadowShaders, VS->ShaderName)) {
+				LoadShader(VS, "Exterior");
 			}
 		}
 	}
@@ -2225,6 +2281,9 @@ void ShaderManager::DisposeShader(const char* Name) {
 	ShaderDefinition* (__cdecl * GetShaderDefinition)(UInt32) = (ShaderDefinition* (__cdecl *)(UInt32))0x007B4290;
 	NiD3DVertexShaderEx** ShadowLightVertexShaders = (NiD3DVertexShaderEx**)0x00B4528C;
 	NiD3DPixelShaderEx** ShadowLightPixelShaders = (NiD3DPixelShaderEx**)0x00B45088;
+	NiD3DPixelShaderEx** SM3PixelShaders = (NiD3DPixelShaderEx**)0x00B46ED8;//SM3 psos + 39
+	NiD3DPixelShaderEx** SM3LLPixelShaders = (NiD3DPixelShaderEx**)0x00B46C20; //SM3LL psos + 20
+	NiD3DVertexShaderEx** SM3VertexShaders = (NiD3DVertexShaderEx**)0x00B47288;//SM3* vsos + 32
 
 	if (!strcmp(Name, "Water")) {
 		WaterShader* WS = (WaterShader*)GetShaderDefinition(17)->Shader;
@@ -2370,6 +2429,29 @@ void ShaderManager::DisposeShader(const char* Name) {
 			if (PS && PS->ShaderProg && strstr(InteriorShadowShaders, PS->ShaderName)) {
 				PS->ShaderHandle = PS->ShaderHandleBackup;
 				delete PS->ShaderProg; PS->ShaderProg = NULL;
+			}
+		}
+
+		for (int i = 0; i < 39; i++) {
+			NiD3DPixelShaderEx* PS = SM3PixelShaders[i];
+			if (PS && PS->ShaderProg && strstr(InteriorShadowShaders, PS->ShaderName)) {
+				PS->ShaderHandle = PS->ShaderHandleBackup;
+				delete PS->ShaderProg; PS->ShaderProg = NULL;
+			}
+		}
+
+		for (int i = 0; i < 20; i++) {
+			NiD3DPixelShaderEx* PS = SM3LLPixelShaders[i];
+			if (PS && PS->ShaderProg && strstr(InteriorShadowShaders, PS->ShaderName)) {
+				PS->ShaderHandle = PS->ShaderHandleBackup;
+				delete PS->ShaderProg; PS->ShaderProg = NULL;
+			}
+		}
+		for (int i = 0; i < 32; i++) {
+			NiD3DVertexShaderEx* VS = SM3VertexShaders[i];
+			if (VS && VS->ShaderProg && strstr(InteriorShadowShaders, VS->ShaderName)) {
+				VS->ShaderHandle = VS->ShaderHandleBackup;
+				delete VS->ShaderProg; VS->ShaderProg = NULL;
 			}
 		}
 
@@ -2636,16 +2718,11 @@ void ShaderManager::DisposeEffect(EffectRecord* TheEffect) {
 }
 
 void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
-	
 	SettingsMainStruct::EffectsStruct* Effects = &TheSettingManager->SettingsMain.Effects;
 	IDirect3DDevice9* Device = TheRenderManager->device;
 	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();
 	D3DXVECTOR4* SunDir = &TheShaderManager->ShaderConst.SunDir;
 
-	TheRenderManager->SetupSceneCamera();
-	Device->SetStreamSource(0, EffectVertex, 0, sizeof(EffectQuad));
-	Device->SetFVF(EFFECTQUADFORMAT);
-	Device->StretchRect(RenderTarget, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
 	if (Effects->WetWorld && currentWorldSpace && ShaderConst.WetWorld.Data.x > 0.0f) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		WetWorldEffect->SetCT();
@@ -2791,8 +2868,43 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		D3DXSaveSurfaceToFileA(Filename, (D3DXIMAGE_FILEFORMAT)TheSettingManager->SettingsMain.Main.ScreenshotType, RenderTarget, NULL, NULL);
 		MenuManager->ShowMessage("Screenshot taken!");
 	}
-
 }
+
+void ShaderManager::RenderEffectsPreHdr(IDirect3DSurface9* RenderTargetParam) {
+	IDirect3DDevice9* Device = TheRenderManager->device;
+	NiDX9RenderState* RenderState = TheRenderManager->renderState;
+	int rs1 = RenderState->GetRenderState(D3DRS_ZENABLE); //1
+	int rs2 = RenderState->GetRenderState(D3DRS_ALPHAREF); //1
+	int rs3 = RenderState->GetRenderState(D3DRS_ALPHABLENDENABLE); //1
+	int rs4 = RenderState->GetRenderState(D3DRS_COLORWRITEENABLE); //1
+	RenderState->SetRenderState(D3DRS_ZENABLE, FALSE, 0); //1
+	RenderState->SetRenderState(D3DRS_ALPHAREF, FALSE, 0); //10
+	RenderState->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE, 0);//1
+	RenderState->SetRenderState(D3DRS_COLORWRITEENABLE, 15, 0); //0
+	TheRenderManager->SetupSceneCamera();
+	Device->SetStreamSource(0, EffectVertex, 0, sizeof(EffectQuad));
+	Device->SetFVF(EFFECTQUADFORMAT);
+    Device->StretchRect(RenderTargetParam, NULL, EffectSurface, NULL, D3DTEXF_NONE); 
+	Device->StretchRect(RenderTargetParam, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
+	Device->SetRenderTarget(0,EffectSurface);
+	IDirect3DSurface9* RenderTarget = EffectSurface;
+	RenderEffects(RenderTarget);
+	Device->SetRenderTarget(0, RenderTargetParam);
+	RenderState->SetRenderState(D3DRS_ZENABLE, rs1, 0); //1
+	RenderState->SetRenderState(D3DRS_ALPHAREF, rs2, 0); //10
+	RenderState->SetRenderState(D3DRS_ALPHABLENDENABLE, rs3, 0);//1
+	RenderState->SetRenderState(D3DRS_COLORWRITEENABLE, rs4, 0); //0
+}
+
+void ShaderManager::RenderEffectsPostHdr(IDirect3DSurface9* RenderTargetParam) {
+	IDirect3DDevice9* Device = TheRenderManager->device;
+	TheRenderManager->SetupSceneCamera();
+	Device->SetStreamSource(0, EffectVertex, 0, sizeof(EffectQuad));
+	Device->SetFVF(EFFECTQUADFORMAT);
+	Device->StretchRect(RenderTargetParam, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
+	RenderEffects(RenderTargetParam);
+}
+
 void ShaderManager::LoadEffectSettings() {
 	TESObjectCELL* currentCell = Player->parentCell;
 	TESWorldSpace* currentWorldSpace = Player->GetWorldSpace();

@@ -206,11 +206,6 @@ struct ShaderConstants {
 
 	};
 
-	struct SimpleWeatherStruct {
-		TESWeather::ColorData		colors[10];
-		float			hdrInfo[14];
-	};
-
 	struct SimpleLightingStruct {
 		UInt8	r;
 		UInt8	g;
@@ -218,7 +213,6 @@ struct ShaderConstants {
 		UInt8	a;
 	};
 
-	typedef std::map<std::string, SimpleWeatherStruct> WeatherMap;
 	typedef std::map<std::string, SimpleLightingStruct> InteriorLightingMap;
 
 	D3DXVECTOR4				ReciprocalResolution;
@@ -237,7 +231,6 @@ struct ShaderConstants {
 	D3DXVECTOR4				SecundaAmount;
 	float					SecundaFade;
 	bool					MoonsExist;
-	WeatherMap				OrigWeathers;
 	InteriorLightingMap		InteriorLighting;
 	float					MoonPhaseCoeff;
 	D3DXVECTOR4				RaysPhaseCoeff;
@@ -376,6 +369,8 @@ public:
 	bool					LoadEffect(EffectRecord* TheEffect, char* Filename, char* CustomEffectName);
 	void					LoadEffectSettings();
 	void					DisposeEffect(EffectRecord* TheEffect);
+	void					RenderEffectsPreHdr(IDirect3DSurface9* RenderTarget);
+	void					RenderEffectsPostHdr(IDirect3DSurface9* RenderTarget);
 	void					RenderEffects(IDirect3DSurface9* RenderTarget);
 	void					SwitchShaderStatus(const char* Name);
 	void					SetCustomConstant(const char* Name, D3DXVECTOR4 Value);
@@ -397,6 +392,8 @@ public:
 	IDirect3DSurface9*		RenderedSurface;
 	IDirect3DTexture9*		RenderTextureSMAA;
 	IDirect3DSurface9*		RenderSurfaceSMAA;
+	IDirect3DTexture9*		EffectTexture;
+	IDirect3DSurface9*		EffectSurface;
 	bool					RenderedBufferFilled;
 	bool					DepthBufferFilled;
 	bool					isFullyInitialized;

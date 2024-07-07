@@ -243,7 +243,6 @@ float MultiBoundWaterHeightFix() {
 void (__thiscall RenderHook::* Render)(BSRenderedTexture*);
 void (__thiscall RenderHook::* TrackRender)(BSRenderedTexture*);
 void RenderHook::TrackRender(BSRenderedTexture* RenderedTexture) {
-	
 	TheShaderManager->UpdateShaderStates();
 	TheRenderManager->SetSceneGraph();
 	TheShaderManager->UpdateConstants();
@@ -272,7 +271,18 @@ void (__thiscall RenderHook::* HDRRender)(NiScreenElements*, BSRenderedTexture**
 void (__thiscall RenderHook::* TrackHDRRender)(NiScreenElements*, BSRenderedTexture**, BSRenderedTexture**, UInt8);
 void RenderHook::TrackHDRRender(NiScreenElements* ScreenElements, BSRenderedTexture** RenderedTexture1, BSRenderedTexture** RenderedTexture2, UInt8 Arg4) {
 	
-	(this->*HDRRender)(ScreenElements, RenderedTexture1, RenderedTexture2, Arg4);
+	//NOTE: textures are set here because applying surface changes directly to the RT interferes with the Refraction shader
+	
+	if (TheSettingManager->SettingsMain.Main.RenderEffectsBeforeHdr) {
+		BSRenderedTexture* rt1 = *RenderedTexture1;
+		rt1->RenderedTexture->rendererData->dTexture = TheShaderManager->EffectTexture;
+		(this->*HDRRender)(ScreenElements, RenderedTexture1, RenderedTexture2, Arg4);
+		//Copy back to SourceBuffer for vanilla image space effects that needed fixes
+		TheRenderManager->device->StretchRect(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, NULL, TheShaderManager->SourceSurface, NULL, D3DTEXF_NONE);
+	}
+	else {
+		(this->*HDRRender)(ScreenElements, RenderedTexture1, RenderedTexture2, Arg4);
+	}
 
 }
 
@@ -297,6 +307,7 @@ UInt32 (__thiscall RenderHook::* SetupShaderPrograms)(NiGeometry*, NiSkinInstanc
 UInt32 (__thiscall RenderHook::* TrackSetupShaderPrograms)(NiGeometry*, NiSkinInstance*, NiSkinPartition::Partition*, NiGeometryBufferData*, NiPropertyState*, NiDynamicEffectState*, NiTransform*, UInt32);
 UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance* SkinInstance, NiSkinPartition::Partition* SkinPartition, NiGeometryBufferData* GeometryBufferData, NiPropertyState* PropertyState, NiDynamicEffectState* EffectState, NiTransform* WorldTransform, UInt32 WorldBound) {
 
+	NiDX9RenderState* RenderState = TheRenderManager->renderState;
 	NiD3DPass* Pass = ((NiD3DShader*)this)->CurrentPass;
 	NiD3DVertexShaderEx* VertexShader = (NiD3DVertexShaderEx*)Pass->VertexShader;
 	NiD3DPixelShaderEx* PixelShader = (NiD3DPixelShaderEx*)Pass->PixelShader;
@@ -312,10 +323,13 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 		if (PixelShader->ShaderProg && TheRenderManager->renderState->GetPixelShader() != PixelShader->ShaderHandle) PixelShader->ShaderProg->SetCT();
 		if (RenderWindowRootNode) {
 			char Name[256];
-			NiNode* Node = (NiNode*)MemoryAlloc(sizeof(NiNode)); Node->New(2);
+			NiNode* Node = (NiNode*)MemoryAlloc(sizeof(NiNode)); Node->New(2);			
 			sprintf(Name, "Pass %s (%s %s)", Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
 			if (!VertexShader->ShaderProg) strcat(Name, " - Vertex: vanilla");
 			if (!PixelShader->ShaderProg) strcat(Name, " - Pixel: vanilla");
+			if ((!VertexShader->ShaderProg && PixelShader->ShaderProg) || (VertexShader->ShaderProg && !PixelShader->ShaderProg)) {
+				strcat(Name, "----------------------------SHADER MISMATCH HERE");
+			}
 			Node->SetName(Name);
 			Node->m_children.Add((NiAVObject**)&Geometry->m_parent); // We do not use the AddObject to avoid to alter the original object
 			Node->m_children.Add((NiAVObject**)&Geometry); // Same as above
@@ -324,6 +338,9 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 		if (TheSettingManager->SettingsMain.Develop.LogShaders && TheKeyboardManager->OnKeyPressed(TheSettingManager->SettingsMain.Develop.LogShaders)) {
 			Logger::Log("Pass %s (%s %s)", Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
 		}
+	}
+	else {
+		RenderState->SetRenderState(D3DRS_ZWRITEENABLE, FALSE, 0);
 	}
 
 	return (this->*SetupShaderPrograms)(Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
@@ -380,7 +397,7 @@ void __cdecl TrackRenderObject(NiCamera* Camera, NiNode* Object, NiCullingProces
 	bool CameraMode = TheSettingManager->SettingsMain.CameraMode.Enabled;
 
 	RenderObject(Camera, Object, CullingProcess, VisibleArray);
-	if (Object == WorldSceneGraph && (CameraMode || Player->IsThirdPersonView(CameraMode, TheRenderManager->FirstPersonView))) {
+	if (Object == WorldSceneGraph) {
 		TheRenderManager->ResolveDepthBuffer();
 	}
 	else if (Object == Player->firstPersonNiNode) {
@@ -542,10 +559,20 @@ void (__cdecl * ProcessImageSpaceShaders)(NiDX9Renderer*, BSRenderedTexture*, BS
 void __cdecl TrackProcessImageSpaceShaders(NiDX9Renderer* Renderer, BSRenderedTexture* RenderedTexture1, BSRenderedTexture* RenderedTexture2) {
 	
 	BSRenderedTexture* MenuRenderedTexture = *(BSRenderedTexture**)kMenuRenderedTexture;
-	
+
 	if (TheRenderManager->BackBuffer) TheRenderManager->defaultRTGroup->RenderTargets[0]->data->Surface = TheRenderManager->BackBuffer;
-	ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
-	if ((!RenderedTexture2 || MenuRenderedTexture) && TheRenderManager->currentRTGroup) TheShaderManager->RenderEffects(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
+	if ((!RenderedTexture2 || MenuRenderedTexture) && TheRenderManager->currentRTGroup) {
+		IDirect3DDevice9* Device = TheRenderManager->device;
+		if (TheSettingManager->SettingsMain.Main.RenderEffectsBeforeHdr) {
+			TheShaderManager->RenderEffectsPreHdr(RenderedTexture1->RenderedTexture->buffer->data->Surface);
+			ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
+		}
+		else {
+			ProcessImageSpaceShaders(Renderer, RenderedTexture1, RenderedTexture2);
+			TheShaderManager->RenderEffectsPostHdr(TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface);
+		}
+	}
+
 	if (TheRenderManager->IsSaveGameScreenShot) {
 		if (MenuRenderedTexture)
 			TheRenderManager->device->StretchRect(MenuRenderedTexture->RenderTargetGroup->RenderTargets[0]->data->Surface, NULL, TheRenderManager->currentRTGroup->RenderTargets[0]->data->Surface, &TheRenderManager->SaveGameScreenShotRECT, D3DTEXF_NONE);
