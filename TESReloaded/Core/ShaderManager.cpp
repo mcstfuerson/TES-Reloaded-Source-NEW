@@ -1361,11 +1361,14 @@ void ShaderManager::UpdateConstants() {
 			}
 
 			ShaderConst.InteriorDimmer.x = dimmer;
-			float dimmerAdj = std::clamp(dimmer, TheSettingManager->SettingsMain.Main.InteriorDimmerCoeff, 1.0f);
 
-			LightData->ambient.r = InteriorLighting.r * dimmerAdj;
-			LightData->ambient.g = InteriorLighting.g * dimmerAdj;
-			LightData->ambient.b = InteriorLighting.b * dimmerAdj;
+			if (TheSettingManager->SettingsMain.Main.InteriorDimmerCoeff < 1.0f) {
+				float dimmerAdj = std::clamp(dimmer, TheSettingManager->SettingsMain.Main.InteriorDimmerCoeff, 1.0f);
+
+				LightData->ambient.r = InteriorLighting.r * dimmerAdj;
+				LightData->ambient.g = InteriorLighting.g * dimmerAdj;
+				LightData->ambient.b = InteriorLighting.b * dimmerAdj;
+			}
 		}
 
 		if (TheSettingManager->SettingsMain.Shaders.Water || TheSettingManager->SettingsMain.Effects.Underwater) {
