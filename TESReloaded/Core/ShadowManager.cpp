@@ -490,6 +490,7 @@ void ShadowManager::RenderActor(NiGeometry* Geo, D3DXVECTOR4* ShadowData, int li
 	if (GeoData) {
 		CreateD3DMatrix(&TheShaderManager->ShaderConst.ShadowMap.ShadowWorld, &Geo->m_worldTransform);
 		BSShaderProperty* LProp = (BSShaderProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Lighting);
+		if (!LProp || !LProp->IsLightingProperty()) return;
 		if (AlphaEnabled) {
 			NiAlphaProperty* AProp = (NiAlphaProperty*)Geo->GetProperty(NiProperty::PropertyType::kType_Alpha);
 			if (AProp->flags & NiAlphaProperty::AlphaFlags::ALPHA_BLEND_MASK || AProp->flags & NiAlphaProperty::AlphaFlags::TEST_ENABLE_MASK) {
