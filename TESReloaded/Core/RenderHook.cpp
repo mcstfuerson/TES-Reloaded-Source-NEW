@@ -340,7 +340,9 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 		}
 	}
 	else {
-		RenderState->SetRenderState(D3DRS_ZWRITEENABLE, FALSE, 0);
+		if (!MenuManager->IsActive(Menu::MenuType::kMenuType_BigFour)) {
+			RenderState->SetRenderState(D3DRS_ZWRITEENABLE, FALSE, 0);
+		}
 	}
 
 	return (this->*SetupShaderPrograms)(Geometry, SkinInstance, SkinPartition, GeometryBufferData, PropertyState, EffectState, WorldTransform, WorldBound);
