@@ -75,6 +75,7 @@ assert(sizeof(NiPoint2) == 0x008);
 
 class NiPoint3 {
 public:
+	float NiPoint3::operator * (const NiPoint3 pt) const { return x * pt.x + y * pt.y + z * pt.z; }
 	float x;
 	float y;
 	float z;
@@ -111,6 +112,14 @@ public:
 			data[0][0] * pt.x + data[0][1] * pt.y + data[0][2] * pt.z,
 			data[1][0] * pt.x + data[1][1] * pt.y + data[1][2] * pt.z,
 			data[2][0] * pt.x + data[2][1] * pt.y + data[2][2] * pt.z
+		};
+	}
+
+	NiPoint3 NiMatrix33::operator< (const NiPoint3 pt) const {
+		return {
+			data[0][0] * pt.x + data[1][0] * pt.y + data[2][0] * pt.z,
+			data[0][1] * pt.x + data[1][1] * pt.y + data[2][1] * pt.z,
+			data[0][2] * pt.x + data[1][2] * pt.y + data[2][2] * pt.z
 		};
 	}
 	NiMatrix33 NiMatrix33::operator* (const NiMatrix33 mat) const {
@@ -1906,6 +1915,17 @@ public:
 		v.y = this->m_worldTransform.pos.y - Point->y;
 		v.z = this->m_worldTransform.pos.z - Point->z;
 		return sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+
+	}
+
+	NiPoint3 GetEye(NiPoint3* Point) {
+
+		NiPoint3 v;
+
+		v.x = Point->x - this->m_worldTransform.pos.x;
+		v.y = Point->y - this->m_worldTransform.pos.y;
+		v.z = Point->z - this->m_worldTransform.pos.z;
+		return v;
 
 	}
 	NiBound*	GetWorldBound() { return &m_kWorldBound; }

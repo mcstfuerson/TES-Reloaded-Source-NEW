@@ -5,7 +5,7 @@ public:
 	static void CreateLog(char* FileName);
 	static void Log(char* Message, ...);
 	
-	static char			MessageBuffer[2048];
+	static char			MessageBuffer[4096];
 	static FILE*		LogFile;
 
 };

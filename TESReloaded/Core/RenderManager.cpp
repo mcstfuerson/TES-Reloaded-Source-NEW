@@ -47,6 +47,7 @@ void RenderManager::SetupSceneCamera() {
 		float TmB = Frustum->Top - Frustum->Bottom;
 		float TpB = Frustum->Top + Frustum->Bottom;
 		float InvFmN = 1.0f / (Frustum->Far - Frustum->Near);
+		NiPoint3 CameraLocation = *(NiPoint3*)0x00B3F9A8;
 
 		memcpy(CameraWorldTranslate, WorldTranslate, 0x0C);
 
@@ -90,9 +91,9 @@ void RenderManager::SetupSceneCamera() {
 		View->_32 = Up.z;
 		View->_33 = Forward.z;
 		View->_34 = 0.0f;
-		View->_41 = 0.0f;
-		View->_42 = 0.0f;
-		View->_43 = 0.0f;
+		View->_41 = -(Right * CameraLocation);
+		View->_42 = -(Up * CameraLocation);
+		View->_43 = -(Forward * CameraLocation);
 		View->_44 = 1.0f;
 
 		InvView->_11 = Right.x;
@@ -107,9 +108,9 @@ void RenderManager::SetupSceneCamera() {
 		InvView->_32 = Forward.y;
 		InvView->_33 = Forward.z;
 		InvView->_34 = 0.0f;
-		InvView->_41 = 0.0f;
-		InvView->_42 = 0.0f;
-		InvView->_43 = 0.0f;
+		InvView->_41 = CameraLocation.x;
+		InvView->_42 = CameraLocation.y;
+		InvView->_43 = CameraLocation.z;
 		InvView->_44 = 1.0f;
 
 		Proj->_11 = 2.0f / RmL;

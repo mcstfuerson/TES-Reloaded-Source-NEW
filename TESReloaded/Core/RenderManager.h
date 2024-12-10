@@ -11,6 +11,10 @@ public:
 	ShaderRecord*			ShaderProg;
 	IDirect3DVertexShader9*	ShaderHandleBackup;
 	char*					ShaderName;
+	bool					isSkin;
+	bool					isEyePosition;
+	bool					isSun;
+	bool					isTree;
 };
 
 class NiD3DPixelShaderEx : public NiD3DPixelShader {
@@ -18,6 +22,7 @@ public:
 	ShaderRecord*			ShaderProg;
 	IDirect3DPixelShader9*	ShaderHandleBackup;
 	char*					ShaderName;
+	bool					isSkin;
 };
 
 class RenderManager: public NiDX9Renderer {

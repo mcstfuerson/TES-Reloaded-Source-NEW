@@ -6,6 +6,11 @@
 #elif defined(OBLIVION)
 #define kCreateVertexShader 0x008014E0
 #define kCreatePixelShader 0x00801C90
+#define SunVertexShaders "SKYT.vso"
+#define TreeVertexShaders "STB2005.vso STB2007.vso STB2009.vso STB2015.vso"
+#define SkinVertexShaders "SLS2034.vso SLS2014.vso SLS2005.vso"
+#define SkinPixelShaders "SLS2003.pso SLS2018.pso SLS2039.pso"
+#define EyePositionShaders "SLS2025.vso SLS2009.vso SLS2003.vso SLS2042.vso SLS2043.vso"
 #elif defined(SKYRIM)
 #define kCreateVertexShader 0x00CCBB00
 #define kCreatePixelShader 0x00CCC420
@@ -91,6 +96,10 @@ NiD3DVertexShader* ShaderIOHook::TrackCreateVertexShader(char* FileName, char* A
 	VertexShader->ShaderHandleBackup = NULL;
 	VertexShader->ShaderName = new char[24];
 	strcpy(VertexShader->ShaderName, ShaderName);
+	VertexShader->isSkin = strstr(SkinVertexShaders, VertexShader->ShaderName) != NULL;
+	VertexShader->isEyePosition = strstr(EyePositionShaders, VertexShader->ShaderName) != NULL;
+	VertexShader->isSun = strstr(SunVertexShaders, VertexShader->ShaderName) != NULL;
+	VertexShader->isTree = strstr(TreeVertexShaders, VertexShader->ShaderName) != NULL;
 	TheShaderManager->LoadShader(VertexShader);
 	return (NiD3DVertexShader*)VertexShader;
 
@@ -106,6 +115,7 @@ NiD3DPixelShader* ShaderIOHook::TrackCreatePixelShader(char* FileName, char* Arg
 	PixelShader->ShaderHandleBackup = NULL;
 	PixelShader->ShaderName = new char[24];
 	strcpy(PixelShader->ShaderName, ShaderName);
+	PixelShader->isSkin = strstr(SkinPixelShaders, PixelShader->ShaderName) != NULL;
 	TheShaderManager->LoadShader(PixelShader);
 	return (NiD3DPixelShader*)PixelShader;
 

@@ -5,6 +5,7 @@
 #include <WeatherMode.h>
 #include <algorithm>
 #include <iostream>
+#include <filesystem>
 #define EFFECTQUADFORMAT D3DFVF_XYZ | D3DFVF_TEX1
 
 #if defined(NEWVEGAS)
@@ -327,6 +328,20 @@ bool ShaderProgram::SetConstantTableValue2(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.data5;
 	else if (!strcmp(Name, "TESR_VolumetricLightData6"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.data6;
+	else if (!strcmp(Name, "TESR_SpecularData"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Specular.SpecularData;
+	else {
+		return false;
+	}
+	return true;
+}
+
+bool ShaderProgram::SetPerGeomConstantTableValue(LPCSTR Name, UInt32 Index) {
+
+	if (!strcmp(Name, "TESR_GEOM_EyePosition"))
+		PerGeomFloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Specular.EyePosition;
+	else if (!strcmp(Name, "TESR_GEOM_Toggles"))
+		PerGeomFloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Geometry.Toggles;
 	else {
 		return false;
 	}
@@ -432,49 +447,32 @@ bool ShaderRecord::LoadShader(const char* Name, const char* DirPostFix) {
 	strcpy(FileNameBinary, FileName);
 	strcat(FileName, ".hlsl");
 	std::ifstream FileSource(FileName, std::ios::in | std::ios::binary | std::ios::ate);
-	if (FileSource.is_open()) {
-		bool useFlowControl = false;
-		std::streampos size = FileSource.tellg();
-		Source = new char[size];
-	
+	if (FileSource.is_open()) {	
+		size_t size = FileSource.tellg();
+		Source = new char[size + 1];
 		FileSource.seekg(0, std::ios::beg);
 		FileSource.read(Source, size);
-		std::string s = Source;
-		useFlowControl = s.find("Includes/ShadowCube") != std::string::npos;
+		Source[size] = 0;
 		FileSource.close();
 		if (strstr(Name, ".vso"))
 			Type = ShaderType_Vertex;
 		else if (strstr(Name, ".pso"))
 			Type = ShaderType_Pixel;
-		if (TheSettingManager->SettingsMain.Develop.CompileShaders) {
-			if (useFlowControl) {
-				Logger::Log("%s will be optimized for flow control", FileName);
-			}
-			D3DXCompileShaderFromFileA(FileName, NULL, NULL, "main", (Type == ShaderType_Vertex ? "vs_3_0" : "ps_3_0"), (useFlowControl ? D3DXSHADER_PREFER_FLOW_CONTROL : NULL), &Shader, &Errors, &Table);
-			if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
-			if (Shader) {
-				std::ofstream FileBinary(FileNameBinary, std::ios::out|std::ios::binary);
-				FileBinary.write((char*)Shader->GetBufferPointer(), Shader->GetBufferSize());
-				FileBinary.flush();
-				FileBinary.close();
-				Logger::Log("Shader compiled: %s", FileName);
-			}
+
+		std::ifstream FileBinary(FileNameBinary, std::ios::in | std::ios::binary | std::ios::ate);
+		if (FileBinary.is_open()) {
+			size = FileBinary.tellg();
+			D3DXCreateBuffer(size, &Shader);
+			FileBinary.seekg(0, std::ios::beg);
+			void* pShaderBuffer = Shader->GetBufferPointer();
+			FileBinary.read((char*)pShaderBuffer, size);
+			FileBinary.close();
+			D3DXGetShaderConstantTable((const DWORD*)pShaderBuffer, &Table);
 		}
 		else {
-			std::ifstream FileBinary(FileNameBinary, std::ios::in | std::ios::binary | std::ios::ate);
-			if (FileBinary.is_open()) {
-				size = FileBinary.tellg();
-				D3DXCreateBuffer(size, &Shader);
-				FileBinary.seekg(0, std::ios::beg);
-				void* pShaderBuffer = Shader->GetBufferPointer();
-				FileBinary.read((char*)pShaderBuffer, size);
-				FileBinary.close();
-				D3DXGetShaderConstantTable((const DWORD*)pShaderBuffer, &Table);
-			}
-			else {
-				Logger::Log("ERROR: Shader %s not found. Try to enable the CompileShader option to recompile the shaders.", FileNameBinary);
-			}
+			Logger::Log("ERROR: Shader %s not found. Try to enable the CompileShader option to recompile the shaders.", FileNameBinary);
 		}
+
 		if (Shader) {
 			Function = Shader->GetBufferPointer();
 			CreateCT();
@@ -492,32 +490,44 @@ void ShaderRecord::CreateCT() {
 	D3DXHANDLE Handle;
 	UINT ConstantCount = 1;
 	UInt32 FloatIndex = 0;
+	UInt32 PerGeomFloatIndex = 0;
 	UInt32 TextureIndex = 0;
 	
 	Table->GetDesc(&ConstantTableDesc);
     for (UINT c = 0; c < ConstantTableDesc.Constants; c++) {
 		Handle = Table->GetConstant(NULL, c);
 		Table->GetConstantDesc(Handle, &ConstantDesc, &ConstantCount);
-		if (ConstantDesc.RegisterSet == D3DXRS_FLOAT4 && !memcmp(ConstantDesc.Name, "TESR_", 5)) FloatShaderValuesCount += 1;
+		//if (ConstantDesc.RegisterSet == D3DXRS_FLOAT4 && !memcmp(ConstantDesc.Name, "TESR_", 5)) FloatShaderValuesCount += 1;
+		if (ConstantDesc.RegisterSet == D3DXRS_FLOAT4 && !memcmp(ConstantDesc.Name, "TESR_GEOM_", 10)) { PerGeomFloatShaderValuesCount += 1; }
+		else if(ConstantDesc.RegisterSet == D3DXRS_FLOAT4 && !memcmp(ConstantDesc.Name, "TESR_", 5)) { FloatShaderValuesCount += 1; }
 		if (ConstantDesc.RegisterSet == D3DXRS_SAMPLER && !memcmp(ConstantDesc.Name, "TESR_", 5)) TextureShaderValuesCount += 1;
     }
-	HasCT = FloatShaderValuesCount + TextureShaderValuesCount;
+	HasCT = FloatShaderValuesCount + TextureShaderValuesCount + PerGeomFloatShaderValuesCount;
     if (HasCT) {
 		FloatShaderValues = (ShaderValue*)malloc(FloatShaderValuesCount * sizeof(ShaderValue));
+		PerGeomFloatShaderValues = (ShaderValue*)malloc(PerGeomFloatShaderValuesCount * sizeof(ShaderValue));
 		TextureShaderValues = (ShaderValue*)malloc(TextureShaderValuesCount * sizeof(ShaderValue));
 		for (UINT c = 0; c < ConstantTableDesc.Constants; c++) {
 			Handle = Table->GetConstant(NULL, c);
 			Table->GetConstantDesc(Handle, &ConstantDesc, &ConstantCount);
 			if (!memcmp(ConstantDesc.Name, "TESR_", 5)) {
+				Logger::Log("%s", ConstantDesc.Name);
 				switch (ConstantDesc.RegisterSet) {
 					case D3DXRS_FLOAT4:
-						if (!(SetConstantTableValue1(ConstantDesc.Name, FloatIndex) || SetConstantTableValue2(ConstantDesc.Name, FloatIndex))) {
-							SetConstantTableCustom(ConstantDesc.Name, FloatIndex);
+						if (SetPerGeomConstantTableValue(ConstantDesc.Name, PerGeomFloatIndex)) {
+							PerGeomFloatShaderValues[PerGeomFloatIndex].RegisterIndex = ConstantDesc.RegisterIndex;
+							PerGeomFloatShaderValues[PerGeomFloatIndex].RegisterCount = ConstantDesc.RegisterCount;
+							PerGeomFloatIndex++;
 						}
-						FloatShaderValues[FloatIndex].RegisterIndex = ConstantDesc.RegisterIndex;
-						FloatShaderValues[FloatIndex].RegisterCount = ConstantDesc.RegisterCount;
-						FloatIndex++;
- 						break;
+						else {
+							if (!(SetConstantTableValue1(ConstantDesc.Name, FloatIndex) || SetConstantTableValue2(ConstantDesc.Name, FloatIndex))) {
+								SetConstantTableCustom(ConstantDesc.Name, FloatIndex);
+							}
+							FloatShaderValues[FloatIndex].RegisterIndex = ConstantDesc.RegisterIndex;
+							FloatShaderValues[FloatIndex].RegisterCount = ConstantDesc.RegisterCount;
+							FloatIndex++;
+						}
+						break;
 					case D3DXRS_SAMPLER:
 						if (!strcmp(ConstantDesc.Name, WordRenderedBuffer)) HasRB = true;
 						if (!strcmp(ConstantDesc.Name, WordDepthBuffer)) HasDB = true;
@@ -566,6 +576,22 @@ void ShaderRecord::SetCT() {
 
 }
 
+void ShaderRecord::SetPerGeomCT() {
+
+	ShaderValue* Value;
+
+	if (HasCT) {
+		for (UInt32 c = 0; c < PerGeomFloatShaderValuesCount; c++) {
+			Value = &PerGeomFloatShaderValues[c];
+			if (Type == ShaderType_Vertex)
+				TheRenderManager->device->SetVertexShaderConstantF(Value->RegisterIndex, (const float*)Value->Value, Value->RegisterCount);
+			else
+				TheRenderManager->device->SetPixelShaderConstantF(Value->RegisterIndex, (const float*)Value->Value, Value->RegisterCount);
+		}
+	}
+
+}
+
 EffectRecord::EffectRecord() {
 
 	Enabled = false;
@@ -586,50 +612,125 @@ EffectRecord::~EffectRecord() {
 bool EffectRecord::LoadEffect(const char* Name) {
 
 	char FileName[MAX_PATH];
-	bool Compiled = true;
-
 	strcpy(FileName, Name);
 	strcat(FileName, ".hlsl");
 	std::ifstream FileSource(FileName, std::ios::in | std::ios::binary | std::ios::ate);
 	if (FileSource.is_open()) {
-		std::streampos size = FileSource.tellg();
-		Source = new char[size];
+		size_t size = FileSource.tellg();
+		Source = new char[size + 1];
 		FileSource.seekg(0, std::ios::beg);
 		FileSource.read(Source, size);
+		Source[size] = 0;
 		FileSource.close();
-		if (TheSettingManager->SettingsMain.Develop.CompileEffects) {
-			Compiled = false;
-			ID3DXEffectCompiler* Compiler = NULL;
-			ID3DXBuffer* EffectBuffer = NULL;
-			D3DXCreateEffectCompilerFromFileA(FileName, NULL, NULL, NULL, &Compiler, &Errors);
-			if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
-			if (Compiler) {
-				Compiler->CompileEffect(NULL, &EffectBuffer, &Errors);
-				if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
-			}
-			if (EffectBuffer) {
-				std::ofstream FileBinary(Name, std::ios::out | std::ios::binary);
-				FileBinary.write((char*)EffectBuffer->GetBufferPointer(), EffectBuffer->GetBufferSize());
-				FileBinary.flush();
-				FileBinary.close();
-				Compiled = true;
-				Logger::Log("Effect compiled: %s", FileName);
-			}
-			if (EffectBuffer) EffectBuffer->Release();
-			if (Compiler) Compiler->Release();
-		}
-		if (Compiled) {
-			D3DXCreateEffectFromFileA(TheRenderManager->device, Name, NULL, NULL, NULL, NULL, &Effect, &Errors);
-			if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
-			if (Effect) {
-				CreateCT();
-				Logger::Log("Effect loaded: %s", Name);
-				return true;
-			}
+
+		D3DXCreateEffectFromFileA(TheRenderManager->device, Name, NULL, NULL, NULL, NULL, &Effect, &Errors);
+		if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
+		if (Effect) {
+			CreateCT();
+			Logger::Log("Effect loaded: %s", Name);
+			return true;
 		}
 	}
 	return false;
+}
 
+void ShaderManager::CompileShader(char* FileName, char* FileNameBinary, char* Source, ShaderType Type, ID3DXBuffer* Errors, ID3DXBuffer* Shader, ID3DXConstantTable* Table) {
+
+	bool useFlowControl = false;
+	useFlowControl = strstr(Source, "Includes/ShadowCube") != nullptr;
+	if (useFlowControl) {
+		Logger::Log("%s will be optimized for flow control", FileName);
+	}
+	D3DXCompileShaderFromFileA(FileName, NULL, NULL, "main", (Type == ShaderType_Vertex ? "vs_3_0" : "ps_3_0"), (useFlowControl ? D3DXSHADER_PREFER_FLOW_CONTROL : NULL), &Shader, &Errors, &Table);
+	if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
+	if (Shader) {
+		std::ofstream FileBinary(FileNameBinary, std::ios::out | std::ios::binary);
+		FileBinary.write((char*)Shader->GetBufferPointer(), Shader->GetBufferSize());
+		FileBinary.flush();
+		FileBinary.close();
+		Logger::Log("Shader compiled: %s", FileNameBinary);
+	}
+}
+
+void ShaderManager::CompileEffect(char* FileName, char* FileNameBinary, char* Source, ID3DXBuffer* Errors) {
+
+	bool useFlowControl = false;
+	std::string s = Source;
+	useFlowControl = strstr(Source, "/Gfp") != nullptr;
+	if (useFlowControl) {
+		Logger::Log("%s will be optimized for flow control", FileName);
+	}
+	ID3DXEffectCompiler* Compiler = NULL;
+	ID3DXBuffer* EffectBuffer = NULL;
+	D3DXCreateEffectCompilerFromFileA(FileName, NULL, NULL, NULL, &Compiler, &Errors);
+	if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
+	if (Compiler) {
+		Compiler->CompileEffect((useFlowControl ? D3DXSHADER_PREFER_FLOW_CONTROL : NULL), &EffectBuffer, &Errors);
+		if (Errors) Logger::Log((char*)Errors->GetBufferPointer());
+	}
+	if (EffectBuffer) {
+		std::ofstream FileBinary(FileNameBinary, std::ios::out | std::ios::binary);
+		FileBinary.write((char*)EffectBuffer->GetBufferPointer(), EffectBuffer->GetBufferSize());
+		FileBinary.flush();
+		FileBinary.close();
+		Logger::Log("Effect compiled: %s", FileNameBinary);
+	}
+	if (EffectBuffer) EffectBuffer->Release();
+	if (Compiler) Compiler->Release();
+}
+
+void ShaderManager::CompileShaders(const std::filesystem::path& path){
+	for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		if (entry.is_directory()) {
+			Logger::Log("Compiling Directory: %s", entry.path().string());
+			CompileShaders(entry.path()); 
+		}
+		else if (entry.is_regular_file()) {
+
+			std::string FileNameStr = entry.path().string();
+			
+			ShaderType Type;
+			bool validFile = false;
+			bool isEffect = false;
+			if (FileNameStr.ends_with(".vso.hlsl")) {
+				Type = ShaderType_Vertex;
+				validFile = true;
+			}
+			else if (FileNameStr.ends_with(".pso.hlsl")) {
+				Type = ShaderType_Pixel;
+				validFile = true;
+			}
+			else if (FileNameStr.ends_with(".fx.hlsl")) {
+				validFile = true;
+				isEffect = true;
+			}
+
+			if (validFile) {
+				char* FileName = FileNameStr.data();
+				Logger::Log("Compiling File: %s", entry.path().string());
+				std::ifstream FileSource(FileName, std::ios::in | std::ios::binary | std::ios::ate);
+				if (FileSource.is_open()) {
+					size_t size = FileSource.tellg();
+					char* Source = new char[size+1];
+					FileSource.seekg(0, std::ios::beg);
+					FileSource.read(Source, size);
+					Source[size] = 0;
+					FileSource.close();
+					std::string FileNameBinaryStr = FileNameStr.substr(0, FileNameStr.length() - 5);
+					char* FileNameBinary = FileNameBinaryStr.data();
+					ID3DXBuffer* Errors = NULL;
+					ID3DXBuffer* Shader = NULL;
+					ID3DXConstantTable* Table = NULL;
+					if (!isEffect) {
+						CompileShader(FileName, FileNameBinary, Source, Type, Errors, Shader, Table);
+					}
+					else {
+						CompileEffect(FileName, FileNameBinary, Source, Errors);
+					}
+				}			
+			}			
+		}
+	}
 }
 
 void EffectRecord::CreateCT() {
@@ -639,6 +740,7 @@ void EffectRecord::CreateCT() {
 	D3DXHANDLE Handle;
 	UINT ConstantCount = 1;
 	UInt32 FloatIndex = 0;
+	UInt32 PerGeomFloatIndex = 0;
 	UInt32 TextureIndex = 0;
 
 	Effect->GetDesc(&ConstantTableDesc);
@@ -658,7 +760,7 @@ void EffectRecord::CreateCT() {
 				case D3DXPC_VECTOR:
 				case D3DXPC_MATRIX_ROWS:
 					if (!(SetConstantTableValue1(ConstantDesc.Name, FloatIndex) || SetConstantTableValue2(ConstantDesc.Name, FloatIndex))) {
-						SetConstantTableCustom(ConstantDesc.Name, FloatIndex);
+							SetConstantTableCustom(ConstantDesc.Name, FloatIndex);
 					}
 					FloatShaderValues[FloatIndex].RegisterIndex = (UInt32)Handle;
 					FloatShaderValues[FloatIndex].RegisterCount = ConstantDesc.Rows;
@@ -788,7 +890,9 @@ ShaderManager::ShaderManager() {
 	RenderTextureSMAA->GetSurfaceLevel(0, &RenderSurfaceSMAA);
 	EffectTexture->GetSurfaceLevel(0, &EffectSurface);
 	UseIntervalUpdate = TheSettingManager->SettingsShadows.Exteriors.UseIntervalUpdate;
-
+	if (TheSettingManager->SettingsMain.Develop.CompileShaders) {
+		CompileShaders(ShadersPath);
+	}
 }
 
 void ShaderManager::CreateEffects() {
@@ -1730,6 +1834,7 @@ void ShaderManager::UpdateConstants() {
 
 			ShaderConst.Cinema.Data.x = TheSettingManager->SettingsCinema.AspectRatio;
 			ShaderConst.Cinema.Data.y = TheSettingManager->SettingsCinema.VignetteRadius;
+			ShaderConst.Cinema.Data.w = TheSettingManager->SettingsCinema.ChromaticAberrationPower;
 			if (Mode == 1) {
 				if (MenuManager->IsActive(Menu::MenuType::kMenuType_Dialog) || MenuManager->IsActive(Menu::MenuType::kMenuType_Persuasion)) Mode = -1;
 			}
@@ -1939,6 +2044,7 @@ void ShaderManager::UpdateConstants() {
 			ShaderConst.VolumetricLight.data6.x = std::lerp(previousValues.data6.x, currentValues.data6.x, weatherPercent);
 			ShaderConst.VolumetricLight.data6.y = std::lerp(previousValues.data6.y, currentValues.data6.y, weatherPercent);
 			ShaderConst.VolumetricLight.data6.z = std::lerp(previousValues.data6.z, currentValues.data6.z, weatherPercent);
+			ShaderConst.VolumetricLight.data6.w = dayPercent;
 
 			if (weatherPercent > 0.5f) {
 				ShaderConst.VolumetricLight.data4.y = std::lerp(0.0f, currentSettings->animatedFogToggle * 2, weatherPercent - .5);
@@ -1949,6 +2055,11 @@ void ShaderManager::UpdateConstants() {
 				ShaderConst.VolumetricLight.data4.y = std::lerp(previousSettings->animatedFogToggle, 0.0f, weatherPercent * 2);
 			}
 		}
+
+		//Specular data
+		ShaderConst.Specular.SpecularData.x = TheSettingManager->SettingsSpecular.SpecularPower;
+		ShaderConst.Specular.SpecularData.y = TheSettingManager->SettingsSpecular.FresnelPowerActors;
+		ShaderConst.Specular.SpecularData.z = TheSettingManager->SettingsSpecular.FresnelPowerObjects;
 	}
 }
 

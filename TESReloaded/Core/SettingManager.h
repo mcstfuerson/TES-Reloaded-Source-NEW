@@ -518,6 +518,14 @@ struct SettingsCinemaStruct {
 	float AspectRatio;
 	float VignetteRadius;
 	float VignetteDarkness;
+	float ChromaticAberrationPower;
+};
+
+struct SettingsSpecularStruct {
+	float SpecularPower;
+	float FresnelPowerObjects;
+	float FresnelPowerActors;
+	float SunPower;
 };
 
 struct SettingsBloomStruct {
@@ -697,6 +705,7 @@ public:
 	SettingsGodRaysStruct			SettingsGodRays;
 	SettingsKhajiitRaysStruct		SettingsKhajiitRays;
 	SettingsCinemaStruct			SettingsCinema;
+	SettingsSpecularStruct			SettingsSpecular;
 	SettingsPrecipitationsStruct	SettingsPrecipitations;
 	SettingsSharpeningStruct		SettingsSharpening;
 	SettingsVolumetricFogStruct		SettingsVolumetricFog;

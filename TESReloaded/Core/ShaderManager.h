@@ -1,5 +1,6 @@
 #pragma once
 #include <d3dx9mesh.h>
+#include <filesystem>
 
 enum EffectRecordType
 {
@@ -143,6 +144,16 @@ struct ShaderConstants {
 		D3DXVECTOR4		BloomData;
 		D3DXVECTOR4		BloomValues;
 	};
+
+	struct SpecularStruct {
+		D3DXVECTOR4		EyePosition;
+		D3DXVECTOR4		SpecularData;
+	};
+
+	struct GeometryStruct {
+		D3DXVECTOR4		Toggles;
+	};
+
 	struct SnowAccumulationStruct {
 		D3DXVECTOR4		Params;
 	};
@@ -275,6 +286,8 @@ struct ShaderConstants {
 	ColoringStruct			Coloring;
 	CinemaStruct			Cinema;
 	BloomStruct				Bloom;
+	SpecularStruct			Specular;
+	GeometryStruct			Geometry;
 	SnowAccumulationStruct	SnowAccumulation;
 	MotionBlurStruct		MotionBlur;
 	WetWorldStruct			WetWorld;
@@ -303,10 +316,15 @@ public:
 
 	bool					SetConstantTableValue1(LPCSTR Name, UInt32 Index);
 	bool					SetConstantTableValue2(LPCSTR Name, UInt32 Index);
+	bool					SetPerGeomConstantTableValue(LPCSTR Name, UInt32 Index);
 	void					SetConstantTableCustom(LPCSTR Name, UInt32 Index);
 
 	ShaderValue*			FloatShaderValues;
 	UInt32					FloatShaderValuesCount;
+
+	ShaderValue*			PerGeomFloatShaderValues;
+	UInt32					PerGeomFloatShaderValuesCount;
+
 	ShaderValue*			TextureShaderValues;
 	UInt32					TextureShaderValuesCount;
 };
@@ -318,6 +336,7 @@ public:
 
 	void					CreateCT();
 	void					SetCT();
+	void					SetPerGeomCT();
 	bool					LoadShader(const char* Name, const char* DirPostFix = "");
 	
 	ShaderType				Type;
@@ -354,8 +373,10 @@ typedef std::map<std::string, D3DXVECTOR4> CustomConstants;
 class ShaderManager { // Never disposed
 public:
 	ShaderManager();
-
 	void					CreateEffects();
+	void					CompileShader(char* FileName, char* FileNameBinary, char* Source, ShaderType Type, ID3DXBuffer* Errors, ID3DXBuffer* Shader, ID3DXConstantTable* Table);
+	void					CompileEffect(char* FileName, char* FileNameBinary, char* Source, ID3DXBuffer* Errors);
+	void					CompileShaders(const std::filesystem::path&);
 	void					InitializeConstants();
 	void					UpdateConstants();
 	void					UpdateShaderStates();

@@ -843,6 +843,20 @@ void SettingManager::LoadSettings() {
 	SettingsCinema.VignetteRadius = atof(value);
 	GetPrivateProfileStringA("Default", "VignetteDarkness", "0.55", value, SettingStringBuffer, Filename);
 	SettingsCinema.VignetteDarkness = atof(value);
+	GetPrivateProfileStringA("Default", "ChromaticAberrationPower", "0.0", value, SettingStringBuffer, Filename);
+	SettingsCinema.ChromaticAberrationPower = atof(value);
+
+	strcpy(Filename, CurrentPath);
+	strcat(Filename, SettingsPath);
+	strcat(Filename, "Specular\\Specular.ini");
+	GetPrivateProfileStringA("Default", "SpecularPower", "0.0", value, SettingStringBuffer, Filename);
+	SettingsSpecular.SpecularPower = atof(value);
+	GetPrivateProfileStringA("Default", "FresnelPowerActors", "0.0", value, SettingStringBuffer, Filename);
+	SettingsSpecular.FresnelPowerActors = atof(value);
+	GetPrivateProfileStringA("Default", "FresnelPowerObjects", "0.0", value, SettingStringBuffer, Filename);
+	SettingsSpecular.FresnelPowerObjects = atof(value);
+	GetPrivateProfileStringA("Default", "SunPower", "0.0", value, SettingStringBuffer, Filename);
+	SettingsSpecular.SunPower = atof(value);
 
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
@@ -1486,6 +1500,7 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 			WritePrivateProfileStringA("Default", "Mode", ToString(SettingsCinema.Mode).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "VignetteDarkness", ToString(SettingsCinema.VignetteDarkness).c_str(), Filename);
 			WritePrivateProfileStringA("Default", "VignetteRadius", ToString(SettingsCinema.VignetteRadius).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "ChromaticAberrationPower", ToString(SettingsCinema.ChromaticAberrationPower).c_str(), Filename);
 		}
 		else if (!strcmp(Definition, "Coloring")) {
 			WritePrivateProfileStringA("Effects", "Coloring", ToString(SettingsMain.Effects.Coloring).c_str(), SettingsMain.Main.MainFile);
@@ -1677,6 +1692,13 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 			WritePrivateProfileStringA("SnowAccumulation", "Amount", ToString(SettingsPrecipitations.SnowAccumulation.Amount).c_str(), Filename);
 			WritePrivateProfileStringA("SnowAccumulation", "BlurNormDropThreshhold", ToString(SettingsPrecipitations.SnowAccumulation.BlurNormDropThreshhold).c_str(), Filename);
 			WritePrivateProfileStringA("SnowAccumulation", "BlurRadiusMultiplier", ToString(SettingsPrecipitations.SnowAccumulation.BlurRadiusMultiplier).c_str(), Filename);
+		}
+		else if (!strcmp(Definition, "Specular")) {
+			strcat(Filename, "Specular\\Specular.ini");
+			WritePrivateProfileStringA("Default", "SpecularPower", ToString(SettingsSpecular.SpecularPower).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "FresnelPowerActors", ToString(SettingsSpecular.FresnelPowerActors).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "FresnelPowerObjects", ToString(SettingsSpecular.FresnelPowerObjects).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "SunPower", ToString(SettingsSpecular.SunPower).c_str(), Filename);
 		}
 		else if (!strcmp(Definition, "Terrain")) {
 			strcat(Filename, "Terrain\\Terrain.ini");
@@ -1878,6 +1900,7 @@ DefinitionsList SettingManager::GetMenuDefinitions(const char* Item) {
 		Definitions["Sharpening"] = "Sharpening";
 		Definitions["SMAA"] = "Subpixel Morphological AA";
 		Definitions["SnowAccumulation"] = "Snow Accumulation";
+		Definitions["Specular"] = "Specular";
 #if defined(OBLIVION)
 		Definitions["Skin"] = "Skin";
 		Definitions["Terrain"] = "Terrain";
@@ -2194,6 +2217,7 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["Mode"] = SettingsCinema.Mode;
 			Settings["VignetteDarkness"] = SettingsCinema.VignetteDarkness;
 			Settings["VignetteRadius"] = SettingsCinema.VignetteRadius;
+			Settings["ChromaticAberrationPower"] = SettingsCinema.ChromaticAberrationPower;
 		}
 		else if (!strcmp(Definition, "Coloring")) {
 			SettingsColoringStruct* scs = GetSettingsColoring(Section);
@@ -2365,6 +2389,12 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["Decrease"] = SettingsPrecipitations.SnowAccumulation.Decrease;
 			Settings["Increase"] = SettingsPrecipitations.SnowAccumulation.Increase;
 			Settings["SunPower"] = SettingsPrecipitations.SnowAccumulation.SunPower;
+		}
+		else if (!strcmp(Definition, "Specular")) {
+			Settings["SpecularPower"] = SettingsSpecular.SpecularPower;
+			Settings["FresnelPowerActors"] = SettingsSpecular.FresnelPowerActors;
+			Settings["FresnelPowerObjects"] = SettingsSpecular.FresnelPowerObjects;
+			Settings["SunPower"] = SettingsSpecular.SunPower;
 		}
 		else if (!strcmp(Definition, "Terrain")) {
 			Settings["DistantNoise"] = SettingsTerrain.DistantNoise;
@@ -2860,6 +2890,8 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				SettingsCinema.VignetteDarkness = Value;
 			else if (!strcmp(Setting, "VignetteRadius"))
 				SettingsCinema.VignetteRadius = Value;
+			else if (!strcmp(Setting, "ChromaticAberrationPower"))
+				SettingsCinema.ChromaticAberrationPower = Value;
 		}
 		else if (!strcmp(Definition, "Coloring")) {
 			SettingsColoringStruct* scs = GetSettingsColoring(Section);
@@ -3194,6 +3226,16 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 				SettingsPrecipitations.SnowAccumulation.BlurNormDropThreshhold = Value;
 			else if (!strcmp(Setting, "BlurRadiusMultiplier"))
 				SettingsPrecipitations.SnowAccumulation.BlurRadiusMultiplier = Value;
+		}
+		else if (!strcmp(Definition, "Specular")) {
+			if (!strcmp(Setting, "SpecularPower"))
+				SettingsSpecular.SpecularPower = Value;
+			else if (!strcmp(Setting, "FresnelPowerActors"))
+				SettingsSpecular.FresnelPowerActors = Value;
+			else if (!strcmp(Setting, "FresnelPowerObjects"))
+				SettingsSpecular.FresnelPowerObjects = Value;
+			else if (!strcmp(Setting, "SunPower"))
+				SettingsSpecular.SunPower = Value;
 		}
 		else if (!strcmp(Definition, "Terrain")) {
 			if (!strcmp(Setting, "DistantNoise"))
@@ -3575,6 +3617,8 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name)
 		Value = SettingsMain.Effects.SMAA;
 	else if (!strcmp(Name, "SnowAccumulation"))
 		Value = SettingsMain.Effects.SnowAccumulation;
+	else if (!strcmp(Name, "Specular"))
+		Value = true;
 	else if (!strcmp(Name, "Terrain"))
 		Value = SettingsMain.Shaders.Terrain;
 	else if (!strcmp(Name, "Underwater"))

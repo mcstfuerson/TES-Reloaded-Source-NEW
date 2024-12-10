@@ -319,7 +319,33 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 			TheShaderManager->ShaderConst.TextureData.y = Pass->Stages.data[0]->Texture->GetHeight();
 		}
 
-		if (VertexShader->ShaderProg && TheRenderManager->renderState->GetVertexShader() != VertexShader->ShaderHandle) VertexShader->ShaderProg->SetCT();
+		if (VertexShader->ShaderProg && TheRenderManager->renderState->GetVertexShader() != VertexShader->ShaderHandle) {
+			VertexShader->ShaderProg->SetCT();
+		}
+		if (VertexShader->ShaderProg && VertexShader->isSun) {
+			if (!memcmp(Geometry->m_pcName, "Sun Ge", 6)) {
+				TheShaderManager->ShaderConst.Geometry.Toggles.x = TheSettingManager->SettingsSpecular.SunPower;
+			}
+			else {
+				TheShaderManager->ShaderConst.Geometry.Toggles.x = 1.0f;
+			}
+			VertexShader->ShaderProg->SetPerGeomCT();
+		}
+
+		if (VertexShader->ShaderProg && VertexShader->isEyePosition) {
+			NiPoint3 eye = Geometry->GetEye(&WorldSceneGraph->camera->m_worldTransform.pos);
+			eye = Geometry->m_worldTransform.rot < eye;
+			D3DXVECTOR4 e = D3DXVECTOR4(eye.x, eye.y, eye.z, 1.0f);
+			TheShaderManager->ShaderConst.Specular.EyePosition = e;
+			VertexShader->ShaderProg->SetPerGeomCT();
+		}
+
+		if (PixelShader->ShaderProg && PixelShader->isSkin) { //TODO this condition isnt quite right for all tree situations but it just so happens to work
+			TheShaderManager->ShaderConst.Geometry.Toggles.x = VertexShader->isSkin ? 1.0f : 0.0f;
+			TheShaderManager->ShaderConst.Geometry.Toggles.y = VertexShader->isTree ? 1.0f : 0.0f;
+			PixelShader->ShaderProg->SetPerGeomCT();
+		}
+
 		if (PixelShader->ShaderProg && TheRenderManager->renderState->GetPixelShader() != PixelShader->ShaderHandle) PixelShader->ShaderProg->SetCT();
 		if (RenderWindowRootNode) {
 			char Name[256];
@@ -337,6 +363,22 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 		}
 		if (TheSettingManager->SettingsMain.Develop.LogShaders && TheKeyboardManager->OnKeyPressed(TheSettingManager->SettingsMain.Develop.LogShaders)) {
 			Logger::Log("Pass %s (%s %s)", Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
+			NiPoint3 eye = Geometry->GetEye(&WorldSceneGraph->camera->m_worldTransform.pos);
+			Logger::Log("Eye Before: %f, %f, %f", eye.x, eye.y, eye.z);
+			//eye = Geometry->m_worldTransform.rot * eye;
+			eye = Geometry->m_worldTransform.rot < eye;
+			Logger::Log("Eye After: %f, %f, %f", eye.x, eye.y, eye.z);
+			Logger::Log("PP: %f, %f, %f", Player->pos.x, Player->pos.y, Player->pos.z);
+			Logger::Log("CP: %f, %f, %f", TheRenderManager->CameraPosition.x, TheRenderManager->CameraPosition.y, TheRenderManager->CameraPosition.z);
+			Logger::Log("%f, %f, %f", Geometry->m_worldTransform.rot.data[0][0]
+				, Geometry->m_worldTransform.rot.data[0][1]
+				, Geometry->m_worldTransform.rot.data[0][2]);
+			Logger::Log("%f, %f, %f", Geometry->m_worldTransform.rot.data[1][0]
+				, Geometry->m_worldTransform.rot.data[1][1]
+				, Geometry->m_worldTransform.rot.data[1][2]);
+			Logger::Log("%f, %f, %f", Geometry->m_worldTransform.rot.data[2][0]
+				, Geometry->m_worldTransform.rot.data[2][1]
+				, Geometry->m_worldTransform.rot.data[2][2]);
 		}
 	}
 	else {
