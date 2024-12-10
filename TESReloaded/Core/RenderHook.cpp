@@ -363,22 +363,6 @@ UInt32 RenderHook::TrackSetupShaderPrograms(NiGeometry* Geometry, NiSkinInstance
 		}
 		if (TheSettingManager->SettingsMain.Develop.LogShaders && TheKeyboardManager->OnKeyPressed(TheSettingManager->SettingsMain.Develop.LogShaders)) {
 			Logger::Log("Pass %s (%s %s)", Geometry->m_pcName, VertexShader->ShaderName, PixelShader->ShaderName);
-			NiPoint3 eye = Geometry->GetEye(&WorldSceneGraph->camera->m_worldTransform.pos);
-			Logger::Log("Eye Before: %f, %f, %f", eye.x, eye.y, eye.z);
-			//eye = Geometry->m_worldTransform.rot * eye;
-			eye = Geometry->m_worldTransform.rot < eye;
-			Logger::Log("Eye After: %f, %f, %f", eye.x, eye.y, eye.z);
-			Logger::Log("PP: %f, %f, %f", Player->pos.x, Player->pos.y, Player->pos.z);
-			Logger::Log("CP: %f, %f, %f", TheRenderManager->CameraPosition.x, TheRenderManager->CameraPosition.y, TheRenderManager->CameraPosition.z);
-			Logger::Log("%f, %f, %f", Geometry->m_worldTransform.rot.data[0][0]
-				, Geometry->m_worldTransform.rot.data[0][1]
-				, Geometry->m_worldTransform.rot.data[0][2]);
-			Logger::Log("%f, %f, %f", Geometry->m_worldTransform.rot.data[1][0]
-				, Geometry->m_worldTransform.rot.data[1][1]
-				, Geometry->m_worldTransform.rot.data[1][2]);
-			Logger::Log("%f, %f, %f", Geometry->m_worldTransform.rot.data[2][0]
-				, Geometry->m_worldTransform.rot.data[2][1]
-				, Geometry->m_worldTransform.rot.data[2][2]);
 		}
 	}
 	else {
