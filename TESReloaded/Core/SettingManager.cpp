@@ -319,6 +319,7 @@ SettingManager::SettingManager() {
 	SettingsMain.Effects.WetWorld = GetPrivateProfileIntA("Effects", "WetWorld", 0, Filename);
 	SettingsMain.Effects.Sharpening = GetPrivateProfileIntA("Effects", "Sharpening", 0, Filename);
 	SettingsMain.Effects.SMAA = GetPrivateProfileIntA("Effects", "SMAA", 0, Filename);
+	SettingsMain.Effects.TAA = GetPrivateProfileIntA("Effects", "TAA", 0, Filename);
 	SettingsMain.Effects.VolumetricFog = GetPrivateProfileIntA("Effects", "VolumetricFog", 0, Filename);
 	SettingsMain.Effects.VolumetricLight = GetPrivateProfileIntA("Effects", "VolumetricLight", 0, Filename);
 	SettingsMain.Effects.Precipitations = GetPrivateProfileIntA("Effects", "Precipitations", 0, Filename);
@@ -1007,6 +1008,16 @@ void SettingManager::LoadSettings() {
 
 	strcpy(Filename, CurrentPath);
 	strcat(Filename, SettingsPath);
+	strcat(Filename, "TAA\\TAA.ini");
+	GetPrivateProfileStringA("Default", "BlendWeight", "0.80", value, SettingStringBuffer, Filename);
+	SettingsTAA.BlendWeight = atof(value);
+	GetPrivateProfileStringA("Default", "ClampRadius", "0.5", value, SettingStringBuffer, Filename);
+	SettingsTAA.ClampRadius = atof(value);
+	GetPrivateProfileStringA("Default", "Sharpening", "0.15", value, SettingStringBuffer, Filename);
+	SettingsTAA.Sharpening = atof(value);
+
+	strcpy(Filename, CurrentPath);
+	strcat(Filename, SettingsPath);
 	strcat(Filename, "Fog\\Fog.ini");
 	GetPrivateProfileStringA("Default", "Exponent", "1.0", value, SettingStringBuffer, Filename);
 	SettingsVolumetricFog.Exponent = atof(value);
@@ -1683,6 +1694,13 @@ void SettingManager::SaveSettings(const char* Item, const char* Definition, cons
 		else if (!strcmp(Definition, "SMAA")) {
 			WritePrivateProfileStringA("Effects", "SMAA", ToString(SettingsMain.Effects.SMAA).c_str(), SettingsMain.Main.MainFile);
 		}
+		else if (!strcmp(Definition, "TAA")) {
+			WritePrivateProfileStringA("Effects", "TAA", ToString(SettingsMain.Effects.TAA).c_str(), SettingsMain.Main.MainFile);
+			strcat(Filename, "TAA\\TAA.ini");
+			WritePrivateProfileStringA("Default", "BlendWeight", ToString(SettingsTAA.BlendWeight).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "ClampRadius", ToString(SettingsTAA.ClampRadius).c_str(), Filename);
+			WritePrivateProfileStringA("Default", "Sharpening", ToString(SettingsTAA.Sharpening).c_str(), Filename);
+		}
 		else if (!strcmp(Definition, "SnowAccumulation")) {
 			WritePrivateProfileStringA("Effects", "SnowAccumulation", ToString(SettingsMain.Effects.SnowAccumulation).c_str(), SettingsMain.Main.MainFile);
 			strcat(Filename, "Precipitations\\Precipitations.ini");
@@ -1898,7 +1916,8 @@ DefinitionsList SettingManager::GetMenuDefinitions(const char* Item) {
 		Definitions["ShadowPointLights"] = "ShadowPointLights";
 #endif
 		Definitions["Sharpening"] = "Sharpening";
-		Definitions["SMAA"] = "Subpixel Morphological AA";
+		Definitions["SMAA"] = "Subpixel Morphological Anti Aliasing (SMAA)";
+		Definitions["TAA"] = "Temporal Anti Aliasing (TAA)";
 		Definitions["SnowAccumulation"] = "Snow Accumulation";
 		Definitions["Specular"] = "Specular";
 #if defined(OBLIVION)
@@ -1906,7 +1925,7 @@ DefinitionsList SettingManager::GetMenuDefinitions(const char* Item) {
 		Definitions["Terrain"] = "Terrain";
 #endif
 		Definitions["VolumetricFog"] = "Volumetric Fog";
-		Definitions["VolumetricLight"] = "VolumetricLight";
+		Definitions["VolumetricLight"] = "Volumetric Light";
 		Definitions["Underwater"] = "Underwater";
 		Definitions["Water"] = "Water";
 		Definitions["WaterLens"] = "Water on Lens";
@@ -2371,6 +2390,11 @@ SettingsList SettingManager::GetMenuSettings(const char* Item, const char* Defin
 			Settings["Strength"] = SettingsSharpening.Strength;
 			Settings["Clamp"] = SettingsSharpening.Clamp;
 			Settings["Offset"] = SettingsSharpening.Offset;
+		}
+		else if (!strcmp(Definition, "TAA")) {
+			Settings["BlendWeight"] = SettingsTAA.BlendWeight;
+			Settings["ClampRadius"] = SettingsTAA.ClampRadius;
+			Settings["Sharpening"] = SettingsTAA.Sharpening;
 		}
 		else if (!strcmp(Definition, "Skin")) {
 			Settings["UseVanillaShaders"] = SettingsSkin.UseVanillaShaders;
@@ -3193,6 +3217,14 @@ void SettingManager::SetMenuSetting(const char* Item, const char* Definition, co
 			else if (!strcmp(Setting, "Strength"))
 				SettingsSharpening.Strength = Value;
 		}
+		else if (!strcmp(Definition, "TAA")) {
+			if (!strcmp(Setting, "BlendWeight"))
+				SettingsTAA.BlendWeight = Value;
+			else if (!strcmp(Setting, "ClampRadius"))
+				SettingsTAA.ClampRadius = Value;
+			else if (!strcmp(Setting, "Sharpening"))
+				SettingsTAA.Sharpening = Value;
+		}
 		else if (!strcmp(Definition, "Skin")) {
 			if (!strcmp(Setting, "Attenuation"))
 				SettingsSkin.Attenuation = Value;
@@ -3615,6 +3647,8 @@ bool SettingManager::GetMenuShaderEnabled(const char* Name)
 		Value = SettingsMain.Shaders.Skin;
 	else if (!strcmp(Name, "SMAA"))
 		Value = SettingsMain.Effects.SMAA;
+	else if (!strcmp(Name, "TAA"))
+		Value = SettingsMain.Effects.TAA;
 	else if (!strcmp(Name, "SnowAccumulation"))
 		Value = SettingsMain.Effects.SnowAccumulation;
 	else if (!strcmp(Name, "Specular"))

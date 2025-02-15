@@ -330,6 +330,10 @@ bool ShaderProgram::SetConstantTableValue2(LPCSTR Name, UInt32 Index) {
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.VolumetricLight.data6;
 	else if (!strcmp(Name, "TESR_SpecularData"))
 		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.Specular.SpecularData;
+	else if (!strcmp(Name, "TESR_TAAData"))
+		FloatShaderValues[Index].Value = &TheShaderManager->ShaderConst.TAA.Data;
+	else if (!strcmp(Name, "TESR_PrevWorldViewProjectionTransform"))
+		FloatShaderValues[Index].Value = (D3DXVECTOR4*)&TheShaderManager->PrevWorldViewProjMatrix;
 	else {
 		return false;
 	}
@@ -845,6 +849,7 @@ ShaderManager::ShaderManager() {
 	BloomEffect = NULL;
 	SnowAccumulationEffect = NULL;
 	SMAAEffect = NULL;
+	TAAEffect = NULL;
 	MotionBlurEffect = NULL;
 	WetWorldEffect = NULL;
 	SharpeningEffect = NULL;
@@ -885,10 +890,12 @@ ShaderManager::ShaderManager() {
 	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A16B16G16R16F, D3DPOOL_DEFAULT, &RenderedTexture, NULL);
 	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A16B16G16R16F, D3DPOOL_DEFAULT, &RenderTextureSMAA, NULL);
 	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A16B16G16R16F, D3DPOOL_DEFAULT, &EffectTexture, NULL);
+	TheRenderManager->device->CreateTexture(TheRenderManager->width, TheRenderManager->height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A16B16G16R16F, D3DPOOL_DEFAULT, &TAATexture, NULL);
 	SourceTexture->GetSurfaceLevel(0, &SourceSurface);
 	RenderedTexture->GetSurfaceLevel(0, &RenderedSurface);
 	RenderTextureSMAA->GetSurfaceLevel(0, &RenderSurfaceSMAA);
 	EffectTexture->GetSurfaceLevel(0, &EffectSurface);
+	TAATexture->GetSurfaceLevel(0, &TAASurface);
 	UseIntervalUpdate = TheSettingManager->SettingsShadows.Exteriors.UseIntervalUpdate;
 	if (TheSettingManager->SettingsMain.Develop.CompileShaders) {
 		CompileShaders(ShadersPath);
@@ -909,6 +916,7 @@ void ShaderManager::CreateEffects() {
 	if (Effects->MotionBlur) CreateEffect(EffectRecordType_MotionBlur);
 	if (Effects->Sharpening) CreateEffect(EffectRecordType_Sharpening);
 	if (Effects->SMAA) CreateEffect(EffectRecordType_SMAA);
+	if (Effects->TAA) CreateEffect(EffectRecordType_TAA);
 	if (Effects->SnowAccumulation) CreateEffect(EffectRecordType_SnowAccumulation);
 	if (Effects->Underwater) CreateEffect(EffectRecordType_Underwater);
 	if (Effects->VolumetricFog) CreateEffect(EffectRecordType_VolumetricFog);
@@ -1912,6 +1920,12 @@ void ShaderManager::UpdateConstants() {
 			if (weatherPercent == 1.0f && ShaderConst.fogData.y > TheSettingManager->SettingsVolumetricFog.MaxDistance) ShaderConst.VolumetricFog.Data.w = 0.0f;
 		}
 
+		if (TheSettingManager->SettingsMain.Effects.TAA) {
+			ShaderConst.TAA.Data.x = TheSettingManager->SettingsTAA.BlendWeight;
+			ShaderConst.TAA.Data.y = TheSettingManager->SettingsTAA.ClampRadius;
+			ShaderConst.TAA.Data.z = TheSettingManager->SettingsTAA.Sharpening;
+		}
+
 		if (TheSettingManager->SettingsMain.Effects.VolumetricLight) {
 
 			SettingsVolumetricLightStruct* currentSettings = TheSettingManager->GetSettingsVolumetricLight(((TESWeatherEx*)currentWeather)->EditorName);
@@ -2697,6 +2711,11 @@ void ShaderManager::CreateEffect(EffectRecordType EffectType) {
 			SMAAEffect = new EffectRecord();
 			TheSettingManager->SettingsMain.Effects.SMAA = LoadEffect(SMAAEffect, Filename, NULL);
 			break;
+		case EffectRecordType_TAA:
+			strcat(Filename, "TAA\\TAA.fx");
+			TAAEffect = new EffectRecord();
+			TheSettingManager->SettingsMain.Effects.TAA = LoadEffect(TAAEffect, Filename, NULL);
+			break;
 		case EffectRecordType_MotionBlur:
 			strcat(Filename, "MotionBlur\\MotionBlur.fx");
 			MotionBlurEffect = new EffectRecord();
@@ -2813,6 +2832,7 @@ void ShaderManager::DisposeEffect(EffectRecord* TheEffect) {
 	else if (TheEffect == SecundaRaysEffect) SecundaRaysEffect = NULL;
 	else if (TheEffect == MotionBlurEffect) MotionBlurEffect = NULL;
 	else if (TheEffect == SMAAEffect) SMAAEffect = NULL;
+	else if (TheEffect == TAAEffect) TAAEffect = NULL;
 	else if (TheEffect == SnowAccumulationEffect) SnowAccumulationEffect = NULL;
 	else if (TheEffect == UnderwaterEffect) UnderwaterEffect = NULL;
 	else if (TheEffect == WaterLensEffect) WaterLensEffect = NULL;
@@ -2923,6 +2943,20 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 		VolumetricLightEffect->SetCT();
 		VolumetricLightEffect->Render(Device, RenderTarget, RenderedSurface, false);
 	}
+	if (Effects->SMAA) {
+		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+		Device->SetRenderTarget(0, RenderSurfaceSMAA);
+		SMAAEffect->SetCT();
+		SMAAEffect->Render(Device, RenderSurfaceSMAA, RenderedSurface, true);
+		Device->StretchRect(RenderSurfaceSMAA, NULL, RenderTarget, NULL, D3DTEXF_NONE);
+		Device->SetRenderTarget(0, RenderTarget);
+	}
+	if (Effects->TAA) {
+		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
+		TAAEffect->SetCT();
+		TAAEffect->Render(Device, RenderTarget, RenderedSurface, false);
+		Device->StretchRect(RenderedSurface, NULL, TAASurface, NULL, D3DTEXF_NONE);
+	}
 	if (Effects->DepthOfField && ShaderConst.DepthOfField.Enabled) {
 		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
 		DepthOfFieldEffect->SetCT();
@@ -2956,14 +2990,6 @@ void ShaderManager::RenderEffects(IDirect3DSurface9* RenderTarget) {
 	if (Effects->Cinema && (ShaderConst.Cinema.Data.x != 0.0f || ShaderConst.Cinema.Data.y != 0.0f)) {
 		CinemaEffect->SetCT();
 		CinemaEffect->Render(Device, RenderTarget, RenderedSurface, false);
-	}
-	if (Effects->SMAA) {
-		Device->StretchRect(RenderTarget, NULL, SourceSurface, NULL, D3DTEXF_NONE);
-		Device->SetRenderTarget(0, RenderSurfaceSMAA);
-		SMAAEffect->SetCT();
-		SMAAEffect->Render(Device, RenderSurfaceSMAA, RenderedSurface, true);
-		Device->StretchRect(RenderSurfaceSMAA, NULL, RenderTarget, NULL, D3DTEXF_NONE);
-		Device->SetRenderTarget(0, RenderTarget);
 	}
 	if (TheKeyboardManager->OnKeyDown(TheSettingManager->SettingsMain.Main.ScreenshotKey)) {
 		char Filename[MAX_PATH];
@@ -3017,6 +3043,7 @@ void ShaderManager::RenderEffectsPostHdr(IDirect3DSurface9* RenderTargetParam) {
 	Device->SetFVF(EFFECTQUADFORMAT);
 	Device->StretchRect(RenderTargetParam, NULL, RenderedSurface, NULL, D3DTEXF_NONE);
 	RenderEffects(RenderTargetParam);
+	TheShaderManager->PrevWorldViewProjMatrix = TheRenderManager->WorldViewProjMatrix;
 }
 
 void ShaderManager::LoadEffectSettings() {
@@ -3194,6 +3221,12 @@ void ShaderManager::SwitchShaderStatus(const char* Name) {
 		Effects->SMAA = Value;
 		DisposeEffect(SMAAEffect);
 		if (Value) CreateEffect(EffectRecordType_SMAA);
+	}
+	else if (!strcmp(Name, "TAA")) {
+		Value = !Effects->TAA;
+		Effects->TAA = Value;
+		DisposeEffect(TAAEffect);
+		if (Value) CreateEffect(EffectRecordType_TAA);
 	}
 	else if (!strcmp(Name, "SnowAccumulation")) {
 		Value = !Effects->SnowAccumulation;

@@ -43,6 +43,9 @@ bool TextureRecord::LoadTexture(TextureRecordType Type, const char* Filename) {
 		case TextureRecordType_RenderedBuffer:
 			Texture = TheShaderManager->RenderedTexture;
 			break;
+		case TextureRecordType_TAABuffer:
+			Texture = TheShaderManager->TAATexture;
+			break;
 		case TextureRecordType_DepthBuffer:
 			Texture = TheRenderManager->DepthTexture;
 			break;
@@ -177,6 +180,13 @@ TextureRecord* TextureManager::LoadTexture(const char* ShaderSource, UInt32 Regi
 					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
 						Type = TextureRecordType_RenderedBuffer;
 						strcpy(Filename, WordRenderedBuffer);
+					}
+				}
+				if (!Type) {
+					SamplerParser = strstr(Sampler, WordTAABuffer);
+					if (SamplerParser && SamplerParser < strstr(Sampler, WordSamplerDelimeter)) {
+						Type = TextureRecordType_TAABuffer;
+						strcpy(Filename, WordTAABuffer);
 					}
 				}
 				if (!Type) {

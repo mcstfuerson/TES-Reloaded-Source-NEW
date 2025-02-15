@@ -17,6 +17,7 @@ enum EffectRecordType
 	EffectRecordType_Bloom,
 	EffectRecordType_SnowAccumulation,
 	EffectRecordType_SMAA,
+	EffectRecordType_TAA,
 	EffectRecordType_MotionBlur,
 	EffectRecordType_WetWorld,
 	EffectRecordType_Sharpening,
@@ -177,6 +178,9 @@ struct ShaderConstants {
 	struct VolumetricFogStruct {
 		D3DXVECTOR4		Data;
 	};
+	struct TAAStruct {
+		D3DXVECTOR4		Data;
+	};
 	struct VolumetricLightStruct {
 
 		D3DXVECTOR4 data1;
@@ -292,6 +296,7 @@ struct ShaderConstants {
 	MotionBlurStruct		MotionBlur;
 	WetWorldStruct			WetWorld;
 	SharpeningStruct		Sharpening;
+	TAAStruct				TAA;
 	VolumetricFogStruct		VolumetricFog;
 	VolumetricLightStruct	VolumetricLight;
 	bool					EveningTransLightDirSet;
@@ -415,6 +420,9 @@ public:
 	IDirect3DSurface9*		RenderSurfaceSMAA;
 	IDirect3DTexture9*		EffectTexture;
 	IDirect3DSurface9*		EffectSurface;
+	IDirect3DTexture9*		TAATexture;
+	IDirect3DSurface9*		TAASurface;
+	D3DMATRIX				PrevWorldViewProjMatrix;
 	bool					RenderedBufferFilled;
 	bool					DepthBufferFilled;
 	bool					isFullyInitialized;
@@ -451,6 +459,7 @@ public:
 	EffectRecord*			BloomEffect;
 	EffectRecord*			SnowAccumulationEffect;
 	EffectRecord*			SMAAEffect;
+	EffectRecord*			TAAEffect;
 	EffectRecord*			MotionBlurEffect;
 	EffectRecord*			WetWorldEffect;
 	EffectRecord*			SharpeningEffect;

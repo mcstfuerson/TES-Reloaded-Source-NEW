@@ -189,6 +189,7 @@ struct SettingsMainStruct {
 		bool Precipitations;
 		bool Sharpening;
 		bool SMAA;
+		bool TAA;
 		bool SnowAccumulation;
 		bool Underwater;
 		bool WaterLens;
@@ -588,6 +589,12 @@ struct SettingsSharpeningStruct {
 	float Offset;
 };
 
+struct SettingsTAAStruct {
+	float Sharpening;
+	float ClampRadius;
+	float BlendWeight;
+};
+
 struct SettingsVolumetricFogStruct {
 	float Exponent;
 	float ColorCoeff;
@@ -707,6 +714,7 @@ public:
 	SettingsCinemaStruct			SettingsCinema;
 	SettingsSpecularStruct			SettingsSpecular;
 	SettingsPrecipitationsStruct	SettingsPrecipitations;
+	SettingsTAAStruct				SettingsTAA;
 	SettingsSharpeningStruct		SettingsSharpening;
 	SettingsVolumetricFogStruct		SettingsVolumetricFog;
 	SettingsShadowStruct			SettingsShadows;

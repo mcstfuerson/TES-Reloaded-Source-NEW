@@ -2,6 +2,7 @@
 #define SamplerStatesMax 12
 #define WordSourceBuffer "TESR_SourceBuffer"
 #define WordRenderedBuffer "TESR_RenderedBuffer"
+#define WordTAABuffer "TESR_TAABuffer"
 #define WordDepthBuffer "TESR_DepthBuffer"
 #define WordShadowMapBufferNear "TESR_ShadowMapBufferNear"
 #define WordShadowMapBufferFar "TESR_ShadowMapBufferFar"
@@ -27,6 +28,7 @@ enum TextureRecordType {
 	TextureRecordType_CubeBuffer,
 	TextureRecordType_SourceBuffer,
 	TextureRecordType_RenderedBuffer,
+	TextureRecordType_TAABuffer,
 	TextureRecordType_DepthBuffer,
 	TextureRecordType_ShadowMapBufferNear,
 	TextureRecordType_ShadowMapBufferFar,
