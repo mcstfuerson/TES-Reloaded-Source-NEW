@@ -1076,7 +1076,10 @@ void ShadowManager::RenderExteriorShadows() {
 				GameTime = NewGameTime;
 			}
 
+		}
 
+		if (ShadowLightDir->z > .985) {
+			UpdateShadowLightDir = false;
 		}
 
 		if (UpdateShadowLightDir) {
