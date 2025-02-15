@@ -23,6 +23,7 @@ public:
 	IDirect3DPixelShader9*	ShaderHandleBackup;
 	char*					ShaderName;
 	bool					isSkin;
+	bool					isRefraction;
 };
 
 class RenderManager: public NiDX9Renderer {

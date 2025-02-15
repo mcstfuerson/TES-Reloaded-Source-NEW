@@ -11,6 +11,7 @@
 #define SkinVertexShaders "SLS2034.vso SLS2014.vso SLS2005.vso"
 #define SkinPixelShaders "SLS2003.pso SLS2018.pso SLS2039.pso"
 #define EyePositionShaders "SLS2025.vso SLS2009.vso SLS2003.vso SLS2042.vso SLS2043.vso"
+#define RefractionPixelShaders "SLS2063.pso SM3028.pso SM3029.pso SM3030.pso"
 #elif defined(SKYRIM)
 #define kCreateVertexShader 0x00CCBB00
 #define kCreatePixelShader 0x00CCC420
@@ -116,6 +117,7 @@ NiD3DPixelShader* ShaderIOHook::TrackCreatePixelShader(char* FileName, char* Arg
 	PixelShader->ShaderName = new char[24];
 	strcpy(PixelShader->ShaderName, ShaderName);
 	PixelShader->isSkin = strstr(SkinPixelShaders, PixelShader->ShaderName) != NULL;
+	PixelShader->isRefraction = strstr(RefractionPixelShaders, PixelShader->ShaderName) != NULL;
 	TheShaderManager->LoadShader(PixelShader);
 	return (NiD3DPixelShader*)PixelShader;
 
