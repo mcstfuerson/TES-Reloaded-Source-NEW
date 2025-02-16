@@ -3029,6 +3029,7 @@ void ShaderManager::RenderEffectsPreHdr(IDirect3DSurface9* RenderTargetParam) {
 	Device->SetRenderTarget(0,EffectSurface);
 	IDirect3DSurface9* RenderTarget = EffectSurface;
 	RenderEffects(RenderTarget);
+	TheShaderManager->PrevWorldViewProjMatrix = TheRenderManager->WorldViewProjMatrix;
 	Device->SetRenderTarget(0, RenderTargetParam);
 	RenderState->SetRenderState(D3DRS_ZENABLE, rs1, 0); //1
 	RenderState->SetRenderState(D3DRS_ALPHAREF, rs2, 0); //10
